@@ -10,7 +10,7 @@ impl DataPtr {
     std::slice::from_raw_parts(self.ptr, self.len)
   }
 
-  pub unsafe fn free(mut self) {
+  pub unsafe fn free(&mut self) {
     if self.ptr.is_null() {
       return;
     }
@@ -36,6 +36,6 @@ impl From<Vec<u8>> for DataPtr {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn dataptr_free(data: DataPtr) {
+pub unsafe extern "C" fn dataptr_free(data: &mut DataPtr) {
   data.free();
 }

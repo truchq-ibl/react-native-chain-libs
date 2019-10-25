@@ -16,8 +16,8 @@
     return [NSString stringWithUTF8String:buf];
 }
 
-+ (NSString *)stringFromCharPtr:(CharPtr)ptr {
-    NSString* str = [NSString stringWithUTF8String:ptr];
++ (NSString *)stringFromCharPtr:(CharPtr *)ptr {
+    NSString* str = [NSString stringWithUTF8String:*ptr];
     charptr_free(ptr);
     return str;
 }

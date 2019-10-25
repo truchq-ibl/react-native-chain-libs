@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSData (DataPtr)
 
-+ (NSData *)fromDataPtr:(DataPtr)ptr;
++ (NSData *)fromDataPtr:(DataPtr *)ptr;
 
 - (NSString *)base64;
 

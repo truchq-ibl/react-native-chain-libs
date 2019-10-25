@@ -66,7 +66,7 @@
         CharPtr cError = NULL;
         id result = cb(param, &cError);
         if (cError != NULL && result == nil) {
-            *error = [NSError rustError:[NSString stringFromCharPtr:cError]];
+            *error = [NSError rustError:[NSString stringFromCharPtr:&cError]];
         }
         return result;
     }];

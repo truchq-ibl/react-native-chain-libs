@@ -23,7 +23,7 @@ RCT_EXPORT_METHOD(valueToStr:(nonnull NSString *)ptr withResolve:(RCTPromiseReso
     [[CSafeOperation new:^NSString*(NSString* ptr, CharPtr* error) {
         CharPtr result;
         return value_to_str([ptr rPtr], &result, error)
-            ? [NSString stringFromCharPtr:result]
+            ? [NSString stringFromCharPtr:&result]
             : nil;
     }] exec:ptr andResolve:resolve orReject:reject];
 }
@@ -67,7 +67,7 @@ RCT_EXPORT_METHOD(publicKeyAsBytes:(nonnull NSString *)ptr withResolve:(RCTPromi
     [[CSafeOperation new:^NSString*(NSString* ptr, CharPtr* error) {
         DataPtr result;
         return public_key_as_bytes([ptr rPtr], &result, error)
-            ? [[NSData fromDataPtr:result] base64]
+            ? [[NSData fromDataPtr:&result] base64]
             : nil;
     }] exec:ptr andResolve:resolve orReject:reject];
 }
@@ -87,26 +87,56 @@ RCT_EXPORT_METHOD(addressToString:(nonnull NSString *)ptr withPrefix:(nonnull NS
     [[CSafeOperation new:^NSString*(NSArray<NSString*>* params, CharPtr* error) {
         CharPtr result;
         return address_to_string([[params objectAtIndex:0] rPtr], [[params objectAtIndex:1] charPtr], &result, error)
-            ? [NSString stringFromCharPtr:result]
+            ? [NSString stringFromCharPtr:&result]
             : nil;
     }] exec:@[ptr, prefix] andResolve:resolve orReject:reject];
 }
 
-RCT_EXPORT_METHOD(addressSingleFromPublicKey:(nonnull NSString *)pubPtr withDiscrimination:(nonnull NSNumber *)discrimination withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(addressSingleFromPublicKey:(nonnull NSString *)key withDiscrimination:(nonnull NSNumber *)discrimination withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
         RPtr result;
-        return address_single_from_public_key([[params objectAtIndex:0] rPtr],
+        RPtr key = [[params objectAtIndex:0] rPtr];
+        return address_single_from_public_key(&key,
                                               [[params objectAtIndex:1] intValue],
                                               &result, error)
             ? [NSString stringFromPtr:result]
             : nil;
-    }] exec:@[pubPtr, discrimination] andResolve:resolve orReject:reject];
+    }] exec:@[key, discrimination] andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressDelegationFromPublicKey:(nonnull NSString *)key withDelegation:(nonnull NSString *)delegation withDiscrimination:(nonnull NSNumber *)discrimination withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr key = [[params objectAtIndex:0] rPtr];
+        RPtr delegation = [[params objectAtIndex:1] rPtr];
+        return address_delegation_from_public_key(&key,
+                                                  &delegation,
+                                              [[params objectAtIndex:2] intValue],
+                                              &result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:@[key, delegation, discrimination] andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressAccountFromPublicKey:(nonnull NSString *)key withDiscrimination:(nonnull NSNumber *)discrimination withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr key = [[params objectAtIndex:0] rPtr];
+        return address_single_from_public_key(&key,
+                                              [[params objectAtIndex:1] intValue],
+                                              &result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:@[key, discrimination] andResolve:resolve orReject:reject];
 }
 
 RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr)
 {
-    rptr_free([ptr rPtr]);
+    RPtr rPtr = [ptr rPtr];
+    rptr_free(&rPtr);
 }
 
 + (void)initialize

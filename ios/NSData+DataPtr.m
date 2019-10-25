@@ -10,8 +10,8 @@
 
 @implementation NSData (DataPtr)
 
-+ (NSData *)fromDataPtr:(DataPtr)ptr {
-    NSData* data = [NSData dataWithBytes:ptr.ptr length:ptr.len];
++ (NSData *)fromDataPtr:(DataPtr *)ptr {
+    NSData* data = [NSData dataWithBytes:ptr->ptr length:ptr->len];
     dataptr_free(ptr);
     return data;
 }

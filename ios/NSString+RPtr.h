@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)stringFromPtr:(RPtr)ptr;
 
-+ (NSString *)stringFromCharPtr:(CharPtr)ptr;
++ (NSString *)stringFromCharPtr:(CharPtr _Nonnull * _Nonnull)ptr;
 
 - (CharPtr)charPtr;
 

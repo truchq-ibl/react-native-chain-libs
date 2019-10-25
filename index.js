@@ -13,11 +13,11 @@ class Ptr {
         return obj;
     }
 
-    _assertClass(klass) {
-        if (!(this instanceof klass)) {
+    static _assertClass(ptr, klass) {
+        if (!(ptr instanceof klass)) {
             throw new Error(`expected instance of ${klass.name}`);
         }
-        return this.ptr;
+        return ptr.ptr;
     }
 
     /**
@@ -68,7 +68,7 @@ export class Value extends Ptr {
     * @returns {Promise<Value>}
     */
     async checked_add(other) {
-        const ret = await ChainLibs.valueCheckedAdd(this.ptr, other._assertClass(Value));
+        const ret = await ChainLibs.valueCheckedAdd(this.ptr, Ptr._assertClass(other, Value));
         return Ptr._wrap(ret, Value);
     }
     /**
@@ -76,7 +76,7 @@ export class Value extends Ptr {
     * @returns {Promise<Value>}
     */
     async checked_sub(other) {
-        const ret = await ChainLibs.valueCheckedSub(this.ptr, other._assertClass(Value));
+        const ret = await ChainLibs.valueCheckedSub(this.ptr, Ptr._assertClass(other, Value));
         return Ptr._wrap(ret, Value);
     }
 }
@@ -157,37 +157,35 @@ export class Address extends Ptr {
     * @returns {Promise<Address>}
     */
     static async single_from_public_key(key, discrimination) {
-        const ret = await ChainLibs.addressSingleFromPublicKey(key._assertClass(PublicKey), discrimination);
+        const keyPtr = Ptr._assertClass(key, PublicKey);
+        key.ptr = null;
+        const ret = await ChainLibs.addressSingleFromPublicKey(keyPtr, discrimination);
         return Ptr.__wrap(ret, Address);
     }
-    // /**
-    // * Construct a non-account address from a pair of public keys, delegating founds from the first to the second
-    // * @param {PublicKey} key
-    // * @param {PublicKey} delegation
-    // * @param {number} discrimination
-    // * @returns {Address}
-    // */
-    // static delegation_from_public_key(key, delegation, discrimination) {
-    //     _assertClass(key, PublicKey);
-    //     const ptr0 = key.ptr;
-    //     key.ptr = 0;
-    //     _assertClass(delegation, PublicKey);
-    //     const ptr1 = delegation.ptr;
-    //     delegation.ptr = 0;
-    //     const ret = wasm.address_delegation_from_public_key(ptr0, ptr1, discrimination);
-    //     return Address.__wrap(ret);
-    // }
-    // /**
-    // * Construct address of account type from a public key
-    // * @param {PublicKey} key
-    // * @param {number} discrimination
-    // * @returns {Address}
-    // */
-    // static account_from_public_key(key, discrimination) {
-    //     _assertClass(key, PublicKey);
-    //     const ptr0 = key.ptr;
-    //     key.ptr = 0;
-    //     const ret = wasm.address_account_from_public_key(ptr0, discrimination);
-    //     return Address.__wrap(ret);
-    // }
+    /**
+    * Construct a non-account address from a pair of public keys, delegating founds from the first to the second
+    * @param {PublicKey} key
+    * @param {PublicKey} delegation
+    * @param {number} discrimination
+    * @returns {Promise<Address>}
+    */
+    static async delegation_from_public_key(key, delegation, discrimination) {
+        const keyPtr = Ptr._assertClass(key, PublicKey);
+        const delPtr = Ptr._assertClass(delegation, PublicKey);
+        key.ptr = delegation.ptr = null;
+        const ret = await ChainLibs.addressDelegationFromPublicKey(keyPtr, delPtr, discrimination);
+        return Ptr.__wrap(ret, Address);
+    }
+    /**
+    * Construct address of account type from a public key
+    * @param {PublicKey} key
+    * @param {number} discrimination
+    * @returns {Promise<Address>}
+    */
+    static async account_from_public_key(key, discrimination) {
+        const keyPtr = Ptr._assertClass(key, PublicKey);
+        key.ptr = null;
+        const ret = await ChainLibs.addressAccountFromPublicKey(keyPtr, discrimination);
+        return Ptr.__wrap(ret, Address);
+    }
 }

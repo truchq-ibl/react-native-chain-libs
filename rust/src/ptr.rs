@@ -1,4 +1,4 @@
-use crate::panic::Result;
+use crate::panic::{Result, ToResult};
 use std::any::Any;
 use std::ffi::c_void;
 
@@ -34,7 +34,16 @@ impl RPtr {
       .ok_or_else(|| format!("Bad pointer: 0x{:x}", self.0 as usize))
   }
 
-  pub unsafe fn free(mut self) {
+  pub unsafe fn owned<T: Sized + 'static>(mut self) -> Result<Box<T>> {
+    if self.0.is_null() {
+      return Err(String::from("Pointer is NULL"));
+    }
+    let boxed = *Box::from_raw(self.0 as *mut Box<dyn Any>);
+    self.0 = std::ptr::null_mut();
+    boxed.downcast::<T>().into_result()
+  }
+
+  pub unsafe fn free(&mut self) {
     if self.0.is_null() {
       return;
     }

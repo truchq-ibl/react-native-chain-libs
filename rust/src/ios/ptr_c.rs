@@ -11,6 +11,6 @@ pub extern "C" fn rptr_into_usize(ptr: RPtr) -> usize {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn rptr_free(ptr: RPtr) {
+pub unsafe extern "C" fn rptr_free(ptr: &mut RPtr) {
   ptr.free();
 }
