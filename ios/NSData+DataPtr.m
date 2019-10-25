@@ -1,0 +1,23 @@
+//
+//  NSData+DataPtr.m
+//  ChainLibs
+//
+//  Created by Ostap Danylovych on 24.10.2019.
+//  Copyright © 2019 Facebook. All rights reserved.
+//
+
+#import "NSData+DataPtr.h"
+
+@implementation NSData (DataPtr)
+
++ (NSData *)fromDataPtr:(DataPtr)ptr {
+    NSData* data = [NSData dataWithBytes:ptr.ptr length:ptr.len];
+    dataptr_free(ptr);
+    return data;
+}
+
+- (NSString *)base64 {
+    return [self base64EncodedStringWithOptions:0];
+}
+
+@end
