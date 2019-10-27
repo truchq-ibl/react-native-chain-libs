@@ -17,7 +17,8 @@ pub unsafe extern "C" fn public_key_as_bytes(
 pub unsafe extern "C" fn public_key_from_bech32(
   bech32_str: CharPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| PublicKey::from_bech32(bech32_str.into_str()).into_result())
-    .map(|pkey| RPtr::new(pkey))
-    .response(result, error)
+  handle_exception_result(|| {
+    PublicKey::from_bech32(bech32_str.into_str()).map(|pkey| RPtr::new(pkey)).into_result()
+  })
+  .response(result, error)
 }

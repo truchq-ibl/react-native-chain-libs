@@ -1,5 +1,4 @@
 // android/build.gradle
-
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
 }
@@ -10,23 +9,30 @@ buildscript {
     // module dependency in an application project.
     if (project == rootProject) {
         repositories {
-            google()
             jcenter()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:3.4.1'
+            classpath "com.android.tools.build:gradle:3.5.1"
         }
+    }
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' }
+        google()
+    }
+    dependencies {
+        classpath 'gradle.plugin.org.mozilla.rust-android-gradle:plugin:0.8.3'
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 // Matches values in recent template from React Native 0.59 / 0.60
 // https://github.com/facebook/react-native/blob/0.59-stable/template/android/build.gradle#L5-L9
 // https://github.com/facebook/react-native/blob/0.60-stable/template/android/build.gradle#L5-L9
-def DEFAULT_COMPILE_SDK_VERSION = 28
-def DEFAULT_BUILD_TOOLS_VERSION = "28.0.3"
+def DEFAULT_COMPILE_SDK_VERSION = 29
+def DEFAULT_BUILD_TOOLS_VERSION = "29.0.2"
 def DEFAULT_MIN_SDK_VERSION = 16
 def DEFAULT_TARGET_SDK_VERSION = 28
 
@@ -39,9 +45,22 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     lintOptions {
         abortOnError false
     }
+}
+
+cargo {
+    profile = 'release'
+    module = '../rust'
+    libname = 'react_native_chain_libs'
+    targets = ['arm', 'arm64', 'x86', 'x86_64']
+    apiLevel = 21
+    prebuiltToolchains = true
 }
 
 repositories {
@@ -72,7 +91,7 @@ def configureReactNativePom(def pom) {
         name packageJson.title
         artifactId packageJson.name
         version = packageJson.version
-        group = "com.reactlibrary"
+        group = "io.emurgo.cardanolibs"
         description packageJson.description
         url packageJson.repository.baseUrl
 
@@ -104,21 +123,28 @@ afterEvaluate { project ->
     }
 
     task androidJavadocJar(type: Jar, dependsOn: androidJavadoc) {
-        classifier = 'javadoc'
+        archiveClassifier.set('javadoc')
         from androidJavadoc.destinationDir
     }
 
     task androidSourcesJar(type: Jar) {
-        classifier = 'sources'
+        archiveClassifier.set('sources')
         from android.sourceSets.main.java.srcDirs
         include '**/*.java'
     }
 
     android.libraryVariants.all { variant ->
         def name = variant.name.capitalize()
-        task "jar${name}"(type: Jar, dependsOn: variant.javaCompile) {
-            from variant.javaCompile.destinationDir
+        task "jar${name}"(type: Jar, dependsOn: variant.javaCompileProvider) {
+            from variant.javaCompileProvider.get().destinationDir
         }
+
+        def productFlavor = ""
+        variant.productFlavors.each {
+            productFlavor += "${it.name.capitalize()}"
+        }
+        def buildType = "${variant.buildType.name.capitalize()}"
+        tasks["generate${productFlavor}${buildType}Assets"].dependsOn(tasks["cargoBuild"])
     }
 
     artifacts {

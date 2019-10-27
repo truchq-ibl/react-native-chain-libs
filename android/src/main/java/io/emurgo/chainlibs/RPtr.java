@@ -1,0 +1,26 @@
+package io.emurgo.chainlibs;
+
+public final class RPtr {
+    private long ptr;
+
+    public String toString() {
+        return Long.toHexString(this.ptr);
+    }
+
+    final String toJs() {
+        return this.toString();
+    }
+
+    final void free() {
+        Native.I.ptrFree(this);
+        this.ptr = 0L;
+    }
+
+    private RPtr(long ptr) {
+        this.ptr = ptr;
+    }
+
+    RPtr(String str) {
+        this(Long.parseLong(str, 16));
+    }
+}

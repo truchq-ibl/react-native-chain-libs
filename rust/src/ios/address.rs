@@ -24,9 +24,10 @@ impl From<AddressDiscrimination> for RAddressDiscrimination {
 pub unsafe extern "C" fn address_from_string(
   string: CharPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| Address::from_string(string.into_str()).into_result())
-    .map(|addr| RPtr::new(addr))
-    .response(result, error)
+  handle_exception_result(|| {
+    Address::from_string(string.into_str()).map(|addr| RPtr::new(addr)).into_result()
+  })
+  .response(result, error)
 }
 
 #[no_mangle]
@@ -47,8 +48,8 @@ pub unsafe extern "C" fn address_single_from_public_key(
     key
       .owned::<PublicKey>()
       .map(|key| Address::single_from_public_key(*key, discrimination.into()))
+      .map(|addr| RPtr::new(addr))
   })
-  .map(|addr| RPtr::new(addr))
   .response(result, error)
 }
 
@@ -62,8 +63,8 @@ pub unsafe extern "C" fn address_delegation_from_public_key(
     key.owned::<PublicKey>().map(|key| {
       Address::delegation_from_public_key(*key, *delegation, discrimination.into())
     })
+    .map(|address| RPtr::new(address))
   })
-  .map(|address| RPtr::new(address))
   .response(result, error)
 }
 
@@ -75,7 +76,7 @@ pub unsafe extern "C" fn address_account_from_public_key(
     key
       .owned::<PublicKey>()
       .map(|key| Address::account_from_public_key(*key, discrimination.into()))
+      .map(|address| RPtr::new(address))
   })
-  .map(|address| RPtr::new(address))
   .response(result, error)
 }

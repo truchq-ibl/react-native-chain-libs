@@ -14,12 +14,7 @@ mod android;
 #[cfg(target_os = "android")]
 pub use self::android::*;
 
-//#[cfg(target_os="ios")]
+#[cfg(target_os="ios")]
 mod ios;
-//#[cfg(target_os="ios")]
+#[cfg(target_os="ios")]
 pub use self::ios::*;
-
-#[no_mangle]
-pub extern "C" fn init_chain_libs_library() {
-  panic::hide_exceptions();
-}
