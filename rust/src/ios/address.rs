@@ -2,23 +2,8 @@ use super::result::CResult;
 use super::string::{CharPtr, IntoCString, IntoStr};
 use crate::panic::{handle_exception_result, ToResult};
 use crate::ptr::RPtr;
-use js_chain_libs::{Address, AddressDiscrimination as RAddressDiscrimination, PublicKey};
-
-#[repr(C)]
-#[derive(Copy, Clone, Eq, PartialEq)]
-pub enum AddressDiscrimination {
-  Production = 0,
-  Test = 1
-}
-
-impl From<AddressDiscrimination> for RAddressDiscrimination {
-  fn from(ad: AddressDiscrimination) -> Self {
-    match ad {
-      AddressDiscrimination::Production => RAddressDiscrimination::Production,
-      AddressDiscrimination::Test => RAddressDiscrimination::Test
-    }
-  }
-}
+use crate::address::AddressDiscrimination;
+use js_chain_libs::{Address, PublicKey};
 
 #[no_mangle]
 pub unsafe extern "C" fn address_from_string(

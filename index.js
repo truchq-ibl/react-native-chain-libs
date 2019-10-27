@@ -1,9 +1,10 @@
 import { NativeModules } from 'react-native';
+import { decode as base64_decode } from 'base-64';
 
 const { ChainLibs } = NativeModules;
 
 function Uint8ArrayFromB64(base64_string) {
-    return Uint8Array.from(atob(base64_string), c => c.charCodeAt(0));
+    return Uint8Array.from(base64_decode(base64_string), c => c.charCodeAt(0));
 }
 
 class Ptr {
@@ -44,7 +45,7 @@ class Ptr {
 * let address = Address::single_from_public_key(public_key, discriminant);
 * ```
 */
-export const AddressDiscrimination = Object.freeze({ Production:0, Test:1 });
+export const AddressDiscrimination = ChainLibs.AddressDiscrimination;
 
 export class Value extends Ptr {
     /**

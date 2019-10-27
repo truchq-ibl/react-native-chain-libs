@@ -25,11 +25,11 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
         return "ChainLibs";
     }
 
-//    public Map<String, Object> getConstants() {
-//        HashMap<String, Object> map = new HashMap<>();
-//        map.put("AddressDiscrimination",  Native.I.AddressDiscrimination());
-//        return map;
-//    }
+    public Map<String, Object> getConstants() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("AddressDiscrimination",  Native.I.AddressDiscrimination());
+        return map;
+    }
 
     @ReactMethod
     public final void valueFromStr(String str, Promise promise) {

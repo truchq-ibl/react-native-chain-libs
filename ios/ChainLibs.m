@@ -8,6 +8,15 @@
 
 RCT_EXPORT_MODULE(ChainLibs)
 
+- (NSDictionary *)constantsToExport {
+    return @{
+             @"AddressDiscrimination": @{
+                     @"Test": @(Test),
+                     @"Production": @(Production)
+                     }
+             };
+}
+
 RCT_EXPORT_METHOD(valueFromStr:(nonnull NSString *)string withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSString* string, CharPtr* error) {
