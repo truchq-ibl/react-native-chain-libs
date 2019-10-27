@@ -96,7 +96,7 @@ export class PublicKey extends Ptr {
     */
     static async from_bech32(bech32_str) {
         const ret = await ChainLibs.publicKeyFromBech32(bech32_str);
-        return Ptr.__wrap(ret, PublicKey);
+        return Ptr._wrap(ret, PublicKey);
     }
     /**
     * @returns {Promise<Uint8Array>}
@@ -125,7 +125,7 @@ export class Address extends Ptr {
     */
     static async from_string(s) {
         const ret = await ChainLibs.addressFromString(s);
-        return Ptr.__wrap(ret, Address);
+        return Ptr._wrap(ret, Address);
     }
     /**
     * Get Address bech32 (string) representation with a given prefix
@@ -160,7 +160,7 @@ export class Address extends Ptr {
         const keyPtr = Ptr._assertClass(key, PublicKey);
         key.ptr = null;
         const ret = await ChainLibs.addressSingleFromPublicKey(keyPtr, discrimination);
-        return Ptr.__wrap(ret, Address);
+        return Ptr._wrap(ret, Address);
     }
     /**
     * Construct a non-account address from a pair of public keys, delegating founds from the first to the second
@@ -174,7 +174,7 @@ export class Address extends Ptr {
         const delPtr = Ptr._assertClass(delegation, PublicKey);
         key.ptr = delegation.ptr = null;
         const ret = await ChainLibs.addressDelegationFromPublicKey(keyPtr, delPtr, discrimination);
-        return Ptr.__wrap(ret, Address);
+        return Ptr._wrap(ret, Address);
     }
     /**
     * Construct address of account type from a public key
@@ -186,6 +186,6 @@ export class Address extends Ptr {
         const keyPtr = Ptr._assertClass(key, PublicKey);
         key.ptr = null;
         const ret = await ChainLibs.addressAccountFromPublicKey(keyPtr, discrimination);
-        return Ptr.__wrap(ret, Address);
+        return Ptr._wrap(ret, Address);
     }
 }

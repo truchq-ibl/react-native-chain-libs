@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import android.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +73,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void publicKeyAsBytes(String pubPtr, Promise promise) {
         Native.I
                 .publicKeyAsBytes(new RPtr(pubPtr))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
                 .pour(promise);
     }
 
