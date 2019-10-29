@@ -1,8 +1,8 @@
 use super::result::CResult;
 use super::string::CharPtr;
-use crate::panic::{handle_exception, handle_exception_result, Zip};
+use crate::panic::{handle_exception, handle_exception_result, ToResult, Zip};
 use crate::ptr::RPtr;
-use js_chain_libs::{Address, Input, TransactionBuilder, Value};
+use js_chain_libs::{Address, Fee, Input, OutputPolicy, TransactionBuilder, Value};
 
 #[no_mangle]
 pub unsafe extern "C" fn transaction_builder_new_no_payload(
@@ -36,4 +36,22 @@ pub unsafe extern "C" fn transaction_builder_add_output(
       .map(|((tx_builder, address), value)| tx_builder.add_output(address, value))
   })
   .response(&mut (), error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn transaction_builder_seal_with_output_policy(
+  tx_builder: &mut RPtr, fee: RPtr, output_policy: &mut RPtr, result: &mut RPtr,
+  error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    tx_builder
+      .owned::<TransactionBuilder>()
+      .zip(fee.typed_ref::<Fee>())
+      .zip(output_policy.owned::<OutputPolicy>())
+      .and_then(|((tx_builder, fee), output_policy)| {
+        tx_builder.seal_with_output_policy(fee, output_policy).into_result()
+      })
+  })
+  .map(|transaction| RPtr::new(transaction))
+  .response(result, error)
 }

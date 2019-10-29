@@ -5,6 +5,7 @@ mod data;
 mod fee;
 mod fragment;
 mod input;
+mod output_policy;
 mod ptr_c;
 mod public_key;
 mod result;

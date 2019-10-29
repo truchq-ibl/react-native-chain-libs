@@ -257,6 +257,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
+    public final void transactionBuilderSealWithOutputPolicy(RPtr txBuilder, RPtr fee, RPtr outputPolicy, Promise promise) {
+        Native.I
+                .transactionBuilderSealWithOutputPolicy(txBuilder, fee, outputPolicy)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // Account
 
     @ReactMethod
@@ -283,6 +291,24 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate, Promise promise) {
         Native.I
                 .feeLinearFee(constant, coefficient, certificate)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // OutputPolicy
+
+    @ReactMethod
+    public final void outputPolicyForget(Promise promise) {
+        Native.I
+                .outputPolicyForget()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void outputPolicyOne(RPtr address, Promise promise) {
+        Native.I
+                .outputPolicyOne(address)
                 .map(RPtr::toJs)
                 .pour(promise);
     }

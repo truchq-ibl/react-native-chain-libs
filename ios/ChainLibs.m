@@ -338,6 +338,19 @@ RCT_EXPORT_METHOD(transactionBuilderAddOutput:(nonnull NSString *)ptr withAddres
     }] exec:@[ptr, address, value] andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(transactionBuilderSealWithOutputPolicy:(nonnull NSString *)txBuilder withFee:(nonnull NSString *)fee andOutputPolicy:(nonnull NSString *)outputPolicy withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr txBuilder = [[params objectAtIndex:0] rPtr];
+        RPtr fee = [[params objectAtIndex:1] rPtr];
+        RPtr outputPolicy = [[params objectAtIndex:2] rPtr];
+        return transaction_builder_seal_with_output_policy(&txBuilder, fee, &outputPolicy, &result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:@[txBuilder, fee, outputPolicy] andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(accountFromAddress:(nonnull NSString *)address  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSString* ptr, CharPtr* error) {
@@ -372,6 +385,27 @@ RCT_EXPORT_METHOD(feeLinearFee:(nonnull NSString *)constant withСoefficient:(no
         ? [NSString stringFromPtr:result]
         : nil;
     }] exec:@[constant, coefficient, certificate] andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(outputPolicyForget:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(id _void, CharPtr* error) {
+        RPtr result;
+        return output_policy_forget(&result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:nil andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(outputPolicyOne:(nonnull NSString *)addressPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* addressPtr, CharPtr* error) {
+        RPtr result;
+        RPtr address = [addressPtr rPtr];
+        return output_policy_one(&address, &result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
 }
 
 RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr)

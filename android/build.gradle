@@ -69,10 +69,6 @@ repositories {
         // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
         url "$rootDir/../node_modules/react-native/android"
     }
-    maven {
-        // Android JSC is installed from npm
-        url "$rootDir/../node_modules/jsc-android/dist"
-    }
     google()
     jcenter()
 }
@@ -82,6 +78,11 @@ dependencies {
     // https://github.com/facebook/react-native/blob/0.61-stable/template/android/app/build.gradle#L192
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
+
+    def defaultAndroidXVersion = "1.+"
+    def androidXVersion = safeExtGet('androidXVersion', defaultAndroidXVersion)
+    def androidXAnnotation = safeExtGet('androidXAnnotation', androidXVersion)
+    implementation "androidx.annotation:annotation:$androidXAnnotation"
 }
 
 def configureReactNativePom(def pom) {

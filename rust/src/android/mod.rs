@@ -4,6 +4,7 @@ mod authenticated_transaction;
 mod fee;
 mod fragment;
 mod input;
+mod output_policy;
 mod primitive;
 mod ptr_j;
 mod public_key;

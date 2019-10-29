@@ -32,10 +32,7 @@ pub unsafe extern "C" fn fragment_get_transaction(
   fragment: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    fragment
-      .owned::<Fragment>()
-      .map(|fragment| fragment.get_transaction().into_result())
-      .and_then(|fragment| fragment)
+    fragment.owned::<Fragment>().and_then(|fragment| fragment.get_transaction().into_result())
   })
   .map(|tx| RPtr::new(tx))
   .response(result, error)

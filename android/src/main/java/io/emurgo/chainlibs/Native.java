@@ -58,6 +58,7 @@ final class Native {
     public final native Result<RPtr> transactionBuilderNewNoPayload();
     public final native Result<Void> transactionBuilderAddInput(RPtr txBuilder, RPtr input);
     public final native Result<Void> transactionBuilderAddOutput(RPtr txBuilder, RPtr address, RPtr value);
+    public final native Result<RPtr> transactionBuilderSealWithOutputPolicy(RPtr txBuilder, RPtr fee, RPtr outputPolicy);
 
     // Account
     public final native Result<RPtr> accountFromAddress(RPtr address);
@@ -67,6 +68,10 @@ final class Native {
 
     // Fee
     public final native Result<RPtr> feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate);
+
+    // OutputPolicy
+    public final native Result<RPtr> outputPolicyForget();
+    public final native Result<RPtr> outputPolicyOne(RPtr address);
 
     public final native void ptrFree(RPtr ptr);
 }
