@@ -1,9 +1,9 @@
-use jni::JNIEnv;
 use jni::objects::JObject;
 use jni::sys::jobject;
+use jni::JNIEnv;
 
-use crate::panic::{Result, ToResult};
 use super::string::ToJniString;
+use crate::panic::{Result, ToResult};
 
 pub trait ToJniResult {
   fn jresult<'a>(self, env: &'a JNIEnv) -> jobject;
@@ -15,19 +15,28 @@ impl<T> ToResult<T> for std::result::Result<T, jni::errors::Error> {
   }
 }
 
-impl<'a, T> ToJniResult for Result<T> where T: Into<JObject<'a>> {
+impl<'a, T> ToJniResult for Result<T>
+where
+  T: Into<JObject<'a>>
+{
   fn jresult(self, env: &JNIEnv) -> jobject {
     static CONSTRUCTOR: &str = "(Ljava/lang/Object;Ljava/lang/String;)V";
 
     let class = env.find_class("io/emurgo/chainlibs/Result").expect("Can't find Result class");
-     match self {
+    match self {
       Ok(res) => {
         let jobj = res.into();
-        env.new_object(class, CONSTRUCTOR, &[jobj.into(), JObject::null().into()]).unwrap().into_inner()
-      },
-      Err(error) => { 
+        env
+          .new_object(class, CONSTRUCTOR, &[jobj.into(), JObject::null().into()])
+          .unwrap()
+          .into_inner()
+      }
+      Err(error) => {
         let jstr = *error.jstring(env).expect("Couldn't create java string!");
-        env.new_object(class, CONSTRUCTOR, &[JObject::null().into(), jstr.into()]).unwrap().into_inner()
+        env
+          .new_object(class, CONSTRUCTOR, &[JObject::null().into(), jstr.into()])
+          .unwrap()
+          .into_inner()
       }
     }
   }

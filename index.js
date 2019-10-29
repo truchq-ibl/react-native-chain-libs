@@ -190,3 +190,116 @@ export class Address extends Ptr {
         return Ptr._wrap(ret, Address);
     }
 }
+
+export class AuthenticatedTransaction extends Ptr {
+    /**
+    * Get a copy of the inner Transaction, discarding the signatures
+    * @returns {Promise<Transaction>}
+    */
+    async transaction() {
+        const ret = await ChainLibs.authenticatedTransactionTransaction(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+}
+
+export class Fragment {
+    /**
+    * @param {AuthenticatedTransaction} tx
+    * @returns {Promise<Fragment>}
+    */
+    static async from_authenticated_transaction(tx) {
+        const txPtr = Ptr._assertClass(tx, AuthenticatedTransaction);
+        tx.ptr = null;
+        const ret = await ChainLibs.authenticatedTransactionTransaction(txPtr);
+        return Ptr._wrap(ret, Fragment);
+    }
+    /**
+    * Deprecated: Use `from_authenticated_transaction` instead
+    * @param {AuthenticatedTransaction} tx
+    * @returns {Promise<Fragment>}
+    */
+    static async from_generated_transaction(tx) {
+        const txPtr = Ptr._assertClass(tx, AuthenticatedTransaction);
+        tx.ptr = null;
+        const ret = await ChainLibs.fragmentFromAuthenticatedTransaction(txPtr);
+        return Ptr._wrap(ret, Fragment);
+    }
+    /**
+    * Get a Transaction if the Fragment represents one
+    * @returns {Promise<AuthenticatedTransaction>}
+    */
+    async get_transaction() {
+        const ptr = this.ptr;
+        this.ptr = null;
+        const ret = await ChainLibs.fragmentGetTransaction(ptr);
+        return Ptr._wrap(ret, AuthenticatedTransaction);
+    }
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.fragmentAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_initial() {
+        return ChainLibs.fragmentIsInitial(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_transaction() {
+        return ChainLibs.fragmentIsTransaction(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_owner_stake_delegation() {
+        return ChainLibs.fragmentIsOwnerStakeDelegation(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_stake_delegation() {
+        return ChainLibs.fragmentIsStakeDelegation(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_pool_registration() {
+        return ChainLibs.fragmentIsPoolRegistration(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_pool_management() {
+        return ChainLibs.fragmentIsPoolManagement(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_old_utxo_declaration() {
+        return ChainLibs.fragmentIsOldUtxoDeclaration(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_update_proposal() {
+        return ChainLibs.fragmentIsUpdateProposal(this.ptr);
+    }
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_update_vote() {
+        return ChainLibs.fragmentIsUpdateVote(this.ptr);
+    }
+    /**
+    * @returns {Promise<FragmentId>}
+    */
+    async id() {
+        const ret = await ChainLibs.fragmentId(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+}

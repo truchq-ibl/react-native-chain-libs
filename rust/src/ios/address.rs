@@ -1,8 +1,8 @@
 use super::result::CResult;
 use super::string::{CharPtr, IntoCString, IntoStr};
-use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
 use crate::address::AddressDiscrimination;
+use crate::panic::{handle_exception_result, ToResult, Zip};
+use crate::ptr::RPtr;
 use js_chain_libs::{Address, PublicKey};
 
 #[no_mangle]
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn address_single_from_public_key(
   handle_exception_result(|| {
     key
       .owned::<PublicKey>()
-      .map(|key| Address::single_from_public_key(*key, discrimination.into()))
+      .map(|key| Address::single_from_public_key(key, discrimination.into()))
       .map(|addr| RPtr::new(addr))
   })
   .response(result, error)
@@ -44,11 +44,13 @@ pub unsafe extern "C" fn address_delegation_from_public_key(
   error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    let delegation = delegation.owned::<PublicKey>()?;
-    key.owned::<PublicKey>().map(|key| {
-      Address::delegation_from_public_key(*key, *delegation, discrimination.into())
-    })
-    .map(|address| RPtr::new(address))
+    key
+      .owned::<PublicKey>()
+      .zip(delegation.owned::<PublicKey>())
+      .map(|(key, delegation)| {
+        Address::delegation_from_public_key(key, delegation, discrimination.into())
+      })
+      .map(|address| RPtr::new(address))
   })
   .response(result, error)
 }
@@ -60,7 +62,7 @@ pub unsafe extern "C" fn address_account_from_public_key(
   handle_exception_result(|| {
     key
       .owned::<PublicKey>()
-      .map(|key| Address::account_from_public_key(*key, discrimination.into()))
+      .map(|key| Address::account_from_public_key(key, discrimination.into()))
       .map(|address| RPtr::new(address))
   })
   .response(result, error)

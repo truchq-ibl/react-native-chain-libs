@@ -1,24 +1,83 @@
-use jni::JNIEnv;
 use jni::objects::{JObject, JString};
 use jni::sys::jlong;
+use jni::JNIEnv;
 
 #[cfg(target_pointer_width = "64")]
 use std::mem;
 
-use crate::ptr::RPtr;
-use crate::panic::{Result, ToResult};
 use super::string::ToString;
+use crate::panic::{Result, ToResult};
+use crate::ptr::RPtr;
+
+pub type JRPtr<'a> = JObject<'a>;
+
+pub struct RPtrRef(RPtr);
+
+impl RPtrRef {
+  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&T> {
+    self.0.typed_ref::<T>()
+  }
+
+  fn new(ptr: RPtr) -> Self {
+    return Self(ptr);
+  }
+
+  fn to_ptr(self) -> RPtr {
+    self.0
+  }
+}
 
 pub trait ToJniPtr {
-  fn jptr<'a>(self, env: &'a JNIEnv) -> Result<JObject<'a>>;
+  fn jptr<'a>(self, env: &'a JNIEnv) -> Result<JRPtr<'a>>;
 }
 
 pub trait FromJniPtr {
-  fn rptr<'a>(self, env: &'a JNIEnv) -> Result<RPtr>;
+  fn rptr<'a>(self, env: &'a JNIEnv) -> Result<RPtrRef>;
+  unsafe fn owned<'a, T: Sized + 'static>(self, env: &'a JNIEnv) -> Result<T>;
+  unsafe fn free<'a>(self, env: &'a JNIEnv) -> Result<()>;
 }
 
-impl<'a> FromJniPtr for JObject<'a> {
-  fn rptr(self, env: &JNIEnv) -> Result<RPtr> {
+pub trait JLongConvertible {
+  fn from_jlong(long: jlong) -> Self;
+  fn into_jlong(self) -> jlong;
+}
+
+impl JLongConvertible for usize {
+  fn from_jlong(long: jlong) -> Self {
+    #[cfg(target_pointer_width = "32")]
+    {
+      long as usize
+    }
+    #[cfg(target_pointer_width = "64")]
+    {
+      u64::from_jlong(long) as usize
+    }
+  }
+
+  fn into_jlong(self) -> jlong {
+    #[cfg(target_pointer_width = "32")]
+    {
+      self as jlong
+    }
+    #[cfg(target_pointer_width = "64")]
+    {
+      (self as u64).into_jlong()
+    }
+  }
+}
+
+impl JLongConvertible for u64 {
+  fn from_jlong(long: jlong) -> Self {
+    unsafe { mem::transmute::<jlong, u64>(long) }
+  }
+
+  fn into_jlong(self) -> jlong {
+    unsafe { mem::transmute::<u64, jlong>(self) }
+  }
+}
+
+impl<'a> FromJniPtr for JRPtr<'a> {
+  fn rptr(self, env: &JNIEnv) -> Result<RPtrRef> {
     let class_obj = env
       .call_method(self, "getClass", "()Ljava/lang/Class;", &[])
       .and_then(|res| res.l())
@@ -34,42 +93,41 @@ impl<'a> FromJniPtr for JObject<'a> {
     env
       .get_field(self, "ptr", "J")
       .and_then(|res| res.j())
-      .map(|iptr| {
-        #[cfg(target_pointer_width = "32")]
-        {
-          (iptr as usize).into()
-        }
-        #[cfg(target_pointer_width = "64")]
-        unsafe {
-          mem::transmute::<jlong, usize>(iptr).into()
-        }
-      })
+      .map(|iptr| RPtrRef::new(usize::from_jlong(iptr).into()))
       .into_result()
+  }
+
+  unsafe fn owned<T: Sized + 'static>(self, env: &JNIEnv) -> Result<T> {
+    self
+      .rptr(env)
+      .and_then(|rptr| rptr.to_ptr().owned::<T>())
+      .and_then(|val| env.set_field(self, "ptr", "J", 0.into()).map(|_| val).into_result())
+  }
+
+  unsafe fn free(self, env: &JNIEnv) -> Result<()> {
+    self.rptr(env)
+      .and_then(|rptr| {
+        env.set_field(self, "ptr", "J", 0.into())
+          .into_result()
+          .map(|_| rptr.to_ptr().free())
+      })
   }
 }
 
 impl ToJniPtr for RPtr {
-  fn jptr<'a>(self, env: &'a JNIEnv) -> Result<JObject<'a>> {
-    let ptr = {
-      #[cfg(target_pointer_width = "32")]
-      {
-        usize::from(self) as jlong
-      }
-      #[cfg(target_pointer_width = "64")]
-      unsafe {
-        mem::transmute::<usize, jlong>(self.into())
-      }
-    };
-    env.find_class("io/emurgo/chainlibs/RPtr")
-      .and_then(|class| env.new_object(class, "(J)V", &[ptr.into()]))
+  fn jptr<'a>(self, env: &'a JNIEnv) -> Result<JRPtr<'a>> {
+    let ptr: usize = self.into();
+    env
+      .find_class("io/emurgo/chainlibs/RPtr")
+      .and_then(|class| env.new_object(class, "(J)V", &[ptr.into_jlong().into()]))
       .into_result()
   }
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern fn Java_io_emurgo_chainlibs_Native_ptrFree(
-  env: JNIEnv, _: JObject, ptr: JObject
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_ptrFree(
+  env: JNIEnv, _: JObject, ptr: JRPtr
 ) {
-  ptr.rptr(&env).unwrap().free();
+  ptr.free(&env).unwrap();
 }

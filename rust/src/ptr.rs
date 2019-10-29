@@ -34,13 +34,13 @@ impl RPtr {
       .ok_or_else(|| format!("Bad pointer: 0x{:x}", self.0 as usize))
   }
 
-  pub unsafe fn owned<T: Sized + 'static>(mut self) -> Result<Box<T>> {
+  pub unsafe fn owned<T: Sized + 'static>(mut self) -> Result<T> {
     if self.0.is_null() {
       return Err(String::from("Pointer is NULL"));
     }
     let boxed = *Box::from_raw(self.0 as *mut Box<dyn Any>);
     self.0 = std::ptr::null_mut();
-    boxed.downcast::<T>().into_result()
+    boxed.downcast::<T>().into_result().map(|boxed| *boxed)
   }
 
   pub unsafe fn free(&mut self) {

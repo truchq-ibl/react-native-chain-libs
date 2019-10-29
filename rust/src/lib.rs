@@ -1,13 +1,13 @@
 extern crate js_chain_libs;
 extern crate wasm_bindgen;
 
+mod address;
 mod js_result;
 mod panic;
 mod ptr;
-mod address;
 
-pub use ptr::*;
 pub use address::*;
+pub use ptr::*;
 
 #[cfg(target_os = "android")]
 extern crate jni;

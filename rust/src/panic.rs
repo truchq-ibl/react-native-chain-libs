@@ -1,10 +1,20 @@
-use std::panic;
 use std::any::Any;
+use std::panic;
 
 pub type Result<T> = std::result::Result<T, String>;
 
 pub trait ToResult<T> {
   fn into_result(self) -> Result<T>;
+}
+
+pub trait Zip<T1> {
+  fn zip<T2>(self, other: Result<T2>) -> Result<(T1, T2)>;
+}
+
+impl<T1> Zip<T1> for Result<T1> {
+  fn zip<T2>(self, other: Result<T2>) -> Result<(T1, T2)> {
+    self.and_then(|val1| other.map(|val2| (val1, val2)))
+  }
 }
 
 fn string_from_any_err(err: Box<dyn Any>) -> String {
@@ -36,9 +46,7 @@ pub fn handle_exception<F: FnOnce() -> R + panic::UnwindSafe, R>(func: F) -> Res
 pub fn handle_exception_result<F: FnOnce() -> Result<R> + panic::UnwindSafe, R>(
   func: F
 ) -> Result<R> {
-  panic::catch_unwind(func)
-    .into_result()
-    .and_then(|res| res)
+  panic::catch_unwind(func).into_result().and_then(|res| res)
 }
 
 pub fn hide_exceptions() {

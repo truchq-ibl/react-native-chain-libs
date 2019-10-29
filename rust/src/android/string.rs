@@ -1,6 +1,6 @@
-use jni::JNIEnv;
-use jni::objects::JString;
 use crate::panic::{Result, ToResult};
+use jni::objects::JString;
+use jni::JNIEnv;
 
 pub trait ToJniString {
   fn jstring<'a>(self, env: &'a JNIEnv) -> Result<JString<'a>>;

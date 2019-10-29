@@ -13,7 +13,6 @@ public final class RPtr {
 
     final void free() {
         Native.I.ptrFree(this);
-        this.ptr = 0L;
     }
 
     private RPtr(long ptr) {

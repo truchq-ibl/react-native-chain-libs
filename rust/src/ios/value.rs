@@ -20,8 +20,10 @@ pub unsafe extern "C" fn value_checked_add(
 pub unsafe extern "C" fn value_from_str(
   chars: CharPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| Value::from_str(chars.into_str()).map(|val| RPtr::new(val)).into_result())
-    .response(result, error)
+  handle_exception_result(|| {
+    Value::from_str(chars.into_str()).map(|val| RPtr::new(val)).into_result()
+  })
+  .response(result, error)
 }
 
 #[no_mangle]
