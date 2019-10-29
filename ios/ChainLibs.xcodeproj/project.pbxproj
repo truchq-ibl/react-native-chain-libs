@@ -11,6 +11,7 @@
 		9284C0332362017700288246 /* SafeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 9284C0312362017700288246 /* SafeOperation.m */; };
 		B3E7B58A1CC2AC0600A0062D /* ChainLibs.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* ChainLibs.m */; };
 		BA22B1452362480000917552 /* NSData+DataPtr.m in Sources */ = {isa = PBXBuildFile; fileRef = BA22B1442362480000917552 /* NSData+DataPtr.m */; };
+		BF0DF270C6C2265C5C2F9E22 /* libPods-ChainLibs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4522B664462E1826102B0845 /* libPods-ChainLibs.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,10 +28,13 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libChainLibs.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libChainLibs.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		4522B664462E1826102B0845 /* libPods-ChainLibs.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ChainLibs.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D4D96C82D20E82694E9EC4C /* Pods-ChainLibs.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChainLibs.debug.xcconfig"; path = "Target Support Files/Pods-ChainLibs/Pods-ChainLibs.debug.xcconfig"; sourceTree = "<group>"; };
 		9284C02B2361E7AF00288246 /* NSString+RPtr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+RPtr.h"; sourceTree = "<group>"; };
 		9284C02C2361E7AF00288246 /* NSString+RPtr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+RPtr.m"; sourceTree = "<group>"; };
 		9284C0312362017700288246 /* SafeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SafeOperation.m; sourceTree = "<group>"; };
 		9284C0322362017700288246 /* SafeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SafeOperation.h; sourceTree = "<group>"; };
+		97F341FC967B85ABAC964AEA /* Pods-ChainLibs.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChainLibs.release.xcconfig"; path = "Target Support Files/Pods-ChainLibs/Pods-ChainLibs.release.xcconfig"; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* ChainLibs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChainLibs.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* ChainLibs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChainLibs.m; sourceTree = "<group>"; };
 		BA22B1432362480000917552 /* NSData+DataPtr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+DataPtr.h"; sourceTree = "<group>"; };
@@ -43,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF0DF270C6C2265C5C2F9E22 /* libPods-ChainLibs.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,6 +60,14 @@
 				134814201AA4EA6300B7C361 /* libChainLibs.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3D353A721E5AA40A6EE8CD52 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4522B664462E1826102B0845 /* libPods-ChainLibs.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		58B511D21A9E6C8500147676 = {
@@ -70,7 +83,18 @@
 				B3E7B5891CC2AC0600A0062D /* ChainLibs.m */,
 				BA3E42142360831E00247396 /* build.sh */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				C22C2789E0481432740B30D2 /* Pods */,
+				3D353A721E5AA40A6EE8CD52 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		C22C2789E0481432740B30D2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				8D4D96C82D20E82694E9EC4C /* Pods-ChainLibs.debug.xcconfig */,
+				97F341FC967B85ABAC964AEA /* Pods-ChainLibs.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -80,6 +104,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "ChainLibs" */;
 			buildPhases = (
+				3194F1966C31B14CE19370E0 /* [CP] Check Pods Manifest.lock */,
 				BA3E4213236082F100247396 /* ShellScript */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
@@ -127,6 +152,28 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		3194F1966C31B14CE19370E0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ChainLibs-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		BA3E4213236082F100247396 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -262,6 +309,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8D4D96C82D20E82694E9EC4C /* Pods-ChainLibs.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -271,7 +319,10 @@
 					"$(CONFIGURATION_BUILD_DIR)/",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				OTHER_LIBTOOLFLAGS = "-lreact_native_chain_libs";
 				PRODUCT_NAME = ChainLibs;
 				SKIP_INSTALL = YES;
@@ -280,6 +331,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 97F341FC967B85ABAC964AEA /* Pods-ChainLibs.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -289,7 +341,10 @@
 					"$(CONFIGURATION_BUILD_DIR)/",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				OTHER_LIBTOOLFLAGS = "-lreact_native_chain_libs";
 				PRODUCT_NAME = ChainLibs;
 				SKIP_INSTALL = YES;

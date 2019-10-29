@@ -2,7 +2,6 @@ use jni::objects::{JObject, JString};
 use jni::sys::jlong;
 use jni::JNIEnv;
 
-#[cfg(target_pointer_width = "64")]
 use std::mem;
 
 use super::string::ToString;
@@ -14,7 +13,7 @@ pub type JRPtr<'a> = JObject<'a>;
 pub struct RPtrRef(RPtr);
 
 impl RPtrRef {
-  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&T> {
+  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&mut T> {
     self.0.typed_ref::<T>()
   }
 
@@ -105,12 +104,9 @@ impl<'a> FromJniPtr for JRPtr<'a> {
   }
 
   unsafe fn free(self, env: &JNIEnv) -> Result<()> {
-    self.rptr(env)
-      .and_then(|rptr| {
-        env.set_field(self, "ptr", "J", 0.into())
-          .into_result()
-          .map(|_| rptr.to_ptr().free())
-      })
+    self.rptr(env).and_then(|rptr| {
+      env.set_field(self, "ptr", "J", 0.into()).into_result().map(|_| rptr.to_ptr().free())
+    })
   }
 }
 

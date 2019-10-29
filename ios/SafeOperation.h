@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (Out)exec:(In)param error:(NSError **)error;
 
-- (void)exec:(In)param andResolve:(RCTPromiseResolveBlock)resolve orReject:(RCTPromiseRejectBlock)reject;
+- (void)exec:(_Nullable In)param andResolve:(RCTPromiseResolveBlock)resolve orReject:(RCTPromiseRejectBlock)reject;
 
 @end
 

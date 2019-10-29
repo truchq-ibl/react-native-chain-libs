@@ -233,6 +233,60 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
 	}
 
+    // TransactionBuilder
+
+    @ReactMethod
+    public final void transactionBuilderNewNoPayload(Promise promise) {
+        Native.I
+                .transactionBuilderNewNoPayload()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionBuilderAddInput(RPtr txBuilder, RPtr input, Promise promise) {
+        Native.I
+                .transactionBuilderAddInput(txBuilder, input)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionBuilderAddOutput(RPtr txBuilder, RPtr address, RPtr value, Promise promise) {
+        Native.I
+                .transactionBuilderAddOutput(txBuilder, address, value)
+                .pour(promise);
+    }
+
+    // Account
+
+    @ReactMethod
+    public final void accountFromAddress(RPtr address, Promise promise) {
+        Native.I
+                .accountFromAddress(address)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Input
+
+    @ReactMethod
+    public final void inputFromAccount(RPtr account, Promise promise) {
+        Native.I
+                .inputFromAccount(account)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Fee
+
+    @ReactMethod
+    public final void feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate, Promise promise) {
+        Native.I
+                .feeLinearFee(constant, coefficient, certificate)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     @ReactMethod
     public final void ptrFree(String ptr) {
         (new RPtr(ptr)).free();

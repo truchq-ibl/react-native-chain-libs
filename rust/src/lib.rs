@@ -16,7 +16,7 @@ mod android;
 #[cfg(target_os = "android")]
 pub use self::android::*;
 
-#[cfg(target_os="ios")]
+#[cfg(target_os = "ios")]
 mod ios;
-#[cfg(target_os="ios")]
+#[cfg(target_os = "ios")]
 pub use self::ios::*;

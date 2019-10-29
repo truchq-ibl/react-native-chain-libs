@@ -1,11 +1,15 @@
+mod account;
 mod address;
 mod authenticated_transaction;
 mod data;
+mod fee;
 mod fragment;
+mod input;
 mod ptr_c;
 mod public_key;
 mod result;
 mod string;
+mod transaction_builder;
 mod value;
 
 pub use address::*;

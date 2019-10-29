@@ -21,6 +21,10 @@ class Ptr {
         return ptr.ptr;
     }
 
+    constructor() {
+        throw new Error("Can't be initialized with constructor");
+    }
+
     /**
     * Frees the pointer
     * @returns {void}
@@ -202,7 +206,7 @@ export class AuthenticatedTransaction extends Ptr {
     }
 }
 
-export class Fragment {
+export class Fragment extends Ptr {
     /**
     * @param {AuthenticatedTransaction} tx
     * @returns {Promise<Fragment>}
@@ -301,5 +305,126 @@ export class Fragment {
     async id() {
         const ret = await ChainLibs.fragmentId(this.ptr);
         return Ptr._wrap(ret, Ptr);
+    }
+}
+
+/**
+* This is either an single account or a multisig account depending on the witness type
+*/
+export class Account extends Ptr {
+    /**
+    * @param {Address} address
+    * @returns {Promise<Account>}
+    */
+    static async from_address(address) {
+        const ret = await ChainLibs.accountFromAddress(Ptr._assertClass(address, Address));
+        return Ptr._wrap(ret, Account);
+    }
+}
+
+/**
+*/
+export class Input extends Ptr {
+    /**
+    * @param {Account} account
+    * @param {Value} v
+    * @returns {Promise<Input>}
+    */
+    static async from_account(account, v) {
+        const vPtr = Ptr._assertClass(v, Value);
+        v.ptr = null;
+        const ret = await ChainLibs.inputFromAccount(Ptr._assertClass(account, Account), vPtr);
+        return Ptr._wrap(ret, Input);
+    }
+}
+
+/**
+* Builder pattern implementation for making a Transaction
+*
+* Example
+*
+* ```javascript
+* const txbuilder = new TransactionBuilder();
+*
+* const account = Account.from_address(Address.from_string(
+*   &#39;ca1qh9u0nxmnfg7af8ycuygx57p5xgzmnmgtaeer9xun7hly6mlgt3pj2xk344&#39;
+* ));
+*
+* const input = Input.from_account(account, Value.from_str(\'1000\'));
+*
+* txbuilder.add_input(input);
+*
+* txbuilder.add_output(
+*   Address.from_string(
+*     &#39;ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn&#39;
+*   ),
+*   Value.from_str(\'500\')
+* );
+*
+* const feeAlgorithm = Fee.linear_fee(
+*   Value.from_str(\'20\'),
+*   Value.from_str(\'5\'),
+*   Value.from_str(\'0\')
+* );
+*
+* const finalizedTx = txbuilder.finalize(
+*   feeAlgorithm,
+*   OutputPolicy.one(accountInputAddress)
+* );
+* ```
+*/
+export class TransactionBuilder extends Ptr {
+    /**
+    * Create a TransactionBuilder for a transaction without certificate
+    * @returns {Promise<TransactionBuilder>}
+    */
+    static async new_no_payload() {
+        const ret = await ChainLibs.transactionBuilderNewNoPayload();
+        return Ptr._wrap(ret, TransactionBuilder);
+    }
+
+    /**
+    * Add input to the transaction
+    * @param {Input} input
+    * @returns {Promise<void>}
+    */
+    add_input(input) {
+        const inputPtr = Ptr._assertClass(input, Input);;
+        input.ptr = null;
+        return ChainLibs.transactionBuilderAddInput(this.ptr, inputPtr);
+    }
+    /**
+    * Add output to the transaction
+    * @param {Address} address
+    * @param {Value} value
+    * @returns {Promise<void>}
+    */
+    add_output(address, value) {
+        const addressPtr = Ptr._assertClass(address, Address);
+        const valuePtr = Ptr._assertClass(value, Value);
+        address.ptr = value.ptr = null;
+        return ChainLibs.transactionBuilderAddOutput(this.ptr, addressPtr, valuePtr);
+    }
+}
+
+/**
+* Algorithm used to compute transaction fees
+* Currently the only implementation if the Linear one
+*/
+export class Fee extends Ptr {
+    /**
+    * Linear algorithm, this is formed by: `coefficient * (#inputs + #outputs) + constant + certificate * #certificate
+    * @param {Value} constant
+    * @param {Value} coefficient
+    * @param {Value} certificate
+    * @returns {Promise<Fee>}
+    */
+    static async linear_fee(constant, coefficient, certificate) {
+        const constantPtr = Ptr._assertClass(constant, Value);
+        const coefficientPtr = Ptr._assertClass(coefficient, Value);
+        const certificatePtr = Ptr._assertClass(certificate, Value);
+        constant.ptr = coefficient.ptr = certificate.ptr = null;
+        const ret = await ChainLibs.feeLinearFee(constantPtr, coefficientPtr, certificatePtr);
+        return Ptr._wrap(ret, Fee);
     }
 }

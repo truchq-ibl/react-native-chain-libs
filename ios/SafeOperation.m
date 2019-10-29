@@ -11,7 +11,7 @@
 
 @implementation BaseSafeOperation
 
-- (void)exec:(id)param andResolve:(RCTPromiseResolveBlock)resolve orReject:(RCTPromiseRejectBlock)reject {
+- (void)exec:(_Nullable id)param andResolve:(RCTPromiseResolveBlock)resolve orReject:(RCTPromiseRejectBlock)reject {
     NSError* error = nil;
     id result = [self exec:param error:&error];
     if (error != nil) {

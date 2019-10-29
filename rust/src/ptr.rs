@@ -24,13 +24,13 @@ impl RPtr {
     Self(Box::into_raw(b) as *mut c_void)
   }
 
-  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&T> {
+  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&mut T> {
     if self.0.is_null() {
       return Err(String::from("Pointer is NULL"));
     }
     (self.0 as *mut Box<dyn Any>)
-      .as_ref()
-      .and_then(|any| any.downcast_ref::<T>())
+      .as_mut()
+      .and_then(|any| any.downcast_mut::<T>())
       .ok_or_else(|| format!("Bad pointer: 0x{:x}", self.0 as usize))
   }
 

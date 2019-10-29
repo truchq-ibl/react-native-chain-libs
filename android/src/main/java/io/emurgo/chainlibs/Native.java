@@ -54,5 +54,19 @@ final class Native {
     public final native Result<Boolean> fragmentIsUpdateVote(RPtr fragment);
     public final native Result<RPtr> fragmentId(RPtr fragment);
 
+    // TransactionBuilder
+    public final native Result<RPtr> transactionBuilderNewNoPayload();
+    public final native Result<Void> transactionBuilderAddInput(RPtr txBuilder, RPtr input);
+    public final native Result<Void> transactionBuilderAddOutput(RPtr txBuilder, RPtr address, RPtr value);
+
+    // Account
+    public final native Result<RPtr> accountFromAddress(RPtr address);
+
+    // Input
+    public final native Result<RPtr> inputFromAccount(RPtr account);
+
+    // Fee
+    public final native Result<RPtr> feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate);
+
     public final native void ptrFree(RPtr ptr);
 }
