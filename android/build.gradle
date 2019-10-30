@@ -35,6 +35,7 @@ def DEFAULT_COMPILE_SDK_VERSION = 29
 def DEFAULT_BUILD_TOOLS_VERSION = "29.0.2"
 def DEFAULT_MIN_SDK_VERSION = 16
 def DEFAULT_TARGET_SDK_VERSION = 28
+def DEFAULT_NDK_API_LEVEL = 21
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
@@ -59,7 +60,7 @@ cargo {
     module = '../rust'
     libname = 'react_native_chain_libs'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
-    apiLevel = 21
+    apiLevel = safeExtGet('ndkApiLevel', DEFAULT_NDK_API_LEVEL)
     prebuiltToolchains = true
 }
 

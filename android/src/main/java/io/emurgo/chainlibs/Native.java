@@ -73,5 +73,23 @@ final class Native {
     public final native Result<RPtr> outputPolicyForget();
     public final native Result<RPtr> outputPolicyOne(RPtr address);
 
+    // TransactionFinalizer
+    public final native Result<RPtr> transactionFinalizerNew(RPtr transaction);
+    public final native Result<RPtr> transactionFinalizerGetTxSignDataHash(RPtr txFinalizer);
+    public final native Result<Void> transactionFinalizerSetWitness(RPtr txFinalizer, long index, RPtr witness);
+    public final native Result<RPtr> transactionFinalizerBuild(RPtr txFinalizer);
+
+    // Witness
+    public final native Result<RPtr> witnessForAccount(RPtr genesisHash, RPtr transactionId, RPtr secretKey, RPtr accountSpendingCounter);
+
+    // PrivateKey
+    public final native Result<RPtr> privateKeyFromBech32(String bech32Str);
+
+    // Hash
+    public final native Result<RPtr> hashFromHex(String hexString);
+
+    // SpendingCounter
+    public final native Result<RPtr> spendingCounterZero();
+
     public final native void ptrFree(RPtr ptr);
 }

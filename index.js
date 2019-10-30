@@ -331,10 +331,60 @@ export class Input extends Ptr {
     * @returns {Promise<Input>}
     */
     static async from_account(account, v) {
+        const accountPtr = Ptr._assertClass(account, Account);
         const vPtr = Ptr._assertClass(v, Value);
         v.ptr = null;
-        const ret = await ChainLibs.inputFromAccount(Ptr._assertClass(account, Account), vPtr);
+        const ret = await ChainLibs.inputFromAccount(accountPtr, vPtr);
         return Ptr._wrap(ret, Input);
+    }
+}
+
+/**
+* Algorithm used to compute transaction fees
+* Currently the only implementation if the Linear one
+*/
+export class Fee extends Ptr {
+    /**
+    * Linear algorithm, this is formed by: `coefficient * (#inputs + #outputs) + constant + certificate * #certificate
+    * @param {Value} constant
+    * @param {Value} coefficient
+    * @param {Value} certificate
+    * @returns {Promise<Fee>}
+    */
+    static async linear_fee(constant, coefficient, certificate) {
+        const constantPtr = Ptr._assertClass(constant, Value);
+        const coefficientPtr = Ptr._assertClass(coefficient, Value);
+        const certificatePtr = Ptr._assertClass(certificate, Value);
+        constant.ptr = coefficient.ptr = certificate.ptr = null;
+        const ret = await ChainLibs.feeLinearFee(constantPtr, coefficientPtr, certificatePtr);
+        return Ptr._wrap(ret, Fee);
+    }
+}
+
+/**
+* Helper to add change addresses when finalizing a transaction, there are currently two options
+* * forget: use all the excess money as fee
+* * one: send all the excess money to the given address
+*/
+export class OutputPolicy extends Ptr {
+    /**
+    * don\'t do anything with the excess money in transaction
+    * @returns {Promise<OutputPolicy>}
+    */
+    static async forget() {
+        const ret = await ChainLibs.outputPolicyForget();
+        return Ptr._wrap(ret, OutputPolicy);
+    }
+    /**
+    * use the given address as the only change address
+    * @param {Address} address
+    * @returns {Promise<OutputPolicy>}
+    */
+    static async one(address) {
+        const addressPtr = Ptr._assertClass(address, Address);
+        address.ptr = null;
+        const ret = await ChainLibs.outputPolicyOne(addressPtr);
+        return Ptr._wrap(ret, OutputPolicy);
     }
 }
 
@@ -405,26 +455,172 @@ export class TransactionBuilder extends Ptr {
         address.ptr = value.ptr = null;
         return ChainLibs.transactionBuilderAddOutput(this.ptr, addressPtr, valuePtr);
     }
+
+    /**
+    * Finalize the transaction by adding the change Address output
+    * leaving enough for paying the minimum fee computed by the given algorithm
+    * see the unchecked_finalize for the non-assisted version
+    *
+    * Example
+    *
+    * ```javascript
+    * const feeAlgorithm = Fee.linear_fee(
+    *     Value.from_str(\'20\'), Value.from_str(\'5\'), Value.from_str(\'10\')
+    * );
+    *
+    * const finalizedTx = txbuilder.finalize(
+    *   feeAlgorithm,
+    *   OutputPolicy.one(changeAddress)
+    * );
+    * ```
+    * @param {Fee} fee
+    * @param {OutputPolicy} outputPolicy
+    * @returns {Promise<Transaction>}
+    */
+    async seal_with_output_policy(fee, outputPolicy) {
+        const feePtr = Ptr._assertClass(fee, Fee);
+        const outputPolicyPtr = Ptr._assertClass(outputPolicy, OutputPolicy);
+        const ptr = this.ptr;
+        this.ptr = outputPolicy.ptr = null;
+        const ret = await ChainLibs.transactionBuilderSealWithOutputPolicy(ptr, feePtr, outputPolicyPtr);
+        return Ptr._wrap(ret, Ptr);
+    }
 }
 
 /**
-* Algorithm used to compute transaction fees
-* Currently the only implementation if the Linear one
+* Type for representing a generic Hash
 */
-export class Fee extends Ptr {
+export class Hash extends Ptr {
     /**
-    * Linear algorithm, this is formed by: `coefficient * (#inputs + #outputs) + constant + certificate * #certificate
-    * @param {Value} constant
-    * @param {Value} coefficient
-    * @param {Value} certificate
-    * @returns {Promise<Fee>}
+    * @param {string} hex_string
+    * @returns {Promise<Hash>}
     */
-    static async linear_fee(constant, coefficient, certificate) {
-        const constantPtr = Ptr._assertClass(constant, Value);
-        const coefficientPtr = Ptr._assertClass(coefficient, Value);
-        const certificatePtr = Ptr._assertClass(certificate, Value);
-        constant.ptr = coefficient.ptr = certificate.ptr = null;
-        const ret = await ChainLibs.feeLinearFee(constantPtr, coefficientPtr, certificatePtr);
-        return Ptr._wrap(ret, Fee);
+    static async from_hex(hexString) {
+        const ret = await ChainLibs.hashFromHex(hexString);
+        return Ptr._wrap(ret, Hash);
+    }
+}
+
+/**
+* ED25519 signing key, either normal or extended
+*/
+export class PrivateKey extends Ptr {
+    /**
+    * Get private key from its bech32 representation
+    * ```javascript
+    * PrivateKey.from_bech32(&#39;ed25519_sk1ahfetf02qwwg4dkq7mgp4a25lx5vh9920cr5wnxmpzz9906qvm8qwvlts0&#39;);
+    * ```
+    * For an extended 25519 key
+    * ```javascript
+    * PrivateKey.from_bech32(&#39;ed25519e_sk1gqwl4szuwwh6d0yk3nsqcc6xxc3fpvjlevgwvt60df59v8zd8f8prazt8ln3lmz096ux3xvhhvm3ca9wj2yctdh3pnw0szrma07rt5gl748fp&#39;);
+    * ```
+    * @param {string} bech32_str
+    * @returns {Promise<PrivateKey>}
+    */
+    static async from_bech32(bech32Str) {
+        const ret = await ChainLibs.privateKeyFromBech32(bech32Str);
+        return Ptr._wrap(ret, PrivateKey);
+    }
+}
+
+/**
+*/
+export class SpendingCounter extends Ptr {
+    /**
+    * @returns {Promise<SpendingCounter>}
+    */
+    static async zero() {
+        const ret = await ChainLibs.spendingCounterZero();
+        return Ptr._wrap(ret, SpendingCounter);
+    }
+}
+
+/**
+* Structure that proofs that certain user agrees with
+* some data. This structure is used to sign `Transaction`
+* and get `SignedTransaction` out.
+*
+* It\'s important that witness works with opaque structures
+* and may not know the contents of the internal transaction.
+*/
+export class Witness extends Ptr {
+    /**
+    * Generate Witness for an account based transaction Input
+    * the account-spending-counter should be incremented on each transaction from this account
+    * @param {Hash} genesisHash
+    * @param {TransactionSignDataHash} transactionId
+    * @param {PrivateKey} secretKey
+    * @param {SpendingCounter} accountSpendingCounter
+    * @returns {Promise<Witness>}
+    */
+    static async for_account(genesisHash, transactionId, secretKey, accountSpendingCounter) {
+        const genesisHashPtr = Ptr._assertClass(genesisHash, Hash);
+        const transactionIdPtr = Ptr._assertClass(transactionId, Ptr);
+        const secretKeyPtr = Ptr._assertClass(secretKey, PrivateKey);
+        const accountSpendingCounterPtr = Ptr._assertClass(accountSpendingCounter, SpendingCounter);
+        genesisHash.ptr = transactionId.ptr = secretKey.ptr = accountSpendingCounter.ptr = null;
+        const ret = await ChainLibs.witnessForAccount(genesisHashPtr, transactionIdPtr, secretKeyPtr, accountSpendingCounterPtr);
+        return Ptr._wrap(ret, Witness);
+    }
+}
+
+/**
+* Builder pattern implementation for signing a Transaction (adding witnesses)
+* Example (for an account as input)
+*
+* ```javascript
+* //finalizedTx could be the result of the finalize method on a TransactionBuilder object
+* const finalizer = new TransactionFinalizer(finalizedTx);
+*
+* const witness = Witness.for_account(
+*   Hash.from_hex(genesisHashString),
+*   finalizer.get_txid(),
+*   inputAccountPrivateKey,
+*   SpendingCounter.zero()
+* );
+*
+* finalizer.set_witness(0, witness);
+*
+* const signedTx = finalizer.build();
+* ```
+*/
+export class TransactionFinalizer extends Ptr {
+    /**
+    * @param {Transaction} transaction
+    * @returns {Promise<TransactionFinalizer>}
+    */
+    static async new(transaction) {
+        const transactionPtr = Ptr._assertClass(transaction, Ptr);
+        transaction.ptr = null;
+        const ret = await ChainLibs.transactionFinalizerNew(transactionPtr);
+        return Ptr._wrap(ret, TransactionFinalizer);
+    }
+    /**
+    * Set the witness for the corresponding index, the index corresponds to the order in which the inputs were added to the transaction
+    * @param {number} index
+    * @param {Witness} witness
+    * @returns {Promise<void>}
+    */
+    set_witness(index, witness) {
+        const witnessPtr = Ptr._assertClass(witness, Witness);
+        witness.ptr = null;
+        return ChainLibs.transactionFinalizerSetWitness(this.ptr, index, witnessPtr);
+    }
+    /**
+    * @returns {Promise<TransactionSignDataHash>}
+    */
+    async get_tx_sign_data_hash() {
+        const ret = await ChainLibs.transactionFinalizerGetTxSignDataHash(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+    /**
+    * Deprecated: Use `get_tx_sign_data_hash` instead\
+    * @returns {Promise<AuthenticatedTransaction>}
+    */
+    async build() {
+        const ptr = this.ptr;
+        this.ptr = null;
+        const ret = await ChainLibs.transactionFinalizerBuild(ptr);
+        return Ptr._wrap(ret, AuthenticatedTransaction);
     }
 }

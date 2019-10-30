@@ -313,6 +313,75 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    // TransactionFinalizer
+
+    @ReactMethod
+    public final void transactionFinalizerNew(RPtr transaction, Promise promise) {
+        Native.I
+                .transactionFinalizerNew(transaction)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionFinalizerGetTxSignDataHash(RPtr txFinalizer, Promise promise) {
+        Native.I
+                .transactionFinalizerGetTxSignDataHash(txFinalizer)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionFinalizerSetWitness(RPtr txFinalizer, long index, RPtr witness, Promise promise) {
+        Native.I
+                .transactionFinalizerSetWitness(txFinalizer, index, witness)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionFinalizerBuild(RPtr txFinalizer, Promise promise) {
+        Native.I
+                .transactionFinalizerBuild(txFinalizer)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Witness
+
+    public final void witnessForAccount(RPtr genesisHash, RPtr transactionId, RPtr secretKey, RPtr accountSpendingCounter, Promise promise) {
+        Native.I
+                .witnessForAccount(genesisHash, transactionId, secretKey, accountSpendingCounter)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // PrivateKey
+
+    public final void privateKeyFromBech32(String bech32Str, Promise promise) {
+        Native.I
+                .privateKeyFromBech32(bech32Str)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Hash
+
+    public final void hashFromHex(String hexString, Promise promise) {
+        Native.I
+                .hashFromHex(hexString)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // SpendingCounter
+
+    public final void spendingCounterZero(Promise promise) {
+        Native.I
+                .spendingCounterZero()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     @ReactMethod
     public final void ptrFree(String ptr) {
         (new RPtr(ptr)).free();

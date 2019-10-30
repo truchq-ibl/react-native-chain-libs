@@ -16,8 +16,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_authenticatedTransactio
     let rptr = ptr.rptr(&env)?;
     rptr
       .typed_ref::<AuthenticatedTransaction>()
-      .map(|auth_tx| RPtr::new(auth_tx.transaction()))
-      .and_then(|rptr| rptr.jptr(&env))
+      .and_then(|auth_tx| RPtr::new(auth_tx.transaction()).jptr(&env))
   })
   .jresult(&env)
 }
