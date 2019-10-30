@@ -95,7 +95,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void addressSingleFromPublicKey(String key, int discrimination, Promise promise) {
+    public final void addressSingleFromPublicKey(String key, Integer discrimination, Promise promise) {
         Native.I
                 .addressSingleFromPublicKey(new RPtr(key), discrimination)
                 .map(RPtr::toJs)
@@ -103,7 +103,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void addressDelegationFromPublicKey(String key, String delegation, int discrimination, Promise promise) {
+    public final void addressDelegationFromPublicKey(String key, String delegation, Integer discrimination, Promise promise) {
         Native.I
                 .addressDelegationFromPublicKey(new RPtr(key), new RPtr(delegation), discrimination)
                 .map(RPtr::toJs)
@@ -111,7 +111,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void addressAccountFromPublicKey(String key, int discrimination, Promise promise) {
+    public final void addressAccountFromPublicKey(String key, Integer discrimination, Promise promise) {
         Native.I
                 .addressAccountFromPublicKey(new RPtr(key), discrimination)
                 .map(RPtr::toJs)
@@ -244,23 +244,23 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void transactionBuilderAddInput(RPtr txBuilder, RPtr input, Promise promise) {
+    public final void transactionBuilderAddInput(String txBuilder, String input, Promise promise) {
         Native.I
-                .transactionBuilderAddInput(txBuilder, input)
+                .transactionBuilderAddInput(new RPtr(txBuilder), new RPtr(input))
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionBuilderAddOutput(RPtr txBuilder, RPtr address, RPtr value, Promise promise) {
+    public final void transactionBuilderAddOutput(String txBuilder, String address, String value, Promise promise) {
         Native.I
-                .transactionBuilderAddOutput(txBuilder, address, value)
+                .transactionBuilderAddOutput(new RPtr(txBuilder), new RPtr(address), new RPtr(value))
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionBuilderSealWithOutputPolicy(RPtr txBuilder, RPtr fee, RPtr outputPolicy, Promise promise) {
+    public final void transactionBuilderSealWithOutputPolicy(String txBuilder, String fee, String outputPolicy, Promise promise) {
         Native.I
-                .transactionBuilderSealWithOutputPolicy(txBuilder, fee, outputPolicy)
+                .transactionBuilderSealWithOutputPolicy(new RPtr(txBuilder), new RPtr(fee), new RPtr(outputPolicy))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -268,9 +268,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Account
 
     @ReactMethod
-    public final void accountFromAddress(RPtr address, Promise promise) {
+    public final void accountFromAddress(String address, Promise promise) {
         Native.I
-                .accountFromAddress(address)
+                .accountFromAddress(new RPtr(address))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -278,9 +278,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Input
 
     @ReactMethod
-    public final void inputFromAccount(RPtr account, Promise promise) {
+    public final void inputFromAccount(String account, String v, Promise promise) {
         Native.I
-                .inputFromAccount(account)
+                .inputFromAccount(new RPtr(account), new RPtr(v))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -288,9 +288,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Fee
 
     @ReactMethod
-    public final void feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate, Promise promise) {
+    public final void feeLinearFee(String constant, String coefficient, String certificate, Promise promise) {
         Native.I
-                .feeLinearFee(constant, coefficient, certificate)
+                .feeLinearFee(new RPtr(constant), new RPtr(coefficient), new RPtr(certificate))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -306,9 +306,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void outputPolicyOne(RPtr address, Promise promise) {
+    public final void outputPolicyOne(String address, Promise promise) {
         Native.I
-                .outputPolicyOne(address)
+                .outputPolicyOne(new RPtr(address))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -316,47 +316,49 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // TransactionFinalizer
 
     @ReactMethod
-    public final void transactionFinalizerNew(RPtr transaction, Promise promise) {
+    public final void transactionFinalizerNew(String transaction, Promise promise) {
         Native.I
-                .transactionFinalizerNew(transaction)
+                .transactionFinalizerNew(new RPtr(transaction))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionFinalizerGetTxSignDataHash(RPtr txFinalizer, Promise promise) {
+    public final void transactionFinalizerGetTxSignDataHash(String txFinalizer, Promise promise) {
         Native.I
-                .transactionFinalizerGetTxSignDataHash(txFinalizer)
+                .transactionFinalizerGetTxSignDataHash(new RPtr(txFinalizer))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionFinalizerSetWitness(RPtr txFinalizer, long index, RPtr witness, Promise promise) {
+    public final void transactionFinalizerSetWitness(String txFinalizer, Integer index, String witness, Promise promise) {
         Native.I
-                .transactionFinalizerSetWitness(txFinalizer, index, witness)
+                .transactionFinalizerSetWitness(new RPtr(txFinalizer), index, new RPtr(witness))
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionFinalizerBuild(RPtr txFinalizer, Promise promise) {
+    public final void transactionFinalizerBuild(String txFinalizer, Promise promise) {
         Native.I
-                .transactionFinalizerBuild(txFinalizer)
+                .transactionFinalizerBuild(new RPtr(txFinalizer))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
 
     // Witness
 
-    public final void witnessForAccount(RPtr genesisHash, RPtr transactionId, RPtr secretKey, RPtr accountSpendingCounter, Promise promise) {
+    @ReactMethod
+    public final void witnessForAccount(String genesisHash, String transactionId, String secretKey, String accountSpendingCounter, Promise promise) {
         Native.I
-                .witnessForAccount(genesisHash, transactionId, secretKey, accountSpendingCounter)
+                .witnessForAccount(new RPtr(genesisHash), new RPtr(transactionId), new RPtr(secretKey), new RPtr(accountSpendingCounter))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
 
     // PrivateKey
 
+    @ReactMethod
     public final void privateKeyFromBech32(String bech32Str, Promise promise) {
         Native.I
                 .privateKeyFromBech32(bech32Str)
@@ -366,6 +368,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
 
     // Hash
 
+    @ReactMethod
     public final void hashFromHex(String hexString, Promise promise) {
         Native.I
                 .hashFromHex(hexString)
@@ -375,6 +378,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
 
     // SpendingCounter
 
+    @ReactMethod
     public final void spendingCounterZero(Promise promise) {
         Native.I
                 .spendingCounterZero()
@@ -383,8 +387,13 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void ptrFree(String ptr) {
-        (new RPtr(ptr)).free();
+    public final void ptrFree(String ptr, Promise promise) {
+        try {
+            (new RPtr(ptr)).free();
+            promise.resolve(null);
+        } catch (Throwable err) {
+            promise.reject(err);
+        }
     }
 }
 

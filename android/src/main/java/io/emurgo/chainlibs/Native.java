@@ -64,7 +64,7 @@ final class Native {
     public final native Result<RPtr> accountFromAddress(RPtr address);
 
     // Input
-    public final native Result<RPtr> inputFromAccount(RPtr account);
+    public final native Result<RPtr> inputFromAccount(RPtr account, RPtr v);
 
     // Fee
     public final native Result<RPtr> feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate);

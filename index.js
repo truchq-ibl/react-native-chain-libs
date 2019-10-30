@@ -27,15 +27,15 @@ class Ptr {
 
     /**
     * Frees the pointer
-    * @returns {void}
+    * @returns {Promise<void>}
     */
-    free() {
+    async free() {
         if (!this.ptr) {
             throw new Error("Already freed!");
         }
         const ptr = this.ptr;
         this.ptr = null;
-        ChainLibs.ptrFree(ptr);
+        await ChainLibs.ptrFree(ptr);
     }
 }
 

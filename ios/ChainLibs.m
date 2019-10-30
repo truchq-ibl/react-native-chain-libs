@@ -502,10 +502,11 @@ RCT_EXPORT_METHOD(spendingCounterZero:(RCTPromiseResolveBlock)resolve andReject:
     }] exec:nil andResolve:resolve orReject:reject];
 }
 
-RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr)
+RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     RPtr rPtr = [ptr rPtr];
     rptr_free(&rPtr);
+    resolve(nil);
 }
 
 + (void)initialize

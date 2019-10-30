@@ -100,12 +100,12 @@ impl<'a> FromJniPtr for JRPtr<'a> {
     self
       .rptr(env)
       .and_then(|rptr| rptr.to_ptr().owned::<T>())
-      .and_then(|val| env.set_field(self, "ptr", "J", 0.into()).map(|_| val).into_result())
+      .and_then(|val| env.set_field(self, "ptr", "J", 0i64.into()).map(|_| val).into_result())
   }
 
   unsafe fn free(self, env: &JNIEnv) -> Result<()> {
     self.rptr(env).and_then(|rptr| {
-      env.set_field(self, "ptr", "J", 0.into()).into_result().map(|_| rptr.to_ptr().free())
+      env.set_field(self, "ptr", "J", 0i64.into()).into_result().map(|_| rptr.to_ptr().free())
     })
   }
 }
