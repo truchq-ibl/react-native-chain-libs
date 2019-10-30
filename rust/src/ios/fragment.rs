@@ -21,7 +21,7 @@ pub unsafe extern "C" fn fragment_from_generated_transaction(
   tx: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    tx.owned::<AuthenticatedTransaction>().map(|tx| Fragment::from_authenticated_transaction(tx))
+    tx.owned::<AuthenticatedTransaction>().map(|tx| Fragment::from_generated_transaction(tx))
   })
   .map(|fragment| RPtr::new(fragment))
   .response(result, error)

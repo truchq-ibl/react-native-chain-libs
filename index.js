@@ -61,6 +61,7 @@ export class Value extends Ptr {
         const ret = await ChainLibs.valueFromStr(s);
         return Ptr._wrap(ret, Value);
     }
+
     /**
     * Return the wrapped u64 formatted as a string.
     * @returns {Promise<string>}
@@ -68,6 +69,7 @@ export class Value extends Ptr {
     to_str() {
         return ChainLibs.valueToStr(this.ptr);
     }
+
     /**
     * @param {Value} other
     * @returns {Promise<Value>}
@@ -76,6 +78,7 @@ export class Value extends Ptr {
         const ret = await ChainLibs.valueCheckedAdd(this.ptr, Ptr._assertClass(other, Value));
         return Ptr._wrap(ret, Value);
     }
+
     /**
     * @param {Value} other
     * @returns {Promise<Value>}
@@ -103,6 +106,7 @@ export class PublicKey extends Ptr {
         const ret = await ChainLibs.publicKeyFromBech32(bech32_str);
         return Ptr._wrap(ret, PublicKey);
     }
+
     /**
     * @returns {Promise<Uint8Array>}
     */
@@ -132,6 +136,7 @@ export class Address extends Ptr {
         const ret = await ChainLibs.addressFromString(s);
         return Ptr._wrap(ret, Address);
     }
+
     /**
     * Get Address bech32 (string) representation with a given prefix
     * ```javascript
@@ -149,6 +154,7 @@ export class Address extends Ptr {
     to_string(prefix) {
         return ChainLibs.addressToString(this.ptr, prefix);
     }
+
     /**
     * Construct a single non-account address from a public key
     * ```javascript
@@ -167,6 +173,7 @@ export class Address extends Ptr {
         const ret = await ChainLibs.addressSingleFromPublicKey(keyPtr, discrimination);
         return Ptr._wrap(ret, Address);
     }
+
     /**
     * Construct a non-account address from a pair of public keys, delegating founds from the first to the second
     * @param {PublicKey} key
@@ -181,6 +188,7 @@ export class Address extends Ptr {
         const ret = await ChainLibs.addressDelegationFromPublicKey(keyPtr, delPtr, discrimination);
         return Ptr._wrap(ret, Address);
     }
+
     /**
     * Construct address of account type from a public key
     * @param {PublicKey} key
@@ -214,9 +222,10 @@ export class Fragment extends Ptr {
     static async from_authenticated_transaction(tx) {
         const txPtr = Ptr._assertClass(tx, AuthenticatedTransaction);
         tx.ptr = null;
-        const ret = await ChainLibs.authenticatedTransactionTransaction(txPtr);
+        const ret = await ChainLibs.fragmentFromAuthenticatedTransaction(txPtr);
         return Ptr._wrap(ret, Fragment);
     }
+
     /**
     * Deprecated: Use `from_authenticated_transaction` instead
     * @param {AuthenticatedTransaction} tx
@@ -225,9 +234,10 @@ export class Fragment extends Ptr {
     static async from_generated_transaction(tx) {
         const txPtr = Ptr._assertClass(tx, AuthenticatedTransaction);
         tx.ptr = null;
-        const ret = await ChainLibs.fragmentFromAuthenticatedTransaction(txPtr);
+        const ret = await ChainLibs.fragmentFromGeneratedTransaction(txPtr);
         return Ptr._wrap(ret, Fragment);
     }
+
     /**
     * Get a Transaction if the Fragment represents one
     * @returns {Promise<AuthenticatedTransaction>}
@@ -238,6 +248,7 @@ export class Fragment extends Ptr {
         const ret = await ChainLibs.fragmentGetTransaction(ptr);
         return Ptr._wrap(ret, AuthenticatedTransaction);
     }
+
     /**
     * @returns {Promise<Uint8Array>}
     */
@@ -245,60 +256,70 @@ export class Fragment extends Ptr {
         const b64 = await ChainLibs.fragmentAsBytes(this.ptr);
         return Uint8ArrayFromB64(b64);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_initial() {
         return ChainLibs.fragmentIsInitial(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_transaction() {
         return ChainLibs.fragmentIsTransaction(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_owner_stake_delegation() {
         return ChainLibs.fragmentIsOwnerStakeDelegation(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_stake_delegation() {
         return ChainLibs.fragmentIsStakeDelegation(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_pool_registration() {
         return ChainLibs.fragmentIsPoolRegistration(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_pool_management() {
         return ChainLibs.fragmentIsPoolManagement(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_old_utxo_declaration() {
         return ChainLibs.fragmentIsOldUtxoDeclaration(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_update_proposal() {
         return ChainLibs.fragmentIsUpdateProposal(this.ptr);
     }
+
     /**
     * @returns {Promise<boolean>}
     */
     is_update_vote() {
         return ChainLibs.fragmentIsUpdateVote(this.ptr);
     }
+
     /**
     * @returns {Promise<FragmentId>}
     */
@@ -375,6 +396,7 @@ export class OutputPolicy extends Ptr {
         const ret = await ChainLibs.outputPolicyForget();
         return Ptr._wrap(ret, OutputPolicy);
     }
+
     /**
     * use the given address as the only change address
     * @param {Address} address
@@ -443,6 +465,7 @@ export class TransactionBuilder extends Ptr {
         input.ptr = null;
         return ChainLibs.transactionBuilderAddInput(this.ptr, inputPtr);
     }
+
     /**
     * Add output to the transaction
     * @param {Address} address
@@ -595,6 +618,7 @@ export class TransactionFinalizer extends Ptr {
         const ret = await ChainLibs.transactionFinalizerNew(transactionPtr);
         return Ptr._wrap(ret, TransactionFinalizer);
     }
+
     /**
     * Set the witness for the corresponding index, the index corresponds to the order in which the inputs were added to the transaction
     * @param {number} index
@@ -606,6 +630,7 @@ export class TransactionFinalizer extends Ptr {
         witness.ptr = null;
         return ChainLibs.transactionFinalizerSetWitness(this.ptr, index, witnessPtr);
     }
+
     /**
     * @returns {Promise<TransactionSignDataHash>}
     */
@@ -613,6 +638,7 @@ export class TransactionFinalizer extends Ptr {
         const ret = await ChainLibs.transactionFinalizerGetTxSignDataHash(this.ptr);
         return Ptr._wrap(ret, Ptr);
     }
+    
     /**
     * Deprecated: Use `get_tx_sign_data_hash` instead\
     * @returns {Promise<AuthenticatedTransaction>}

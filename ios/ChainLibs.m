@@ -8,6 +8,10 @@
 
 RCT_EXPORT_MODULE(ChainLibs)
 
++ (BOOL)requiresMainQueueSetup {
+    return NO;
+}
+
 - (NSDictionary *)constantsToExport {
     return @{
              @"AddressDiscrimination": @{
@@ -134,7 +138,7 @@ RCT_EXPORT_METHOD(addressAccountFromPublicKey:(nonnull NSString *)key withDiscri
     [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
         RPtr result;
         RPtr key = [[params objectAtIndex:0] rPtr];
-        return address_single_from_public_key(&key,
+        return address_account_from_public_key(&key,
                                               [[params objectAtIndex:1] intValue],
                                               &result, error)
             ? [NSString stringFromPtr:result]
@@ -177,11 +181,11 @@ RCT_EXPORT_METHOD(fragmentGetTransaction:(nonnull NSString *)ptr  withResolve:(R
 
 RCT_EXPORT_METHOD(fragmentAsBytes:(nonnull NSString *)ptr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
-    [[CSafeOperation new:^NSData*(NSString* ptr, CharPtr* error) {
+    [[CSafeOperation new:^NSString*(NSString* ptr, CharPtr* error) {
         DataPtr result;
         RPtr fragment = [ptr rPtr];
         return fragment_as_bytes(fragment, &result, error)
-            ? [NSData fromDataPtr:&result]
+            ? [[NSData fromDataPtr:&result] base64]
             : nil;
     }] exec:ptr andResolve:resolve orReject:reject];
 }
