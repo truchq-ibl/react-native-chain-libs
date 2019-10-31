@@ -31,7 +31,7 @@ class Ptr {
     */
     async free() {
         if (!this.ptr) {
-            throw new Error("Already freed!");
+            return;
         }
         const ptr = this.ptr;
         this.ptr = null;
@@ -203,6 +203,128 @@ export class Address extends Ptr {
     }
 }
 
+/**
+* This is either an single account or a multisig account depending on the witness type
+*/
+export class Account extends Ptr {
+    /**
+    * @param {Address} address
+    * @returns {Promise<Account>}
+    */
+    static async from_address(address) {
+        const ret = await ChainLibs.accountFromAddress(Ptr._assertClass(address, Address));
+        return Ptr._wrap(ret, Account);
+    }
+}
+
+/**
+*/
+export class Input extends Ptr {
+    /**
+    * @param {Account} account
+    * @param {Value} v
+    * @returns {Promise<Input>}
+    */
+    static async from_account(account, v) {
+        const accountPtr = Ptr._assertClass(account, Account);
+        const vPtr = Ptr._assertClass(v, Value);
+        v.ptr = null;
+        const ret = await ChainLibs.inputFromAccount(accountPtr, vPtr);
+        return Ptr._wrap(ret, Input);
+    }
+}
+
+/**
+*/
+export class Inputs extends Ptr {
+    /**
+    * @returns {Promise<number>}
+    */
+    size() {
+        return ChainLibs.inputsSize(this.ptr);
+    }
+    /**
+    * @param {number} index
+    * @returns {Promise<Input>}
+    */
+    async get(index) {
+        const ret = await ChainLibs.inputsGet(this.ptr, index);
+        return Ptr._wrap(ret, Input);
+    }
+}
+
+/**
+* Type for representing a Transaction Output, composed of an Address and a Value
+*/
+export class Output extends Ptr {
+    /**
+    * @returns {Promise<Address>}
+    */
+    async address() {
+        const ret = await ChainLibs.outputAddress(this.ptr);
+        return Ptr._wrap(ret, Address);
+    }
+
+    /**
+    * @returns {Promise<Value>}
+    */
+    async value() {
+        const ret = await ChainLibs.outputValue(this.ptr);
+        return Ptr._wrap(ret, Value);
+    }
+}
+
+/**
+*/
+export class Outputs extends Ptr {
+    /**
+    * @returns {Promise<number>}
+    */
+    size() {
+        return ChainLibs.outputsSize(this.ptr);
+    }
+    /**
+    * @param {number} index
+    * @returns {Promise<Output>}
+    */
+    async get(index) {
+        const ret = await ChainLibs.outputsGet(this.ptr, index);
+        return Ptr._wrap(ret, Ptr);
+    }
+}
+
+/**
+* Type representing a unsigned transaction
+*/
+export class Transaction extends Ptr {
+    /**
+    * Get the transaction id, needed to compute its signature
+    * @returns {Promise<TransactionSignDataHash>}
+    */
+    async id() {
+        const ret = await ChainLibs.transactionId(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
+    * Get collection of the inputs in the transaction (this allocates new copies of all the values)
+    * @returns {Promise<Inputs>}
+    */
+    async inputs() {
+        const ret = await ChainLibs.transactionInputs(this.ptr);
+        return Ptr._wrap(ret, Inputs);
+    }
+
+    /**
+    * Get collection of the outputs in the transaction (this allocates new copies of all the values)
+    * @returns {Promise<Outputs>}
+    */
+    async outputs() {
+        const ret = await ChainLibs.transactionOutputs(this.ptr);
+        return Ptr._wrap(ret, Outputs);
+    }
+}
+
 export class AuthenticatedTransaction extends Ptr {
     /**
     * Get a copy of the inner Transaction, discarding the signatures
@@ -210,7 +332,7 @@ export class AuthenticatedTransaction extends Ptr {
     */
     async transaction() {
         const ret = await ChainLibs.authenticatedTransactionTransaction(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, Transaction);
     }
 }
 
@@ -330,37 +452,6 @@ export class Fragment extends Ptr {
 }
 
 /**
-* This is either an single account or a multisig account depending on the witness type
-*/
-export class Account extends Ptr {
-    /**
-    * @param {Address} address
-    * @returns {Promise<Account>}
-    */
-    static async from_address(address) {
-        const ret = await ChainLibs.accountFromAddress(Ptr._assertClass(address, Address));
-        return Ptr._wrap(ret, Account);
-    }
-}
-
-/**
-*/
-export class Input extends Ptr {
-    /**
-    * @param {Account} account
-    * @param {Value} v
-    * @returns {Promise<Input>}
-    */
-    static async from_account(account, v) {
-        const accountPtr = Ptr._assertClass(account, Account);
-        const vPtr = Ptr._assertClass(v, Value);
-        v.ptr = null;
-        const ret = await ChainLibs.inputFromAccount(accountPtr, vPtr);
-        return Ptr._wrap(ret, Input);
-    }
-}
-
-/**
 * Algorithm used to compute transaction fees
 * Currently the only implementation if the Linear one
 */
@@ -379,6 +470,18 @@ export class Fee extends Ptr {
         constant.ptr = coefficient.ptr = certificate.ptr = null;
         const ret = await ChainLibs.feeLinearFee(constantPtr, coefficientPtr, certificatePtr);
         return Ptr._wrap(ret, Fee);
+    }
+
+    /**
+    * Compute the fee if possible (it can fail in case the values are out of range)
+    * @param {Transaction} tx
+    * @returns {Promise<Value>}
+    */
+    async calculate(tx) {
+        const txPtr = Ptr._assertClass(tx, Transaction);
+        tx.ptr = null;
+        const ret = await ChainLibs.feeCalculate(this.ptr, txPtr);
+        return Ptr._wrap(ret, Value);
     }
 }
 
@@ -506,7 +609,7 @@ export class TransactionBuilder extends Ptr {
         const ptr = this.ptr;
         this.ptr = outputPolicy.ptr = null;
         const ret = await ChainLibs.transactionBuilderSealWithOutputPolicy(ptr, feePtr, outputPolicyPtr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, Transaction);
     }
 }
 
@@ -613,7 +716,7 @@ export class TransactionFinalizer extends Ptr {
     * @returns {Promise<TransactionFinalizer>}
     */
     static async new(transaction) {
-        const transactionPtr = Ptr._assertClass(transaction, Ptr);
+        const transactionPtr = Ptr._assertClass(transaction, Transaction);
         transaction.ptr = null;
         const ret = await ChainLibs.transactionFinalizerNew(transactionPtr);
         return Ptr._wrap(ret, TransactionFinalizer);
@@ -638,7 +741,7 @@ export class TransactionFinalizer extends Ptr {
         const ret = await ChainLibs.transactionFinalizerGetTxSignDataHash(this.ptr);
         return Ptr._wrap(ret, Ptr);
     }
-    
+
     /**
     * Deprecated: Use `get_tx_sign_data_hash` instead\
     * @returns {Promise<AuthenticatedTransaction>}

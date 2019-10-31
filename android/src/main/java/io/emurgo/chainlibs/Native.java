@@ -66,8 +66,13 @@ final class Native {
     // Input
     public final native Result<RPtr> inputFromAccount(RPtr account, RPtr v);
 
+    // Inputs
+    public final native Result<Long> inputsSize(RPtr inputs);
+    public final native Result<RPtr> inputsGet(RPtr inputs, long index);
+
     // Fee
     public final native Result<RPtr> feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate);
+    public final native Result<RPtr> feeCalculate(RPtr fee, RPtr tx);
 
     // OutputPolicy
     public final native Result<RPtr> outputPolicyForget();
@@ -90,6 +95,19 @@ final class Native {
 
     // SpendingCounter
     public final native Result<RPtr> spendingCounterZero();
+
+    // Transaction
+    public final native Result<RPtr> transactionId(RPtr transaction);
+    public final native Result<RPtr> transactionInputs(RPtr transaction);
+    public final native Result<RPtr> transactionOutputs(RPtr transaction);
+
+    // Output
+    public final native Result<RPtr> outputAddress(RPtr output);
+    public final native Result<RPtr> outputValue(RPtr output);
+
+    // Outputs
+    public final native Result<Long> outputsSize(RPtr outputs);
+    public final native Result<RPtr> outputsGet(RPtr outputs, long index);
 
     public final native void ptrFree(RPtr ptr);
 }

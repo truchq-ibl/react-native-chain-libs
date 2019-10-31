@@ -1,6 +1,6 @@
 use crate::panic::{Result, ToResult};
 use jni::objects::JObject;
-use jni::sys::{jboolean, jint};
+use jni::sys::{jboolean, jint, jlong};
 use jni::JNIEnv;
 
 pub trait ToPrimitiveObject {
@@ -12,6 +12,15 @@ impl ToPrimitiveObject for jint {
     env
       .find_class("java/lang/Integer")
       .and_then(|class| env.new_object(class, "(I)V", &[self.into()]))
+      .into_result()
+  }
+}
+
+impl ToPrimitiveObject for jlong {
+  fn jobject<'a>(self, env: &'a JNIEnv) -> Result<JObject<'a>> {
+    env
+      .find_class("java/lang/Long")
+      .and_then(|class| env.new_object(class, "(J)V", &[self.into()]))
       .into_result()
   }
 }

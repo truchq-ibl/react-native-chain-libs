@@ -285,12 +285,38 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    // Inputs
+
+    @ReactMethod
+    public final void inputsSize(String inputs, Promise promise) {
+        Native.I
+                .inputsSize(new RPtr(inputs))
+                .map(Long::intValue)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputsGet(String inputs, Integer index, Promise promise) {
+        Native.I
+                .inputsGet(new RPtr(inputs), index)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // Fee
 
     @ReactMethod
     public final void feeLinearFee(String constant, String coefficient, String certificate, Promise promise) {
         Native.I
                 .feeLinearFee(new RPtr(constant), new RPtr(coefficient), new RPtr(certificate))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void feeCalculate(String fee, String tx, Promise promise) {
+        Native.I
+                .feeCalculate(new RPtr(fee), new RPtr(tx))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -382,6 +408,68 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void spendingCounterZero(Promise promise) {
         Native.I
                 .spendingCounterZero()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Transaction
+
+    @ReactMethod
+    public final void transactionId(String transaction, Promise promise) {
+        Native.I
+                .transactionId(new RPtr(transaction))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionInputs(String transaction, Promise promise) {
+        Native.I
+                .transactionInputs(new RPtr(transaction))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionOutputs(String transaction, Promise promise) {
+        Native.I
+                .transactionOutputs(new RPtr(transaction))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Output
+
+    @ReactMethod
+    public final void outputAddress(String output, Promise promise) {
+        Native.I
+                .outputAddress(new RPtr(output))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void outputValue(String output, Promise promise) {
+        Native.I
+                .outputAddress(new RPtr(output))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Outputs
+
+    @ReactMethod
+    public final void outputsSize(String outputs, Promise promise) {
+        Native.I
+                .outputsSize(new RPtr(outputs))
+                .map(Long::intValue)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void outputsGet(String outputs, Integer index, Promise promise) {
+        Native.I
+                .outputsGet(new RPtr(outputs), index)
                 .map(RPtr::toJs)
                 .pour(promise);
     }
