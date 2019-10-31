@@ -16,6 +16,10 @@
     return data;
 }
 
++ (NSData *)fromBase64:(NSString *)base64Encoded {
+    return [[NSData alloc] initWithBase64EncodedString:base64Encoded options:0];
+}
+
 - (NSString *)base64 {
     return [self base64EncodedStringWithOptions:0];
 }

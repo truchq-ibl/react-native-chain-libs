@@ -1,10 +1,14 @@
 import { NativeModules } from 'react-native';
-import { decode as base64_decode } from 'base-64';
+import { decode as base64_decode, encode as base64_encode } from 'base-64';
 
 const { ChainLibs } = NativeModules;
 
 function Uint8ArrayFromB64(base64_string) {
     return Uint8Array.from(base64_decode(base64_string), c => c.charCodeAt(0));
+}
+
+function b64FromUint8Array(uint8Array) {
+    return base64_encode(String.fromCharCode.apply(null, uint8Array));
 }
 
 class Ptr {
@@ -336,6 +340,27 @@ export class AuthenticatedTransaction extends Ptr {
     }
 }
 
+/**
+*/
+export class FragmentId extends Ptr {
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<FragmentId>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.fragmentIdFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, FragmentId);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.fragmentIdAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+}
+
 export class Fragment extends Ptr {
     /**
     * @param {AuthenticatedTransaction} tx
@@ -447,7 +472,7 @@ export class Fragment extends Ptr {
     */
     async id() {
         const ret = await ChainLibs.fragmentId(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, FragmentId);
     }
 }
 

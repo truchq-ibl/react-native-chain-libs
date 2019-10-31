@@ -109,5 +109,9 @@ final class Native {
     public final native Result<Long> outputsSize(RPtr outputs);
     public final native Result<RPtr> outputsGet(RPtr outputs, long index);
 
+    // FragmentId
+    public final native Result<RPtr> fragmentIdFromBytes(byte[] bytes);
+    public final native Result<byte[]> fragmentIdAsBytes(RPtr fragmentId);
+
     public final native void ptrFree(RPtr ptr);
 }

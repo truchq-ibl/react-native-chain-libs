@@ -209,6 +209,21 @@ export class Fee extends Ptr {
 }
 
 /**
+*/
+export class FragmentId extends Ptr {
+  /**
+  * @param {Uint8Array} bytes 
+  * @returns {Promise<FragmentId>} 
+  */
+  static from_bytes(bytes: Uint8Array): Promise<FragmentId>;
+
+  /**
+  * @returns {Promise<Uint8Array>} 
+  */
+  as_bytes(): Promise<Uint8Array>;
+}
+
+/**
 * All possible messages recordable in the Block content
 */
 export class Fragment extends Ptr {

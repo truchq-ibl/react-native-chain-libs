@@ -619,6 +619,28 @@ RCT_EXPORT_METHOD(outputsGet:(nonnull NSString *)outputsPtr withIndex:(nonnull N
     }] exec:@[outputsPtr, index] andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(fragmentIdFromBytes:(nonnull NSString *)bytesStr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* bytesStr, CharPtr* error) {
+        RPtr result;
+        NSData* data = [NSData fromBase64:bytesStr];
+        return fragment_id_from_bytes((uint8_t*)data.bytes, data.length, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:bytesStr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(fragmentIdAsBytes:(nonnull NSString *)fragmentIdPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* fragmentIdPtr, CharPtr* error) {
+        DataPtr result;
+        RPtr fragment_id = [fragmentIdPtr rPtr];
+        return fragment_id_as_bytes(fragment_id, &result, error)
+            ? [[NSData fromDataPtr:&result] base64]
+            : nil;
+    }] exec:fragmentIdPtr andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     RPtr rPtr = [ptr rPtr];

@@ -4,6 +4,7 @@ mod authenticated_transaction;
 mod data;
 mod fee;
 mod fragment;
+mod fragment_id;
 mod hash;
 mod input;
 mod output;

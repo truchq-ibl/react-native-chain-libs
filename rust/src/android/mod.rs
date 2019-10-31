@@ -3,6 +3,7 @@ mod address;
 mod authenticated_transaction;
 mod fee;
 mod fragment;
+mod fragment_id;
 mod hash;
 mod input;
 mod output;

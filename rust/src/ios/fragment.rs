@@ -43,10 +43,7 @@ pub unsafe extern "C" fn fragment_as_bytes(
   fragment: RPtr, result: &mut DataPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    fragment
-      .typed_ref::<Fragment>()
-      .map(|fragment| fragment.as_bytes().into_result())
-      .and_then(|fragment| fragment)
+    fragment.typed_ref::<Fragment>().and_then(|fragment| fragment.as_bytes().into_result())
   })
   .map(|bytes| bytes.into())
   .response(result, error)

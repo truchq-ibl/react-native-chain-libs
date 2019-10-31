@@ -474,6 +474,24 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    // FragmentId
+
+    @ReactMethod
+    public final void fragmentIdFromBytes(String bytes, Promise promise) {
+        Native.I
+                .fragmentIdFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void fragmentIdAsBytes(String fragmentId, Promise promise) {
+        Native.I
+                .fragmentIdAsBytes(new RPtr(fragmentId))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
     @ReactMethod
     public final void ptrFree(String ptr, Promise promise) {
         try {
