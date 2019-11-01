@@ -641,6 +641,38 @@ RCT_EXPORT_METHOD(fragmentIdAsBytes:(nonnull NSString *)fragmentIdPtr withResolv
     }] exec:fragmentIdPtr andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(transactionSignDataHashFromBytes:(nonnull NSString *)bytesStr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* bytesStr, CharPtr* error) {
+        RPtr result;
+        NSData* data = [NSData fromBase64:bytesStr];
+        return transaction_sign_data_hash_from_bytes((uint8_t*)data.bytes, data.length, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:bytesStr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(transactionSignDataHashFromHex:(nonnull NSString *)input withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* input, CharPtr* error) {
+        RPtr result;
+        return transaction_sign_data_hash_from_hex([input charPtr], &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:input andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(transactionSignDataHashAsBytes:(nonnull NSString *)txSignDataHashPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* txSignDataHashPtr, CharPtr* error) {
+        DataPtr result;
+        RPtr txSignDataHash = [txSignDataHashPtr rPtr];
+        return transaction_sign_data_hash_as_bytes(txSignDataHash, &result, error)
+        ? [[NSData fromDataPtr:&result] base64]
+        : nil;
+    }] exec:txSignDataHashPtr andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     RPtr rPtr = [ptr rPtr];

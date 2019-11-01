@@ -298,6 +298,37 @@ export class Outputs extends Ptr {
 }
 
 /**
+* Type for representing the hash of a Transaction, necessary for signing it
+*/
+export class TransactionSignDataHash extends Ptr {
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<TransactionSignDataHash>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.transactionSignDataHashFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, TransactionSignDataHash);
+    }
+
+    /**
+    * @param {string} input
+    * @returns {Promise<TransactionSignDataHash>}
+    */
+    static async from_hex(input) {
+        const ret = await ChainLibs.transactionSignDataHashFromHex(input);
+        return Ptr._wrap(ret, TransactionSignDataHash);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.transactionSignDataHashAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+}
+
+/**
 * Type representing a unsigned transaction
 */
 export class Transaction extends Ptr {
@@ -307,7 +338,7 @@ export class Transaction extends Ptr {
     */
     async id() {
         const ret = await ChainLibs.transactionId(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, TransactionSignDataHash);
     }
 
     /**
@@ -706,7 +737,7 @@ export class Witness extends Ptr {
     */
     static async for_account(genesisHash, transactionId, secretKey, accountSpendingCounter) {
         const genesisHashPtr = Ptr._assertClass(genesisHash, Hash);
-        const transactionIdPtr = Ptr._assertClass(transactionId, Ptr);
+        const transactionIdPtr = Ptr._assertClass(transactionId, TransactionSignDataHash);
         const secretKeyPtr = Ptr._assertClass(secretKey, PrivateKey);
         const accountSpendingCounterPtr = Ptr._assertClass(accountSpendingCounter, SpendingCounter);
         genesisHash.ptr = transactionId.ptr = secretKey.ptr = accountSpendingCounter.ptr = null;
@@ -764,7 +795,7 @@ export class TransactionFinalizer extends Ptr {
     */
     async get_tx_sign_data_hash() {
         const ret = await ChainLibs.transactionFinalizerGetTxSignDataHash(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, TransactionSignDataHash);
     }
 
     /**

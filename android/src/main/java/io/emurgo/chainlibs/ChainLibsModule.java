@@ -492,6 +492,32 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    // TransactionSignDataHash
+
+    @ReactMethod
+    public final void transactionSignDataHashFromBytes(String bytes, Promise promise) {
+        Native.I
+                .transactionSignDataHashFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionSignDataHashFromHex(String input, Promise promise) {
+        Native.I
+                .transactionSignDataHashFromHex(input)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void transactionSignDataHashAsBytes(String txSignDataHash, Promise promise) {
+        Native.I
+                .transactionSignDataHashAsBytes(new RPtr(txSignDataHash))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
     @ReactMethod
     public final void ptrFree(String ptr, Promise promise) {
         try {

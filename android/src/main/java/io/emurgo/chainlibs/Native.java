@@ -113,5 +113,10 @@ final class Native {
     public final native Result<RPtr> fragmentIdFromBytes(byte[] bytes);
     public final native Result<byte[]> fragmentIdAsBytes(RPtr fragmentId);
 
+    // TransactionSignDataHash
+    public final native Result<RPtr> transactionSignDataHashFromBytes(byte[] bytes);
+    public final native Result<RPtr> transactionSignDataHashFromHex(String input);
+    public final native Result<byte[]> transactionSignDataHashAsBytes(RPtr txSignDataHash);
+
     public final native void ptrFree(RPtr ptr);
 }

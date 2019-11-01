@@ -153,6 +153,28 @@ export class Outputs extends Ptr {
 }
 
 /**
+* Type for representing the hash of a Transaction, necessary for signing it
+*/
+export class TransactionSignDataHash extends Ptr {
+  /**
+  * @param {Uint8Array} bytes 
+  * @returns {Promise<TransactionSignDataHash>} 
+  */
+  static from_bytes(bytes: Uint8Array): Promise<TransactionSignDataHash>;
+
+  /**
+  * @param {string} input 
+  * @returns {Promise<TransactionSignDataHash>} 
+  */
+  static from_hex(input: string): Promise<TransactionSignDataHash>;
+
+  /**
+  * @returns {Promise<Uint8Array>} 
+  */
+  as_bytes(): Promise<Uint8Array>;
+}
+
+/**
 * Type representing a unsigned transaction
 */
 export class Transaction extends Ptr {
