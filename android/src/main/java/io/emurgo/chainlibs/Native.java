@@ -30,7 +30,7 @@ final class Native {
 
     // Address
     public final native Result<RPtr> addressFromString(String str);
-    public final native Result<String> addressToString(RPtr address);
+    public final native Result<String> addressToString(RPtr address, String prefix);
     public final native Result<RPtr> addressSingleFromPublicKey(RPtr key, int discrimination);
     public final native Result<RPtr> addressDelegationFromPublicKey(RPtr key, RPtr delegation, int discrimination);
     public final native Result<RPtr> addressAccountFromPublicKey(RPtr key, int discrimination);

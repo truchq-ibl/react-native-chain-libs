@@ -88,9 +88,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void addressToString(String address, Promise promise) {
+    public final void addressToString(String address, String prefix, Promise promise) {
         Native.I
-                .addressToString(new RPtr(address))
+                .addressToString(new RPtr(address), prefix)
                 .pour(promise);
     }
 
