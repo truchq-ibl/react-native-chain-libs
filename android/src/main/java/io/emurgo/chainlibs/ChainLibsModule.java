@@ -78,7 +78,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     // Address
-    
+
     @ReactMethod
     public final void addressFromString(String str, Promise promise) {
         Native.I
@@ -392,6 +392,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
+    public final void privateKeyToPublic(Promise promise) {
+        Native.I
+                .privateKeyToPublic()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // Hash
 
     @ReactMethod
@@ -528,4 +536,3 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
         }
     }
 }
-

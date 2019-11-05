@@ -89,6 +89,7 @@ final class Native {
 
     // PrivateKey
     public final native Result<RPtr> privateKeyFromBech32(String bech32Str);
+    public final native Result<RPtr> privateKeyToPublic();
 
     // Hash
     public final native Result<RPtr> hashFromHex(String hexString);

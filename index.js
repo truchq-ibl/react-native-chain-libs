@@ -703,6 +703,14 @@ export class PrivateKey extends Ptr {
         const ret = await ChainLibs.privateKeyFromBech32(bech32Str);
         return Ptr._wrap(ret, PrivateKey);
     }
+
+    /**
+    * @returns {Promise<PublicKey>}
+    */
+    static async to_public() {
+        const ret = await ChainLibs.privateKeyToPublic();
+        return Ptr._wrap(ret, PublicKey);
+    }
 }
 
 /**
