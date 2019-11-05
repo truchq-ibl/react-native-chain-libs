@@ -707,8 +707,8 @@ export class PrivateKey extends Ptr {
     /**
     * @returns {Promise<PublicKey>}
     */
-    static async to_public() {
-        const ret = await ChainLibs.privateKeyToPublic();
+    async to_public() {
+        const ret = await ChainLibs.privateKeyToPublic(this.ptr);
         return Ptr._wrap(ret, PublicKey);
     }
 }

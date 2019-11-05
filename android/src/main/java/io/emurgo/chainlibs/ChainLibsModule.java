@@ -393,9 +393,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public final void privateKeyToPublic(Promise promise) {
+    public final void privateKeyToPublic(String prvPtr, Promise promise) {
         Native.I
-                .privateKeyToPublic()
+                .privateKeyToPublic(new RPtr(prvPtr))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
