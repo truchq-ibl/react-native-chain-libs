@@ -21,3 +21,16 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyFromBech32(
   })
   .jresult(&env)
 }
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyToPublic(
+  env: JNIEnv, _: JObject, ptr: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let rptr = ptr.rptr(&env)?;
+    rptr.typed_ref::<PrivateKey>()
+    .and_then(|private_key| RPtr::new(private_key.to_public()).jptr(&env))
+  })
+  .jresult(&env)
+}
