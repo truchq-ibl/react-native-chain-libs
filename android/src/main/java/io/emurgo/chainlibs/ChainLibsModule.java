@@ -285,6 +285,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
+    public final void inputValue(String input, Promise promise) {
+        Native.I
+                .inputValue(new RPtr(input))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // Inputs
 
     @ReactMethod
@@ -416,6 +424,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void spendingCounterZero(Promise promise) {
         Native.I
                 .spendingCounterZero()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void spendingCounterFromU32(Integer counter, Promise promise) {
+        Native.I
+                .spendingCounterFromU32(counter)
                 .map(RPtr::toJs)
                 .pour(promise);
     }

@@ -26,6 +26,18 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputFromAccount(
 
 #[allow(non_snake_case)]
 #[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputValue(
+  env: JNIEnv, _: JObject, input: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let input = input.rptr(&env)?;
+    input.typed_ref::<Input>().and_then(|input| RPtr::new(input.value()).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsSize(
   env: JNIEnv, _: JObject, inputs: JRPtr
 ) -> jobject {

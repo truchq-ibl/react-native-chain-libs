@@ -65,6 +65,7 @@ final class Native {
 
     // Input
     public final native Result<RPtr> inputFromAccount(RPtr account, RPtr v);
+    public final native Result<RPtr> inputValue(RPtr input);
 
     // Inputs
     public final native Result<Long> inputsSize(RPtr inputs);
@@ -96,6 +97,7 @@ final class Native {
 
     // SpendingCounter
     public final native Result<RPtr> spendingCounterZero();
+    public final native Result<RPtr> spendingCounterFromU32(int counter);
 
     // Transaction
     public final native Result<RPtr> transactionId(RPtr transaction);

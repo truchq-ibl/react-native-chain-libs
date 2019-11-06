@@ -107,6 +107,11 @@ export class Input extends Ptr {
   * @returns {Promise<Input>}
   */
   static from_account(account: Account, v: Value): Promise<Input>;
+
+  /**
+  * @returns {Promise<Value>} 
+  */
+  value(): Promise<Value>;
 }
 
 /**
@@ -407,6 +412,12 @@ export class SpendingCounter extends Ptr {
   * @returns {Promise<SpendingCounter>}
   */
   static zero(): Promise<SpendingCounter>;
+
+  /**
+  * @param {number} counter 
+  * @returns {Promise<SpendingCounter>} 
+  */
+  static from_u32(counter: number): Promise<SpendingCounter>;
 }
 
 /**

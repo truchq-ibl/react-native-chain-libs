@@ -378,6 +378,17 @@ RCT_EXPORT_METHOD(inputFromAccount:(nonnull NSString *)account withV:(nonnull NS
     }] exec:@[account, v] andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(inputValue:(nonnull NSString *)inputPtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* inputPtr, CharPtr* error) {
+        RPtr result;
+        RPtr input = [inputPtr rPtr];
+        return input_value(input, &result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:inputPtr andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(inputsSize:(nonnull NSString *)inputsPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSNumber*(NSString* inputsPtr, CharPtr* error) {
@@ -549,6 +560,16 @@ RCT_EXPORT_METHOD(spendingCounterZero:(RCTPromiseResolveBlock)resolve andReject:
             ? [NSString stringFromPtr:result]
             : nil;
     }] exec:nil andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(spendingCounterFromU32:(nonnull NSNumber *)counter withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSNumber* counter, CharPtr* error) {
+        RPtr result;
+        return spending_counter_from_u32([counter intValue], &result, error)
+        ? [NSString stringFromPtr:result]
+        : nil;
+    }] exec:counter andResolve:resolve orReject:reject];
 }
 
 RCT_EXPORT_METHOD(transactionId:(nonnull NSString *)ptr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)

@@ -236,6 +236,14 @@ export class Input extends Ptr {
         const ret = await ChainLibs.inputFromAccount(accountPtr, vPtr);
         return Ptr._wrap(ret, Input);
     }
+
+    /**
+    * @returns {Promise<Value>}
+    */
+    async value() {
+        const ret = await ChainLibs.inputValue(this.ptr);
+        return Ptr._wrap(ret, Value);
+    }
 }
 
 /**
@@ -721,6 +729,15 @@ export class SpendingCounter extends Ptr {
     */
     static async zero() {
         const ret = await ChainLibs.spendingCounterZero();
+        return Ptr._wrap(ret, SpendingCounter);
+    }
+
+    /**
+    * @param {number} counter
+    * @returns {Promise<SpendingCounter>}
+    */
+    static async from_u32(counter) {
+        const ret = await ChainLibs.spendingCounterFromU32(counter);
         return Ptr._wrap(ret, SpendingCounter);
     }
 }

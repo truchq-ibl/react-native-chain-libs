@@ -19,6 +19,13 @@ pub unsafe extern "C" fn input_from_account(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn input_value(input: RPtr, result: &mut RPtr, error: &mut CharPtr) -> bool {
+  handle_exception_result(|| input.typed_ref::<Input>().map(|input| input.value()))
+    .map(|value| RPtr::new(value))
+    .response(result, error)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn inputs_size(
   inputs: RPtr, result: &mut usize, error: &mut CharPtr
 ) -> bool {
