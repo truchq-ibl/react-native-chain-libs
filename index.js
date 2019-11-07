@@ -400,6 +400,29 @@ export class FragmentId extends Ptr {
     }
 }
 
+/**
+* Unspent transaction pointer. This is composed of:
+* * the transaction identifier where the unspent output is (a FragmentId)
+* * the output index within the pointed transaction\'s outputs
+* * the value we expect to read from this output, this setting is added in order to protect undesired withdrawal
+* and to set the actual fee in the transaction.
+*/
+export class UtxoPointer extends Ptr {
+    /**
+    * @param {FragmentId} fragmentId
+    * @param {number} outputIndex
+    * @param {Value} value
+    * @returns {Promise<UtxoPointer>}
+    */
+    static async new(fragmentId, outputIndex, value) {
+        const fragmentIdPtr = Ptr._assertClass(fragmentId, FragmentId);
+        const valuePtr = Ptr._assertClass(value, Value);
+        fragmentId.ptr = value.ptr = null;
+        const ret = await ChainLibs.utxoPointerNew(fragmentIdPtr, outputIndex, valuePtr);
+        return Ptr._wrap(ret, UtxoPointer);
+    }
+}
+
 export class Fragment extends Ptr {
     /**
     * @param {AuthenticatedTransaction} tx
@@ -751,6 +774,22 @@ export class SpendingCounter extends Ptr {
 * and may not know the contents of the internal transaction.
 */
 export class Witness extends Ptr {
+    /**
+    * Generate Witness for an utxo-based transaction Input
+    * @param {Hash} genesisHash
+    * @param {TransactionSignDataHash} transactionId
+    * @param {PrivateKey} secretKey
+    * @returns {Promise<Witness>}
+    */
+    static async for_utxo(genesisHash, transactionId, secretKey) {
+        const genesisHashPtr = Ptr._assertClass(genesisHash, Hash);
+        const transactionIdPtr = Ptr._assertClass(transactionId, TransactionSignDataHash);
+        const secretKeyPtr = Ptr._assertClass(secretKey, PrivateKey);
+        genesisHash.ptr = transactionId.ptr = secretKey.ptr = null;
+        const ret = await ChainLibs.witnessForUtxo(genesisHashPtr, transactionIdPtr, secretKeyPtr);
+        return Ptr._wrap(ret, Witness);
+    }
+
     /**
     * Generate Witness for an account based transaction Input
     * the account-spending-counter should be incremented on each transaction from this account

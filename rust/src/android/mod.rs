@@ -19,6 +19,7 @@ mod transaction;
 mod transaction_builder;
 mod transaction_finalizer;
 mod transaction_sign_data_hash;
+mod utxo_pointer;
 mod value;
 mod witness;
 

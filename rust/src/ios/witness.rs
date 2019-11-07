@@ -22,3 +22,21 @@ pub unsafe extern "C" fn witness_for_account(
   .map(|witness| RPtr::new(witness))
   .response(result, error)
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn witness_for_utxo(
+  genesis_hash: &mut RPtr, transaction_id: &mut RPtr, secret_key: &mut RPtr, result: &mut RPtr,
+  error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    genesis_hash
+      .owned::<Hash>()
+      .zip(transaction_id.owned::<TransactionSignDataHash>())
+      .zip(secret_key.owned::<PrivateKey>())
+      .map(|((genesis_hash, transaction_id), secret_key)| {
+        Witness::for_utxo(genesis_hash, transaction_id, secret_key)
+      })
+  })
+  .map(|witness| RPtr::new(witness))
+  .response(result, error)
+}

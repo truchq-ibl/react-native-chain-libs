@@ -26,3 +26,21 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_witnessForAccount(
   })
   .jresult(&env)
 }
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_witnessForUtxo(
+  env: JNIEnv, _: JObject, genesis_hash: JRPtr, transaction_id: JRPtr, secret_key: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    genesis_hash
+      .owned::<Hash>(&env)
+      .zip(transaction_id.owned::<TransactionSignDataHash>(&env))
+      .zip(secret_key.owned::<PrivateKey>(&env))
+      .map(|((genesis_hash, transaction_id), secret_key)| {
+        Witness::for_utxo(genesis_hash, transaction_id, secret_key)
+      })
+      .and_then(|witness| RPtr::new(witness).jptr(&env))
+  })
+  .jresult(&env)
+}

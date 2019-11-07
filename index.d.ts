@@ -251,6 +251,23 @@ export class FragmentId extends Ptr {
 }
 
 /**
+* Unspent transaction pointer. This is composed of:
+* * the transaction identifier where the unspent output is (a FragmentId)
+* * the output index within the pointed transaction\'s outputs
+* * the value we expect to read from this output, this setting is added in order to protect undesired withdrawal
+* and to set the actual fee in the transaction.
+*/
+export class UtxoPointer extends Ptr {
+  /**
+  * @param {FragmentId} fragment_id 
+  * @param {number} output_index 
+  * @param {Value} value 
+  * @returns {Promise<UtxoPointer>} 
+  */
+  static new(fragment_id: FragmentId, output_index: number, value: Value): Promise<UtxoPointer>;
+}
+
+/**
 * All possible messages recordable in the Block content
 */
 export class Fragment extends Ptr {
@@ -381,7 +398,7 @@ export class PrivateKey extends Ptr {
   /**
   * @returns {Promise<PublicKey>}
   */
-  async to_public(): Promise<PublicKey>
+  to_public(): Promise<PublicKey>
 }
 
 /**
@@ -591,6 +608,15 @@ export class Value extends Ptr {
 * and may not know the contents of the internal transaction.
 */
 export class Witness extends Ptr {
+  /**
+  * Generate Witness for an utxo-based transaction Input
+  * @param {Hash} genesis_hash 
+  * @param {TransactionSignDataHash} transaction_id 
+  * @param {PrivateKey} secret_key 
+  * @returns {Promise<Witness>} 
+  */
+  static for_utxo(genesis_hash: Hash, transaction_id: TransactionSignDataHash, secret_key: PrivateKey): Promise<Witness>;
+
   /**
   * Generate Witness for an account based transaction Input
   * the account-spending-counter should be incremented on each transaction from this account

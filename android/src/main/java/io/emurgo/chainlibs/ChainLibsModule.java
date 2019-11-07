@@ -390,6 +390,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
+    public final void witnessForUtxo(String genesisHash, String transactionId, String secretKey, Promise promise) {
+        Native.I
+                .witnessForUtxo(new RPtr(genesisHash), new RPtr(transactionId), new RPtr(secretKey))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // PrivateKey
 
     @ReactMethod
@@ -539,6 +547,16 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
         Native.I
                 .transactionSignDataHashAsBytes(new RPtr(txSignDataHash))
                 .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
+    // UtxoPointer
+
+    @ReactMethod
+    public final void utxoPointerNew(String fragmentId, Integer outputIndex, String value, Promise promise) {
+        Native.I
+                .utxoPointerNew(new RPtr(fragmentId), outputIndex, new RPtr(value))
+                .map(RPtr::toJs)
                 .pour(promise);
     }
 

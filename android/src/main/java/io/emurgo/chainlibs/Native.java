@@ -87,6 +87,7 @@ final class Native {
 
     // Witness
     public final native Result<RPtr> witnessForAccount(RPtr genesisHash, RPtr transactionId, RPtr secretKey, RPtr accountSpendingCounter);
+    public final native Result<RPtr> witnessForUtxo(RPtr genesisHash, RPtr transactionId, RPtr secretKey);
 
     // PrivateKey
     public final native Result<RPtr> privateKeyFromBech32(String bech32Str);
@@ -120,6 +121,9 @@ final class Native {
     public final native Result<RPtr> transactionSignDataHashFromBytes(byte[] bytes);
     public final native Result<RPtr> transactionSignDataHashFromHex(String input);
     public final native Result<byte[]> transactionSignDataHashAsBytes(RPtr txSignDataHash);
+
+    // UtxoPointer
+    public final native Result<RPtr> utxoPointerNew(RPtr fragmentId, int outputIndex, RPtr value);
 
     public final native void ptrFree(RPtr ptr);
 }

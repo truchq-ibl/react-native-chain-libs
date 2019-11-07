@@ -384,8 +384,8 @@ RCT_EXPORT_METHOD(inputValue:(nonnull NSString *)inputPtr  withResolve:(RCTPromi
         RPtr result;
         RPtr input = [inputPtr rPtr];
         return input_value(input, &result, error)
-        ? [NSString stringFromPtr:result]
-        : nil;
+            ? [NSString stringFromPtr:result]
+            : nil;
     }] exec:inputPtr andResolve:resolve orReject:reject];
 }
 
@@ -432,8 +432,8 @@ RCT_EXPORT_METHOD(feeCalculate:(nonnull NSString *)feePtr withTx:(nonnull NSStri
         RPtr fee = [[params objectAtIndex:0] rPtr];
         RPtr tx = [[params objectAtIndex:1] rPtr];
         return fee_calculate(fee, &tx, &result, error)
-        ? [NSString stringFromPtr:result]
-        : nil;
+            ? [NSString stringFromPtr:result]
+            : nil;
     }] exec:@[feePtr, txPtr] andResolve:resolve orReject:reject];
 }
 
@@ -522,6 +522,22 @@ RCT_EXPORT_METHOD(witnessForAccount:(nonnull NSString *)genesisHash withTransact
     }] exec:@[genesisHash, transactionId, secretKey, accountSpendingCounter] andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(witnessForUtxo:(nonnull NSString *)genesisHash withTransactionId:(nonnull NSString *)transactionId andSecretKey:(nonnull NSString *)secretKey withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr genesisHash = [[params objectAtIndex:0] rPtr];
+        RPtr transactionId = [[params objectAtIndex:1] rPtr];
+        RPtr secretKey = [[params objectAtIndex:2] rPtr];
+        return witness_for_utxo(&genesisHash,
+                                   &transactionId,
+                                   &secretKey,
+                                   &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:@[genesisHash, transactionId, secretKey] andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(privateKeyFromBech32:(nonnull NSString *)bech32Str withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSString* bech32Str, CharPtr* error) {
@@ -567,8 +583,8 @@ RCT_EXPORT_METHOD(spendingCounterFromU32:(nonnull NSNumber *)counter withResolve
     [[CSafeOperation new:^NSString*(NSNumber* counter, CharPtr* error) {
         RPtr result;
         return spending_counter_from_u32([counter intValue], &result, error)
-        ? [NSString stringFromPtr:result]
-        : nil;
+            ? [NSString stringFromPtr:result]
+            : nil;
     }] exec:counter andResolve:resolve orReject:reject];
 }
 
@@ -699,9 +715,22 @@ RCT_EXPORT_METHOD(transactionSignDataHashAsBytes:(nonnull NSString *)txSignDataH
         DataPtr result;
         RPtr txSignDataHash = [txSignDataHashPtr rPtr];
         return transaction_sign_data_hash_as_bytes(txSignDataHash, &result, error)
-        ? [[NSData fromDataPtr:&result] base64]
-        : nil;
+            ? [[NSData fromDataPtr:&result] base64]
+            : nil;
     }] exec:txSignDataHashPtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(utxoPointerNew:(nonnull NSString *)fragmentIdPtr withOutputIndex:(nonnull NSNumber *)outputIndex withValue:(nonnull NSString *)valuePtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr fragmentId = [[params objectAtIndex:0] rPtr];
+        uint8_t outputIndex = [[params objectAtIndex:1] intValue];
+        RPtr value = [[params objectAtIndex:2] rPtr];
+        return utxo_pointer_new(&fragmentId, outputIndex, &value, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:@[fragmentIdPtr, outputIndex, valuePtr] andResolve:resolve orReject:reject];
 }
 
 RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
