@@ -14,9 +14,11 @@ pub extern "C" fn private_key_from_bech32(
 }
 
 #[no_mangle]
-pub extern "C" fn private_key_to_public(
+pub unsafe extern "C" fn private_key_to_public(
   private_key: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| private_key.typed_ref::<PrivateKey>().map(|pvkey| RPtr::new(pvkey.to_public())))
-    .response(result, error)
+  handle_exception_result(|| {
+    private_key.typed_ref::<PrivateKey>().map(|pvkey| RPtr::new(pvkey.to_public()))
+  })
+  .response(result, error)
 }
