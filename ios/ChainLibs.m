@@ -342,6 +342,18 @@ RCT_EXPORT_METHOD(transactionBuilderAddOutput:(nonnull NSString *)ptr withAddres
     }] exec:@[ptr, address, value] andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(transactionBuilderGetBalance:(nonnull NSString *)txBuilderPtr withFee:(nonnull NSString *)feePtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr txBuilder = [[params objectAtIndex:0] rPtr];
+        RPtr fee = [[params objectAtIndex:1] rPtr];
+        return transaction_builder_get_balance(txBuilder, fee, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:@[txBuilderPtr, feePtr] andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(transactionBuilderSealWithOutputPolicy:(nonnull NSString *)txBuilder withFee:(nonnull NSString *)fee andOutputPolicy:(nonnull NSString *)outputPolicy withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
@@ -731,6 +743,50 @@ RCT_EXPORT_METHOD(utxoPointerNew:(nonnull NSString *)fragmentIdPtr withOutputInd
             ? [NSString stringFromPtr:result]
             : nil;
     }] exec:@[fragmentIdPtr, outputIndex, valuePtr] andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(balanceIsPositive:(nonnull NSString *)balancePtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSNumber*(NSString* balancePtr, CharPtr* error) {
+        BOOL result;
+        RPtr balance = [balancePtr rPtr];
+        return balance_is_positive(balance, &result, error)
+            ? [NSNumber numberWithBool:result]
+            : nil;
+    }] exec:balancePtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(balanceIsNegative:(nonnull NSString *)balancePtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSNumber*(NSString* balancePtr, CharPtr* error) {
+        BOOL result;
+        RPtr balance = [balancePtr rPtr];
+        return balance_is_negative(balance, &result, error)
+            ? [NSNumber numberWithBool:result]
+            : nil;
+    }] exec:balancePtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(balanceIsZero:(nonnull NSString *)balancePtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSNumber*(NSString* balancePtr, CharPtr* error) {
+        BOOL result;
+        RPtr balance = [balancePtr rPtr];
+        return balance_is_zero(balance, &result, error)
+            ? [NSNumber numberWithBool:result]
+            : nil;
+    }] exec:balancePtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(balanceGetValue:(nonnull NSString *)balancePtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* balancePtr, CharPtr* error) {
+        RPtr result;
+        RPtr balance = [balancePtr rPtr];
+        return balance_get_value(balance, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:balancePtr andResolve:resolve orReject:reject];
 }
 
 RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)

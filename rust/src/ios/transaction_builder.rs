@@ -39,6 +39,20 @@ pub unsafe extern "C" fn transaction_builder_add_output(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn transaction_builder_get_balance(
+  tx_builder: RPtr, fee: RPtr, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    tx_builder
+      .typed_ref::<TransactionBuilder>()
+      .zip(fee.typed_ref::<Fee>())
+      .and_then(|(tx_builder, fee)| tx_builder.get_balance(fee).into_result())
+  })
+  .map(|balance| RPtr::new(balance))
+  .response(result, error)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn transaction_builder_seal_with_output_policy(
   tx_builder: &mut RPtr, fee: RPtr, output_policy: &mut RPtr, result: &mut RPtr,
   error: &mut CharPtr

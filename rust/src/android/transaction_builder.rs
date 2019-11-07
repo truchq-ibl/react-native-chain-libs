@@ -51,6 +51,23 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderAddOu
 
 #[allow(non_snake_case)]
 #[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderGetBalance(
+  env: JNIEnv, _: JObject, tx_builder: JRPtr, fee: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let tx_builder = tx_builder.rptr(&env)?;
+    let fee = fee.rptr(&env)?;
+    tx_builder
+      .typed_ref::<TransactionBuilder>()
+      .zip(fee.typed_ref::<Fee>())
+      .and_then(|(tx_builder, fee)| tx_builder.get_balance(fee).into_result())
+      .and_then(|balance| RPtr::new(balance).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSealWithOutputPolicy(
   env: JNIEnv, _: JObject, tx_builder: JRPtr, fee: JRPtr, output_policy: JRPtr
 ) -> jobject {

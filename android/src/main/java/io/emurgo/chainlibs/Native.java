@@ -58,6 +58,7 @@ final class Native {
     public final native Result<RPtr> transactionBuilderNewNoPayload();
     public final native Result<Void> transactionBuilderAddInput(RPtr txBuilder, RPtr input);
     public final native Result<Void> transactionBuilderAddOutput(RPtr txBuilder, RPtr address, RPtr value);
+    public final native Result<RPtr> transactionBuilderGetBalance(RPtr txBuilder, RPtr fee);
     public final native Result<RPtr> transactionBuilderSealWithOutputPolicy(RPtr txBuilder, RPtr fee, RPtr outputPolicy);
 
     // Account
@@ -124,6 +125,12 @@ final class Native {
 
     // UtxoPointer
     public final native Result<RPtr> utxoPointerNew(RPtr fragmentId, int outputIndex, RPtr value);
+
+    // Balance
+    public final native Result<Boolean> balanceIsPositive(RPtr balance);
+    public final native Result<Boolean> balanceIsNegative(RPtr balance);
+    public final native Result<Boolean> balanceIsZero(RPtr balance);
+    public final native Result<RPtr> balanceGetValue(RPtr balance);
 
     public final native void ptrFree(RPtr ptr);
 }

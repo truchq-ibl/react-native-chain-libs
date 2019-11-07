@@ -258,6 +258,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public final void transactionBuilderGetBalance(String txBuilder, String fee, Promise promise) {
+        Native.I
+                .transactionBuilderGetBalance(new RPtr(txBuilder), new RPtr(fee))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void transactionBuilderSealWithOutputPolicy(String txBuilder, String fee, String outputPolicy, Promise promise) {
         Native.I
                 .transactionBuilderSealWithOutputPolicy(new RPtr(txBuilder), new RPtr(fee), new RPtr(outputPolicy))
@@ -556,6 +564,37 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void utxoPointerNew(String fragmentId, Integer outputIndex, String value, Promise promise) {
         Native.I
                 .utxoPointerNew(new RPtr(fragmentId), outputIndex, new RPtr(value))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Balance
+
+    @ReactMethod
+    public final void balanceIsPositive(String balance, Promise promise) {
+        Native.I
+                .balanceIsPositive(new RPtr(balance))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void balanceIsNegative(String balance, Promise promise) {
+        Native.I
+                .balanceIsNegative(new RPtr(balance))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void balanceIsZero(String balance, Promise promise) {
+        Native.I
+                .balanceIsZero(new RPtr(balance))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void balanceGetValue(String balance, Promise promise) {
+        Native.I
+                .balanceGetValue(new RPtr(balance))
                 .map(RPtr::toJs)
                 .pour(promise);
     }

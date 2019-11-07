@@ -438,6 +438,32 @@ export class SpendingCounter extends Ptr {
 }
 
 /**
+* Amount of the balance in the transaction.
+*/
+export class Balance extends Ptr {
+  /**
+  * @returns {Promise<boolean>} 
+  */
+  is_positive(): Promise<boolean>;
+
+  /**
+  * @returns {Promise<boolean>} 
+  */
+  is_negative(): Promise<boolean>;
+
+  /**
+  * @returns {Promise<boolean>} 
+  */
+  is_zero(): Promise<boolean>;
+
+  /**
+  * Get value without taking into account if the balance is positive or negative
+  * @returns {Promise<Value>} 
+  */
+  get_value(): Promise<Value>;
+}
+
+/**
 * Builder pattern implementation for making a Transaction
 *
 * Example
@@ -493,6 +519,12 @@ export class TransactionBuilder extends Ptr {
   * @returns {Promise<void>}
   */
   add_output(address: Address, value: Value): Promise<void>;
+
+  /**
+  * @param {Fee} fee 
+  * @returns {Promise<Balance>} 
+  */
+  get_balance(fee: Fee): Promise<Balance>;
 
   /**
   * Finalize the transaction by adding the change Address output

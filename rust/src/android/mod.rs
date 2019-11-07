@@ -1,6 +1,7 @@
 mod account;
 mod address;
 mod authenticated_transaction;
+mod balance;
 mod fee;
 mod fragment;
 mod fragment_id;

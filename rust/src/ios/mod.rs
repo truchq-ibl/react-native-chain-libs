@@ -1,6 +1,7 @@
 mod account;
 mod address;
 mod authenticated_transaction;
+mod balance;
 mod data;
 mod fee;
 mod fragment;

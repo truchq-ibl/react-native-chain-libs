@@ -601,6 +601,41 @@ export class OutputPolicy extends Ptr {
 }
 
 /**
+* Amount of the balance in the transaction.
+*/
+export class Balance extends Ptr {
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_positive() {
+        return ChainLibs.balanceIsPositive(this.ptr);
+    }
+
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_negative() {
+        return ChainLibs.balanceIsNegative(this.ptr);
+    }
+
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_zero() {
+        return ChainLibs.balanceIsZero(this.ptr);
+    }
+
+    /**
+    * Get value without taking into account if the balance is positive or negative
+    * @returns {Promise<Value>}
+    */
+    async get_value() {
+        const ret = await ChainLibs.balanceGetValue(this.ptr);
+        return Ptr._wrap(ret, Value);
+    }
+}
+
+/**
 * Builder pattern implementation for making a Transaction
 *
 * Example
@@ -667,6 +702,16 @@ export class TransactionBuilder extends Ptr {
         const valuePtr = Ptr._assertClass(value, Value);
         address.ptr = value.ptr = null;
         return ChainLibs.transactionBuilderAddOutput(this.ptr, addressPtr, valuePtr);
+    }
+
+    /**
+    * @param {Fee} fee
+    * @returns {Promise<Balance>}
+    */
+    async get_balance(fee) {
+        const feePtr = Ptr._assertClass(fee, Fee);
+        const ret = await ChainLibs.transactionBuilderGetBalance(this.ptr, feePtr);
+        return Ptr._wrap(ret, Balance);
     }
 
     /**
