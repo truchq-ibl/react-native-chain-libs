@@ -35,12 +35,8 @@ final class Native {
     public final native Result<RPtr> addressDelegationFromPublicKey(RPtr key, RPtr delegation, int discrimination);
     public final native Result<RPtr> addressAccountFromPublicKey(RPtr key, int discrimination);
 
-    // AuthenticatedTransaction
-    public final native Result<RPtr> authenticatedTransactionTransaction(RPtr authTx);
-
     // Fragment
-    public final native Result<RPtr> fragmentFromAuthenticatedTransaction(RPtr authTx);
-    public final native Result<RPtr> fragmentFromGeneratedTransaction(RPtr authTx);
+    public final native Result<RPtr> fragmentFromTransaction(RPtr tx);
     public final native Result<RPtr> fragmentGetTransaction(RPtr fragment);
     public final native Result<byte[]> fragmentAsBytes(RPtr fragment);
     public final native Result<Boolean> fragmentIsInitial(RPtr fragment);
@@ -48,18 +44,26 @@ final class Native {
     public final native Result<Boolean> fragmentIsOwnerStakeDelegation(RPtr fragment);
     public final native Result<Boolean> fragmentIsStakeDelegation(RPtr fragment);
     public final native Result<Boolean> fragmentIsPoolRegistration(RPtr fragment);
-    public final native Result<Boolean> fragmentIsPoolManagement(RPtr fragment);
+    public final native Result<Boolean> fragmentIsPoolRetirement(RPtr fragment);
+    public final native Result<Boolean> fragmentIsPoolUpdate(RPtr fragment);
     public final native Result<Boolean> fragmentIsOldUtxoDeclaration(RPtr fragment);
     public final native Result<Boolean> fragmentIsUpdateProposal(RPtr fragment);
     public final native Result<Boolean> fragmentIsUpdateVote(RPtr fragment);
     public final native Result<RPtr> fragmentId(RPtr fragment);
 
     // TransactionBuilder
-    public final native Result<RPtr> transactionBuilderNewNoPayload();
-    public final native Result<Void> transactionBuilderAddInput(RPtr txBuilder, RPtr input);
-    public final native Result<Void> transactionBuilderAddOutput(RPtr txBuilder, RPtr address, RPtr value);
-    public final native Result<RPtr> transactionBuilderGetBalance(RPtr txBuilder, RPtr fee);
-    public final native Result<RPtr> transactionBuilderSealWithOutputPolicy(RPtr txBuilder, RPtr fee, RPtr outputPolicy);
+    public final native Result<RPtr> transactionBuilderNew();
+    public final native Result<RPtr> transactionBuilderNoPayload(RPtr txBuilder);
+
+    // TransactionBuilderSetIOs
+    public final native Result<RPtr> transactionBuilderSetIOsSetIOs(RPtr txBuilderSetIOs, RPtr inputs, RPtr outputs);
+
+    // TransactionBuilderSetWitness
+    public final native Result<RPtr> transactionBuilderSetWitnessGetAuthDataForWitness(RPtr txBuilderSetWitness);
+    public final native Result<RPtr> transactionBuilderSetWitnessSetWitnesses(RPtr txBuilderSetWitness, RPtr witnesses);
+
+    // TransactionBuilderSetAuthData
+    public final native Result<RPtr> transactionBuilderSetAuthDataSetPayloadAuth(RPtr txBuilderSetAuthData, RPtr auth);
 
     // Account
     public final native Result<RPtr> accountFromAddress(RPtr address);
@@ -69,8 +73,10 @@ final class Native {
     public final native Result<RPtr> inputValue(RPtr input);
 
     // Inputs
+    public final native Result<RPtr> inputsNew();
     public final native Result<Long> inputsSize(RPtr inputs);
     public final native Result<RPtr> inputsGet(RPtr inputs, long index);
+    public final native Result<Void> inputsAdd(RPtr inputs, RPtr item);
 
     // Fee
     public final native Result<RPtr> feeLinearFee(RPtr constant, RPtr coefficient, RPtr certificate);
@@ -79,12 +85,6 @@ final class Native {
     // OutputPolicy
     public final native Result<RPtr> outputPolicyForget();
     public final native Result<RPtr> outputPolicyOne(RPtr address);
-
-    // TransactionFinalizer
-    public final native Result<RPtr> transactionFinalizerNew(RPtr transaction);
-    public final native Result<RPtr> transactionFinalizerGetTxSignDataHash(RPtr txFinalizer);
-    public final native Result<Void> transactionFinalizerSetWitness(RPtr txFinalizer, long index, RPtr witness);
-    public final native Result<RPtr> transactionFinalizerBuild(RPtr txFinalizer);
 
     // Witness
     public final native Result<RPtr> witnessForAccount(RPtr genesisHash, RPtr transactionId, RPtr secretKey, RPtr accountSpendingCounter);
@@ -111,8 +111,10 @@ final class Native {
     public final native Result<RPtr> outputValue(RPtr output);
 
     // Outputs
+    public final native Result<RPtr> outputsNew();
     public final native Result<Long> outputsSize(RPtr outputs);
     public final native Result<RPtr> outputsGet(RPtr outputs, long index);
+    public final native Result<Void> outputsAdd(RPtr outputs, RPtr item);
 
     // FragmentId
     public final native Result<RPtr> fragmentIdFromBytes(byte[] bytes);
@@ -131,6 +133,29 @@ final class Native {
     public final native Result<Boolean> balanceIsNegative(RPtr balance);
     public final native Result<Boolean> balanceIsZero(RPtr balance);
     public final native Result<RPtr> balanceGetValue(RPtr balance);
+
+    // InputOutputBuilder
+    public final native Result<RPtr> inputOutputBuilderEmpty();
+    public final native Result<Void> inputOutputBuilderAddInput(RPtr ioBuilder, RPtr input);
+    public final native Result<Void> inputOutputBuilderAddOutput(RPtr ioBuilder, RPtr address, RPtr value);
+    public final native Result<RPtr> inputOutputBuilderBuild(RPtr ioBuilder);
+    public final native Result<RPtr> inputOutputBuilderSealWithOutputPolicy(RPtr ioBuilder, RPtr payload, RPtr feeAlgorithm, RPtr policy);
+
+    // InputOutput
+    public final native Result<RPtr> inputOutputInputs(RPtr inputOutput);
+    public final native Result<RPtr> inputOutputOutputs(RPtr inputOutput);
+
+    // Witnesses
+    public final native Result<RPtr> witnessesNew();
+    public final native Result<Long> witnessesSize(RPtr witnesses);
+    public final native Result<RPtr> witnessesGet(RPtr witnesses, long index);
+    public final native Result<Void> witnessesAdd(RPtr witnesses, RPtr item);
+
+    // PayloadAuthData
+    public final native Result<RPtr> payloadAuthDataForNoPayload();
+
+    // Payload
+    public final native Result<RPtr> payloadNoPayload();
 
     public final native void ptrFree(RPtr ptr);
 }

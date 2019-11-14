@@ -250,11 +250,20 @@ export class Input extends Ptr {
 */
 export class Inputs extends Ptr {
     /**
+    * @returns {Promise<Inputs>}
+    */
+    static async new() {
+        const ret = await ChainLibs.inputsNew();
+        return Ptr._wrap(ret, Inputs);
+    }
+
+    /**
     * @returns {Promise<number>}
     */
     size() {
         return ChainLibs.inputsSize(this.ptr);
     }
+
     /**
     * @param {number} index
     * @returns {Promise<Input>}
@@ -262,6 +271,16 @@ export class Inputs extends Ptr {
     async get(index) {
         const ret = await ChainLibs.inputsGet(this.ptr, index);
         return Ptr._wrap(ret, Input);
+    }
+
+    /**
+    * @param {Input} item
+    * @returns {Promise<void>}
+    */
+    add(item) {
+        const itemPtr = Ptr._assertClass(item, Input);
+        item.ptr = null;
+        return ChainLibs.inputsAdd(this.ptr, itemPtr);
     }
 }
 
@@ -290,6 +309,14 @@ export class Output extends Ptr {
 */
 export class Outputs extends Ptr {
     /**
+    * @returns {Promise<Outputs>}
+    */
+    static async new() {
+        const ret = await ChainLibs.outputsNew();
+        return Ptr._wrap(ret, Outputs);
+    }
+    
+    /**
     * @returns {Promise<number>}
     */
     size() {
@@ -302,6 +329,16 @@ export class Outputs extends Ptr {
     async get(index) {
         const ret = await ChainLibs.outputsGet(this.ptr, index);
         return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
+    * @param {Input} item
+    * @returns {Promise<void>}
+    */
+    add(item) {
+        const itemPtr = Ptr._assertClass(item, Output);
+        item.ptr = null;
+        return ChainLibs.outputsAdd(this.ptr, itemPtr);
     }
 }
 
@@ -368,17 +405,6 @@ export class Transaction extends Ptr {
     }
 }
 
-export class AuthenticatedTransaction extends Ptr {
-    /**
-    * Get a copy of the inner Transaction, discarding the signatures
-    * @returns {Promise<Transaction>}
-    */
-    async transaction() {
-        const ret = await ChainLibs.authenticatedTransactionTransaction(this.ptr);
-        return Ptr._wrap(ret, Transaction);
-    }
-}
-
 /**
 */
 export class FragmentId extends Ptr {
@@ -425,37 +451,25 @@ export class UtxoPointer extends Ptr {
 
 export class Fragment extends Ptr {
     /**
-    * @param {AuthenticatedTransaction} tx
+    * @param {Transaction} tx
     * @returns {Promise<Fragment>}
     */
-    static async from_authenticated_transaction(tx) {
-        const txPtr = Ptr._assertClass(tx, AuthenticatedTransaction);
+    static async from_transaction(tx) {
+        const txPtr = Ptr._assertClass(tx, Transaction);
         tx.ptr = null;
-        const ret = await ChainLibs.fragmentFromAuthenticatedTransaction(txPtr);
-        return Ptr._wrap(ret, Fragment);
-    }
-
-    /**
-    * Deprecated: Use `from_authenticated_transaction` instead
-    * @param {AuthenticatedTransaction} tx
-    * @returns {Promise<Fragment>}
-    */
-    static async from_generated_transaction(tx) {
-        const txPtr = Ptr._assertClass(tx, AuthenticatedTransaction);
-        tx.ptr = null;
-        const ret = await ChainLibs.fragmentFromGeneratedTransaction(txPtr);
+        const ret = await ChainLibs.fragmentFromTransaction(txPtr);
         return Ptr._wrap(ret, Fragment);
     }
 
     /**
     * Get a Transaction if the Fragment represents one
-    * @returns {Promise<AuthenticatedTransaction>}
+    * @returns {Promise<Transaction>}
     */
     async get_transaction() {
         const ptr = this.ptr;
         this.ptr = null;
         const ret = await ChainLibs.fragmentGetTransaction(ptr);
-        return Ptr._wrap(ret, AuthenticatedTransaction);
+        return Ptr._wrap(ret, Transaction);
     }
 
     /**
@@ -504,8 +518,15 @@ export class Fragment extends Ptr {
     /**
     * @returns {Promise<boolean>}
     */
-    is_pool_management() {
-        return ChainLibs.fragmentIsPoolManagement(this.ptr);
+    is_pool_retirement() {
+        return ChainLibs.fragmentIsPoolRetirement(this.ptr);
+    }
+
+    /**
+    * @returns {Promise<boolean>}
+    */
+    is_pool_update() {
+        return ChainLibs.fragmentIsPoolUpdate(this.ptr);
     }
 
     /**
@@ -636,116 +657,6 @@ export class Balance extends Ptr {
 }
 
 /**
-* Builder pattern implementation for making a Transaction
-*
-* Example
-*
-* ```javascript
-* const txbuilder = new TransactionBuilder();
-*
-* const account = Account.from_address(Address.from_string(
-*   &#39;ca1qh9u0nxmnfg7af8ycuygx57p5xgzmnmgtaeer9xun7hly6mlgt3pj2xk344&#39;
-* ));
-*
-* const input = Input.from_account(account, Value.from_str(\'1000\'));
-*
-* txbuilder.add_input(input);
-*
-* txbuilder.add_output(
-*   Address.from_string(
-*     &#39;ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn&#39;
-*   ),
-*   Value.from_str(\'500\')
-* );
-*
-* const feeAlgorithm = Fee.linear_fee(
-*   Value.from_str(\'20\'),
-*   Value.from_str(\'5\'),
-*   Value.from_str(\'0\')
-* );
-*
-* const finalizedTx = txbuilder.finalize(
-*   feeAlgorithm,
-*   OutputPolicy.one(accountInputAddress)
-* );
-* ```
-*/
-export class TransactionBuilder extends Ptr {
-    /**
-    * Create a TransactionBuilder for a transaction without certificate
-    * @returns {Promise<TransactionBuilder>}
-    */
-    static async new_no_payload() {
-        const ret = await ChainLibs.transactionBuilderNewNoPayload();
-        return Ptr._wrap(ret, TransactionBuilder);
-    }
-
-    /**
-    * Add input to the transaction
-    * @param {Input} input
-    * @returns {Promise<void>}
-    */
-    add_input(input) {
-        const inputPtr = Ptr._assertClass(input, Input);;
-        input.ptr = null;
-        return ChainLibs.transactionBuilderAddInput(this.ptr, inputPtr);
-    }
-
-    /**
-    * Add output to the transaction
-    * @param {Address} address
-    * @param {Value} value
-    * @returns {Promise<void>}
-    */
-    add_output(address, value) {
-        const addressPtr = Ptr._assertClass(address, Address);
-        const valuePtr = Ptr._assertClass(value, Value);
-        address.ptr = value.ptr = null;
-        return ChainLibs.transactionBuilderAddOutput(this.ptr, addressPtr, valuePtr);
-    }
-
-    /**
-    * @param {Fee} fee
-    * @returns {Promise<Balance>}
-    */
-    async get_balance(fee) {
-        const feePtr = Ptr._assertClass(fee, Fee);
-        const ret = await ChainLibs.transactionBuilderGetBalance(this.ptr, feePtr);
-        return Ptr._wrap(ret, Balance);
-    }
-
-    /**
-    * Finalize the transaction by adding the change Address output
-    * leaving enough for paying the minimum fee computed by the given algorithm
-    * see the unchecked_finalize for the non-assisted version
-    *
-    * Example
-    *
-    * ```javascript
-    * const feeAlgorithm = Fee.linear_fee(
-    *     Value.from_str(\'20\'), Value.from_str(\'5\'), Value.from_str(\'10\')
-    * );
-    *
-    * const finalizedTx = txbuilder.finalize(
-    *   feeAlgorithm,
-    *   OutputPolicy.one(changeAddress)
-    * );
-    * ```
-    * @param {Fee} fee
-    * @param {OutputPolicy} outputPolicy
-    * @returns {Promise<Transaction>}
-    */
-    async seal_with_output_policy(fee, outputPolicy) {
-        const feePtr = Ptr._assertClass(fee, Fee);
-        const outputPolicyPtr = Ptr._assertClass(outputPolicy, OutputPolicy);
-        const ptr = this.ptr;
-        this.ptr = outputPolicy.ptr = null;
-        const ret = await ChainLibs.transactionBuilderSealWithOutputPolicy(ptr, feePtr, outputPolicyPtr);
-        return Ptr._wrap(ret, Transaction);
-    }
-}
-
-/**
 * Type for representing a generic Hash
 */
 export class Hash extends Ptr {
@@ -856,65 +767,259 @@ export class Witness extends Ptr {
 }
 
 /**
-* Builder pattern implementation for signing a Transaction (adding witnesses)
-* Example (for an account as input)
-*
-* ```javascript
-* //finalizedTx could be the result of the finalize method on a TransactionBuilder object
-* const finalizer = new TransactionFinalizer(finalizedTx);
-*
-* const witness = Witness.for_account(
-*   Hash.from_hex(genesisHashString),
-*   finalizer.get_txid(),
-*   inputAccountPrivateKey,
-*   SpendingCounter.zero()
-* );
-*
-* finalizer.set_witness(0, witness);
-*
-* const signedTx = finalizer.build();
-* ```
 */
-export class TransactionFinalizer extends Ptr {
+export class Witnesses extends Ptr {
     /**
-    * @param {Transaction} transaction
-    * @returns {Promise<TransactionFinalizer>}
+    * @returns {Promise<Witnesses>}
     */
-    static async new(transaction) {
-        const transactionPtr = Ptr._assertClass(transaction, Transaction);
-        transaction.ptr = null;
-        const ret = await ChainLibs.transactionFinalizerNew(transactionPtr);
-        return Ptr._wrap(ret, TransactionFinalizer);
+    static async new() {
+        const ret = await ChainLibs.witnessesNew();
+        return Ptr._wrap(ret, Witnesses);
     }
 
     /**
-    * Set the witness for the corresponding index, the index corresponds to the order in which the inputs were added to the transaction
+    * @returns {Promise<number>}
+    */
+    size() {
+        return ChainLibs.witnessesSize(this.ptr);
+    }
+
+    /**
     * @param {number} index
-    * @param {Witness} witness
+    * @returns {Promise<Witness>}
+    */
+    async get(index) {
+        const ret = await ChainLibs.witnessesGet(this.ptr, index);
+        return Ptr._wrap(ret, Witness);
+    }
+
+    /**
+    * @param {Witness} item
     * @returns {Promise<void>}
     */
-    set_witness(index, witness) {
-        const witnessPtr = Ptr._assertClass(witness, Witness);
-        witness.ptr = null;
-        return ChainLibs.transactionFinalizerSetWitness(this.ptr, index, witnessPtr);
+    add(item) {
+        const itemPtr = Ptr._assertClass(item, Witness);
+        item.ptr = null;
+        return ChainLibs.witnessesAdd(this.ptr, itemPtr);
     }
+}
 
+/**
+*/
+export class PayloadAuthData extends Ptr {
+    /**
+    * @returns {Promise<PayloadAuthData>}
+    */
+    static async for_no_payload() {
+        const ret = await ChainLibs.payloadAuthDataForNoPayload();
+        return Ptr._wrap(ret, PayloadAuthData);
+    }
+}
+
+/**
+*/
+export class TransactionBuilderSetAuthData extends Ptr {
+    /**
+    * Set the authenticated data
+    * @param {PayloadAuthData} auth
+    * @returns {Promise<Transaction>}
+    */
+    async set_payload_auth(auth) {
+        const authPtr = Ptr._assertClass(auth, PayloadAuthData);
+        const ptr = this.ptr;
+        this.ptr = auth.ptr = null;
+        const ret = await ChainLibs.transactionBuilderSetAuthDataSetPayloadAuth(ptr, authPtr);
+        return Ptr._wrap(ret, Transaction);
+    }
+}
+
+/**
+*/
+export class TransactionBuilderSetWitness extends Ptr {
     /**
     * @returns {Promise<TransactionSignDataHash>}
     */
-    async get_tx_sign_data_hash() {
-        const ret = await ChainLibs.transactionFinalizerGetTxSignDataHash(this.ptr);
+    async get_auth_data_for_witness() {
+        const ret = await ChainLibs.transactionBuilderSetWitnessGetAuthDataForWitness(this.ptr);
         return Ptr._wrap(ret, TransactionSignDataHash);
     }
 
     /**
-    * Deprecated: Use `get_tx_sign_data_hash` instead\
-    * @returns {Promise<AuthenticatedTransaction>}
+    * @param {Witnesses} witnesses
+    * @returns {Promise<TransactionBuilderSetAuthData>}
+    */
+    async set_witnesses(witnesses) {
+        const witnessesPtr = Ptr._assertClass(witnesses, Ptr);
+        const ptr = this.ptr;
+        this.ptr = null;
+        const ret = await ChainLibs.transactionBuilderSetWitnessSetWitnesses(ptr, witnessesPtr);
+        return Ptr._wrap(ret, TransactionBuilderSetAuthData);
+    }
+}
+
+/**
+*/
+export class TransactionBuilderSetIOs extends Ptr {
+    /**
+    * @param {Inputs} inputs
+    * @param {Outputs} outputs
+    * @returns {Promise<TransactionBuilderSetWitness>}
+    */
+    async set_ios(inputs, outputs) {
+        const inputsPtr = Ptr._assertClass(inputs, Inputs);
+        const outputsPtr = Ptr._assertClass(outputs, Outputs);
+        const ptr = this.ptr;
+        this.ptr = null;
+        const ret = await ChainLibs.transactionBuilderSetIOsSetIOs(ptr, inputsPtr, outputsPtr);
+        return Ptr._wrap(ret, TransactionBuilderSetWitness);
+    }
+}
+
+/**
+* Builder pattern implementation for making a Transaction
+*
+* Example
+*
+* ```javascript
+* const txbuilder = new TransactionBuilder();
+*
+* const account = Account.from_address(Address.from_string(
+*   &#39;ca1qh9u0nxmnfg7af8ycuygx57p5xgzmnmgtaeer9xun7hly6mlgt3pj2xk344&#39;
+* ));
+*
+* const input = Input.from_account(account, Value.from_str(\'1000\'));
+*
+* txbuilder.add_input(input);
+*
+* txbuilder.add_output(
+*   Address.from_string(
+*     &#39;ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn&#39;
+*   ),
+*   Value.from_str(\'500\')
+* );
+*
+* const feeAlgorithm = Fee.linear_fee(
+*   Value.from_str(\'20\'),
+*   Value.from_str(\'5\'),
+*   Value.from_str(\'0\')
+* );
+*
+* const finalizedTx = txbuilder.finalize(
+*   feeAlgorithm,
+*   OutputPolicy.one(accountInputAddress)
+* );
+* ```
+*/
+export class TransactionBuilder extends Ptr {
+    /**
+    * Create a TransactionBuilder for a transaction without certificate
+    * @returns {Promise<TransactionBuilder>}
+    */
+    static async new() {
+        const ret = await ChainLibs.transactionBuilderNew();
+        return Ptr._wrap(ret, TransactionBuilder);
+    }
+
+    /**
+    * @returns {Promise<TransactionBuilderSetIOs>}
+    */
+    async no_payload() {
+        const ptr = this.ptr;
+        this.ptr = null;
+        const ret = await ChainLibs.transactionBuilderNoPayload(ptr);
+        return Ptr._wrap(ret, TransactionBuilderSetIOs);
+    }
+}
+
+/**
+*/
+export class Payload extends Ptr {
+    /**
+    * @returns {Promise<Payload>}
+    */
+    static async no_payload() {
+        const ret = await ChainLibs.payloadNoPayload();
+        return Ptr._wrap(ret, Payload);
+    }
+}
+
+/**
+*/
+export class InputOutput extends Ptr {
+    /**
+    * @returns {Promise<Inputs>}
+    */
+    async inputs() {
+        const ret = await ChainLibs.inputOutputInputs(this.ptr);
+        return Ptr._wrap(ret, Inputs);
+    }
+    /**
+    * @returns {Promise<Outputs>}
+    */
+    async outputs() {
+        const ret = await ChainLibs.inputOutputOutputs(this.ptr);
+        return Ptr._wrap(ret, Outputs);
+    }
+}
+
+/**
+*/
+export class InputOutputBuilder extends Ptr {
+    /**
+    * @returns {Promise<InputOutputBuilder>}
+    */
+    static async empty() {
+        const ret = await ChainLibs.inputOutputBuilderEmpty();
+        return Ptr._wrap(ret, InputOutputBuilder);
+    }
+
+    /**
+    * Add input to the IO Builder
+    * @param {Input} input
+    * @returns {Promise<void>}
+    */
+    add_input(input) {
+        const inputPtr = Ptr._assertClass(input, Input);
+        return ChainLibs.inputOutputBuilderAddInput(this.ptr, inputPtr);
+    }
+
+    /**
+    * Add output to the IO Builder
+    * @param {Address} address
+    * @param {Value} value
+    * @returns {Promise<void>}
+    */
+    add_output(address, value) {
+        const addressPtr = Ptr._assertClass(address, Address);
+        const valuePtr = Ptr._assertClass(value, Value);
+        address.ptr = value.ptr = null;
+        return ChainLibs.inputOutputBuilderAddOutput(this.ptr, addressPtr, valuePtr);
+    }
+
+    /**
+    * @returns {Promise<InputOutput>}
     */
     async build() {
         const ptr = this.ptr;
         this.ptr = null;
-        const ret = await ChainLibs.transactionFinalizerBuild(ptr);
-        return Ptr._wrap(ret, AuthenticatedTransaction);
+        const ret = await ChainLibs.inputOutputBuilderBuild(ptr);
+        return Ptr._wrap(ret, InputOutput);
+    }
+
+    /**
+    * Seal the transaction by passing fee rule and the output policy
+    * @param {Payload} payload
+    * @param {Fee} feeAlgorithm
+    * @param {OutputPolicy} policy
+    * @returns {Promise<InputOutput>}
+    */
+    async seal_with_output_policy(payload, feeAlgorithm, policy) {
+        const payloadPtr = Ptr._assertClass(payload, Payload);
+        const feeAlgorithmPtr = Ptr._assertClass(feeAlgorithm, Fee);
+        const policyPtr = Ptr._assertClass(policy, OutputPolicy);
+        const ptr = this.ptr;
+        this.ptr = feeAlgorithm.ptr = policy.ptr = null;
+        const ret = await ChainLibs.inputOutputBuilderSealWithOutputPolicy(ptr, payloadPtr, feeAlgorithmPtr, policyPtr);
+        return Ptr._wrap(ret, InputOutput);
     }
 }

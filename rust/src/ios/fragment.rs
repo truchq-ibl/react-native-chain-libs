@@ -3,28 +3,15 @@ use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::{handle_exception_result, ToResult};
 use crate::ptr::RPtr;
-use js_chain_libs::{AuthenticatedTransaction, Fragment};
+use js_chain_libs::{Fragment, Transaction};
 
 #[no_mangle]
-pub unsafe extern "C" fn fragment_from_authenticated_transaction(
+pub unsafe extern "C" fn fragment_from_transaction(
   tx: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| {
-    tx.owned::<AuthenticatedTransaction>().map(|tx| Fragment::from_authenticated_transaction(tx))
-  })
-  .map(|fragment| RPtr::new(fragment))
-  .response(result, error)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn fragment_from_generated_transaction(
-  tx: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
-) -> bool {
-  handle_exception_result(|| {
-    tx.owned::<AuthenticatedTransaction>().map(|tx| Fragment::from_generated_transaction(tx))
-  })
-  .map(|fragment| RPtr::new(fragment))
-  .response(result, error)
+  handle_exception_result(|| tx.owned::<Transaction>().map(|tx| Fragment::from_transaction(tx)))
+    .map(|fragment| RPtr::new(fragment))
+    .response(result, error)
 }
 
 #[no_mangle]
@@ -98,11 +85,21 @@ pub unsafe extern "C" fn fragment_is_pool_registration(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn fragment_is_pool_management(
+pub unsafe extern "C" fn fragment_is_pool_retirement(
   fragment: RPtr, result: &mut bool, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    fragment.typed_ref::<Fragment>().map(|fragment| fragment.is_pool_management())
+    fragment.typed_ref::<Fragment>().map(|fragment| fragment.is_pool_retirement())
+  })
+  .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn fragment_is_pool_update(
+  fragment: RPtr, result: &mut bool, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    fragment.typed_ref::<Fragment>().map(|fragment| fragment.is_pool_update())
   })
   .response(result, error)
 }

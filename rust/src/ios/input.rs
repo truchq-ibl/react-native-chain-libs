@@ -1,6 +1,6 @@
 use super::result::CResult;
 use super::string::CharPtr;
-use crate::panic::{handle_exception_result, Zip};
+use crate::panic::{handle_exception, handle_exception_result, Zip};
 use crate::ptr::RPtr;
 use js_chain_libs::{Account, Input, Inputs, Value};
 
@@ -26,6 +26,11 @@ pub unsafe extern "C" fn input_value(input: RPtr, result: &mut RPtr, error: &mut
 }
 
 #[no_mangle]
+pub extern "C" fn inputs_new(result: &mut RPtr, error: &mut CharPtr) -> bool {
+  handle_exception(|| RPtr::new(Inputs::new())).response(result, error)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn inputs_size(
   inputs: RPtr, result: &mut usize, error: &mut CharPtr
 ) -> bool {
@@ -40,4 +45,12 @@ pub unsafe extern "C" fn inputs_get(
   handle_exception_result(|| inputs.typed_ref::<Inputs>().map(|inputs| inputs.get(index)))
     .map(|input| RPtr::new(input))
     .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn inputs_add(inputs: RPtr, item: &mut RPtr, error: &mut CharPtr) -> bool {
+  handle_exception_result(|| {
+    inputs.typed_ref::<Inputs>().zip(item.owned::<Input>()).map(|(inputs, item)| inputs.add(item))
+  })
+  .response(&mut (), error)
 }

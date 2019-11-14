@@ -27,10 +27,7 @@ pub unsafe extern "C" fn fee_calculate(
   fee: RPtr, tx: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    fee
-      .typed_ref::<Fee>()
-      .zip(tx.owned::<Transaction>())
-      .and_then(|(fee, tx)| fee.calculate(tx).ok_or(String::from("Cannot calculate fee")))
+    fee.typed_ref::<Fee>().zip(tx.owned::<Transaction>()).map(|(fee, tx)| fee.calculate(tx))
   })
   .map(|value| RPtr::new(value))
   .response(result, error)

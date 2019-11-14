@@ -6,31 +6,17 @@ use crate::ptr::RPtr;
 use jni::objects::JObject;
 use jni::sys::{jboolean, jobject};
 use jni::JNIEnv;
-use js_chain_libs::{AuthenticatedTransaction, Fragment};
+use js_chain_libs::{Fragment, Transaction};
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentFromAuthenticatedTransaction(
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentFromTransaction(
   env: JNIEnv, _: JObject, tx_ptr: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
     tx_ptr
-      .owned::<AuthenticatedTransaction>(&env)
-      .map(|tx| Fragment::from_authenticated_transaction(tx))
-      .and_then(|fragment| RPtr::new(fragment).jptr(&env))
-  })
-  .jresult(&env)
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentFromGeneratedTransaction(
-  env: JNIEnv, _: JObject, tx_ptr: JRPtr
-) -> jobject {
-  handle_exception_result(|| {
-    tx_ptr
-      .owned::<AuthenticatedTransaction>(&env)
-      .map(|tx| Fragment::from_generated_transaction(tx))
+      .owned::<Transaction>(&env)
+      .map(|tx| Fragment::from_transaction(tx))
       .and_then(|fragment| RPtr::new(fragment).jptr(&env))
   })
   .jresult(&env)
@@ -138,14 +124,28 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentIsPoolRegistrat
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentIsPoolManagement(
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentIsPoolRetirement(
   env: JNIEnv, _: JObject, ptr: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
     let rptr = ptr.rptr(&env)?;
     rptr
       .typed_ref::<Fragment>()
-      .and_then(|fragment| (fragment.is_pool_management() as jboolean).jobject(&env))
+      .and_then(|fragment| (fragment.is_pool_retirement() as jboolean).jobject(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentIsPoolUpdate(
+  env: JNIEnv, _: JObject, ptr: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let rptr = ptr.rptr(&env)?;
+    rptr
+      .typed_ref::<Fragment>()
+      .and_then(|fragment| (fragment.is_pool_update() as jboolean).jobject(&env))
   })
   .jresult(&env)
 }

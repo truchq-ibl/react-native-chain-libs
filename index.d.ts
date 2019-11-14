@@ -118,14 +118,25 @@ export class Input extends Ptr {
 */
 export class Inputs extends Ptr {
   /**
+  * @returns {Promise<Inputs>} 
+  */
+  static new(): Promise<Inputs>;
+
+  /**
   * @returns {Promise<number>}
   */
   size(): Promise<number>;
+
   /**
   * @param {number} index
   * @returns {Promise<Input>}
   */
   get(index: number): Promise<Input>;
+
+  /**
+  * @param {Input} item 
+  */
+  add(item: Input): Promise<void>;
 }
 
 /**
@@ -147,14 +158,26 @@ export class Output extends Ptr {
 */
 export class Outputs extends Ptr {
   /**
+  * @returns {Promise<Outputs>} 
+  */
+  static new(): Promise<Outputs>;
+
+  /**
   * @returns {Promise<number>}
   */
   size(): Promise<number>;
+
   /**
   * @param {number} index
   * @returns {Promise<Output>}
   */
   get(index: number): Promise<Output>;
+
+  /**
+  * @param {Output} item 
+  * @returns {Promise<void>}
+  */
+  add(item: Output): Promise<void>;
 }
 
 /**
@@ -200,17 +223,6 @@ export class Transaction extends Ptr {
   * @returns {Promise<Outputs>}
   */
   outputs(): Promise<Outputs>;
-}
-
-/**
-* Type for representing a Transaction with Witnesses (signatures)
-*/
-export class AuthenticatedTransaction extends Ptr {
-  /**
-  * Get a copy of the inner Transaction, discarding the signatures
-  * @returns {Promise<Transaction>}
-  */
-  transaction(): Promise<Transaction>;
 }
 
 /**
@@ -272,23 +284,16 @@ export class UtxoPointer extends Ptr {
 */
 export class Fragment extends Ptr {
   /**
-  * @param {AuthenticatedTransaction} tx
+  * @param {Transaction} tx
   * @returns {Promise<Fragment>}
   */
-  static from_authenticated_transaction(tx: AuthenticatedTransaction): Promise<Fragment>;
-
-  /**
-  * Deprecated: Use `from_authenticated_transaction` instead
-  * @param {AuthenticatedTransaction} tx
-  * @returns {Promise<Fragment>}
-  */
-  static from_generated_transaction(tx: AuthenticatedTransaction): Promise<Fragment>;
+  static from_transaction(tx: Transaction): Promise<Fragment>;
 
   /**
   * Get a Transaction if the Fragment represents one
-  * @returns {Promise<AuthenticatedTransaction>}
+  * @returns {Promise<Transaction>}
   */
-  get_transaction(): Promise<AuthenticatedTransaction>;
+  get_transaction(): Promise<Transaction>;
 
   /**
   * @returns {Promise<Uint8Array>}
@@ -323,7 +328,12 @@ export class Fragment extends Ptr {
   /**
   * @returns {Promise<boolean>}
   */
-  is_pool_management(): Promise<boolean>;
+  is_pool_retirement(): Promise<boolean>;
+
+  /**
+  * @returns {Promise<boolean>}
+  */
+  is_pool_update(): Promise<boolean>;
 
   /**
   * @returns {Promise<boolean>}
@@ -464,140 +474,6 @@ export class Balance extends Ptr {
 }
 
 /**
-* Builder pattern implementation for making a Transaction
-*
-* Example
-*
-* ```javascript
-* const txbuilder = new TransactionBuilder();
-*
-* const account = Account.from_address(Address.from_string(
-*   &#39;ca1qh9u0nxmnfg7af8ycuygx57p5xgzmnmgtaeer9xun7hly6mlgt3pj2xk344&#39;
-* ));
-*
-* const input = Input.from_account(account, Value.from_str(\'1000\'));
-*
-* txbuilder.add_input(input);
-*
-* txbuilder.add_output(
-*   Address.from_string(
-*     &#39;ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn&#39;
-*   ),
-*   Value.from_str(\'500\')
-* );
-*
-* const feeAlgorithm = Fee.linear_fee(
-*   Value.from_str(\'20\'),
-*   Value.from_str(\'5\'),
-*   Value.from_str(\'0\')
-* );
-*
-* const finalizedTx = txbuilder.finalize(
-*   feeAlgorithm,
-*   OutputPolicy.one(accountInputAddress)
-* );
-* ```
-*/
-export class TransactionBuilder extends Ptr {
-  /**
-  * Create a TransactionBuilder for a transaction without certificate
-  * @returns {Promise<TransactionBuilder>}
-  */
-  static new_no_payload(): Promise<TransactionBuilder>;
-
-  /**
-  * Add input to the transaction
-  * @param {Input} input
-  * @returns {Promise<void>}
-  */
-  add_input(input: Input): Promise<void>;
-
-  /**
-  * Add output to the transaction
-  * @param {Address} address
-  * @param {Value} value
-  * @returns {Promise<void>}
-  */
-  add_output(address: Address, value: Value): Promise<void>;
-
-  /**
-  * @param {Fee} fee 
-  * @returns {Promise<Balance>} 
-  */
-  get_balance(fee: Fee): Promise<Balance>;
-
-  /**
-  * Finalize the transaction by adding the change Address output
-  * leaving enough for paying the minimum fee computed by the given algorithm
-  * see the unchecked_finalize for the non-assisted version
-  *
-  * Example
-  *
-  * ```javascript
-  * const feeAlgorithm = Fee.linear_fee(
-  *     Value.from_str(\'20\'), Value.from_str(\'5\'), Value.from_str(\'10\')
-  * );
-  *
-  * const finalizedTx = txbuilder.finalize(
-  *   feeAlgorithm,
-  *   OutputPolicy.one(changeAddress)
-  * );
-  * ```
-  * @param {Fee} fee
-  * @param {OutputPolicy} output_policy
-  * @returns {Promise<Transaction>}
-  */
-  seal_with_output_policy(fee: Fee, output_policy: OutputPolicy): Promise<Transaction>;
-}
-
-/**
-* Builder pattern implementation for signing a Transaction (adding witnesses)
-* Example (for an account as input)
-*
-* ```javascript
-* //finalizedTx could be the result of the finalize method on a TransactionBuilder object
-* const finalizer = new TransactionFinalizer(finalizedTx);
-*
-* const witness = Witness.for_account(
-*   Hash.from_hex(genesisHashString),
-*   finalizer.get_txid(),
-*   inputAccountPrivateKey,
-*   SpendingCounter.zero()
-* );
-*
-* finalizer.set_witness(0, witness);
-*
-* const signedTx = finalizer.build();
-* ```
-*/
-export class TransactionFinalizer extends Ptr {
-  /**
-  * @param {Transaction} transaction
-  * @returns {Promise<TransactionFinalizer>}
-  */
-  static new(transaction: Transaction): Promise<TransactionFinalizer>;
-
-  /**
-  * Set the witness for the corresponding index, the index corresponds to the order in which the inputs were added to the transaction
-  * @param {number} index
-  * @param {Witness} witness
-  * @returns {Promise<void>}
-  */
-  set_witness(index: number, witness: Witness): Promise<void>;
-
-  /**
-  * @returns {Promise<TransactionSignDataHash>}
-  */
-  get_tx_sign_data_hash(): Promise<TransactionSignDataHash>;
-
-  /**
-  * Deprecated: Use `get_tx_sign_data_hash` instead\
-  * @returns {Promise<AuthenticatedTransaction>}
-  */
-  build(): Promise<AuthenticatedTransaction>;
-}
-
-/**
 * Type used for representing certain amount of lovelaces.
 * It wraps an unsigned 64 bits number.
 * Strings are used for passing to and from javascript,
@@ -659,4 +535,185 @@ export class Witness extends Ptr {
   * @returns {Promise<Witness>}
   */
   static for_account(genesis_hash: Hash, transaction_id: TransactionSignDataHash, secret_key: PrivateKey, account_spending_counter: SpendingCounter): Promise<Witness>;
+}
+
+/**
+*/
+export class Witnesses extends Ptr {
+  /**
+  * @returns {Promise<Witnesses>} 
+  */
+  static new(): Promise<Witnesses>;
+
+  /**
+  * @returns {Promise<number>} 
+  */
+  size(): Promise<number>;
+
+  /**
+  * @param {number} index 
+  * @returns {Promise<Witness>} 
+  */
+  get(index: number): Promise<Witness>;
+
+  /**
+  * @param {Witness} item 
+  * @returns {Promise<void>}
+  */
+  add(item: Witness): Promise<void>;
+}
+
+/**
+*/
+export class PayloadAuthData extends Ptr {
+  /**
+  * @returns {Promise<PayloadAuthData>} 
+  */
+  static for_no_payload(): Promise<PayloadAuthData>;
+}
+
+/**
+*/
+export class TransactionBuilderSetAuthData extends Ptr {
+  /**
+  * Set the authenticated data
+  * @param {PayloadAuthData} auth 
+  * @returns {Promise<Transaction>} 
+  */
+  set_payload_auth(auth: PayloadAuthData): Promise<Transaction>;
+}
+
+/**
+*/
+export class TransactionBuilderSetWitness extends Ptr {
+  /**
+  * @returns {Promise<TransactionSignDataHash>} 
+  */
+  get_auth_data_for_witness(): Promise<TransactionSignDataHash>;
+
+  /**
+  * @param {Witnesses} witnesses 
+  * @returns {Promise<TransactionBuilderSetAuthData>} 
+  */
+  set_witnesses(witnesses: Witnesses): Promise<TransactionBuilderSetAuthData>;
+}
+
+/**
+*/
+export class TransactionBuilderSetIOs extends Ptr {
+  /**
+  * @param {Inputs} inputs 
+  * @param {Outputs} outputs 
+  * @returns {Promise<TransactionBuilderSetWitness>} 
+  */
+  set_ios(inputs: Inputs, outputs: Outputs): Promise<TransactionBuilderSetWitness>;
+}
+
+/**
+* Builder pattern implementation for making a Transaction
+*
+* Example
+*
+* ```javascript
+* const txbuilder = new TransactionBuilder();
+*
+* const account = Account.from_address(Address.from_string(
+*   &#39;ca1qh9u0nxmnfg7af8ycuygx57p5xgzmnmgtaeer9xun7hly6mlgt3pj2xk344&#39;
+* ));
+*
+* const input = Input.from_account(account, Value.from_str(\'1000\'));
+*
+* txbuilder.add_input(input);
+*
+* txbuilder.add_output(
+*   Address.from_string(
+*     &#39;ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn&#39;
+*   ),
+*   Value.from_str(\'500\')
+* );
+*
+* const feeAlgorithm = Fee.linear_fee(
+*   Value.from_str(\'20\'),
+*   Value.from_str(\'5\'),
+*   Value.from_str(\'0\')
+* );
+*
+* const finalizedTx = txbuilder.finalize(
+*   feeAlgorithm,
+*   OutputPolicy.one(accountInputAddress)
+* );
+* ```
+*/
+export class TransactionBuilder extends Ptr {
+  /**
+  * Create a TransactionBuilder for a transaction without certificate
+  * @returns {Promise<TransactionBuilder>}
+  */
+  static new(): Promise<TransactionBuilder>;
+
+  /**
+  * @returns {Promise<TransactionBuilderSetIOs>} 
+  */
+  no_payload(): Promise<TransactionBuilderSetIOs>;
+}
+
+/**
+*/
+export class Payload extends Ptr {
+  /**
+  * @returns {Promise<Payload>} 
+  */
+  static no_payload(): Promise<Payload>;
+}
+
+/**
+*/
+export class InputOutput extends Ptr {
+  /**
+  * @returns {Promise<Inputs>} 
+  */
+  inputs(): Promise<Inputs>;
+
+  /**
+  * @returns {Promise<Outputs>} 
+  */
+  outputs(): Promise<Outputs>;
+}
+
+/**
+*/
+export class InputOutputBuilder extends Ptr {
+  /**
+  * @returns {Promise<InputOutputBuilder>} 
+  */
+  static empty(): Promise<InputOutputBuilder>;
+
+  /**
+  * Add input to the IO Builder
+  * @param {Input} input 
+  * @returns {Promise<void>}
+  */
+  add_input(input: Input): Promise<void>;
+
+  /**
+  * Add output to the IO Builder
+  * @param {Address} address 
+  * @param {Value} value 
+  * @returns {Promise<void>}
+  */
+  add_output(address: Address, value: Value): Promise<void>;
+
+  /**
+  * @returns {Promise<InputOutput>} 
+  */
+  build(): Promise<InputOutput>;
+
+  /**
+  * Seal the transaction by passing fee rule and the output policy
+  * @param {Payload} payload 
+  * @param {Fee} fee_algorithm 
+  * @param {OutputPolicy} policy 
+  * @returns {Promise<InputOutput>} 
+  */
+  seal_with_output_policy(payload: Payload, fee_algorithm: Fee, policy: OutputPolicy): Promise<InputOutput>;
 }

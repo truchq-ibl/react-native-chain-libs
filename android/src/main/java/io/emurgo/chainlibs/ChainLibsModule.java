@@ -118,30 +118,12 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
 	}
 
-    // AuthenticatedTransaction
-
-    @ReactMethod
-    public final void authenticatedTransactionTransaction(String authTx, Promise promise) {
-	    Native.I
-                .authenticatedTransactionTransaction(new RPtr(authTx))
-                .map(RPtr::toJs)
-                .pour(promise);
-	}
-
     // Fragment
 
     @ReactMethod
-    public final void fragmentFromAuthenticatedTransaction(String authTx, Promise promise) {
+    public final void fragmentFromTransaction(String tx, Promise promise) {
         Native.I
-                .fragmentFromAuthenticatedTransaction(new RPtr(authTx))
-                .map(RPtr::toJs)
-                .pour(promise);
-	}
-
-    @ReactMethod
-    public final void fragmentFromGeneratedTransaction(String authTx, Promise promise) {
-        Native.I
-                .fragmentFromGeneratedTransaction(new RPtr(authTx))
+                .fragmentFromTransaction(new RPtr(tx))
                 .map(RPtr::toJs)
                 .pour(promise);
 	}
@@ -198,9 +180,16 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
 	}
 
     @ReactMethod
-    public final void fragmentIsPoolManagement(String fragment, Promise promise) {
+    public final void fragmentIsPoolRetirement(String fragment, Promise promise) {
         Native.I
-                .fragmentIsPoolManagement(new RPtr(fragment))
+                .fragmentIsPoolRetirement(new RPtr(fragment))
+                .pour(promise);
+	}
+
+    @ReactMethod
+    public final void fragmentIsPoolUpdate(String fragment, Promise promise) {
+        Native.I
+                .fragmentIsPoolUpdate(new RPtr(fragment))
                 .pour(promise);
 	}
 
@@ -236,39 +225,55 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // TransactionBuilder
 
     @ReactMethod
-    public final void transactionBuilderNewNoPayload(Promise promise) {
+    public final void transactionBuilderNew(Promise promise) {
         Native.I
-                .transactionBuilderNewNoPayload()
+                .transactionBuilderNew()
                 .map(RPtr::toJs)
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionBuilderAddInput(String txBuilder, String input, Promise promise) {
+    public final void transactionBuilderNoPayload(String txBuilder, Promise promise) {
         Native.I
-                .transactionBuilderAddInput(new RPtr(txBuilder), new RPtr(input))
+                .transactionBuilderNoPayload(new RPtr(txBuilder))
+                .map(RPtr::toJs)
                 .pour(promise);
     }
 
+    // TransactionBuilderSetIOs
+
     @ReactMethod
-    public final void transactionBuilderAddOutput(String txBuilder, String address, String value, Promise promise) {
+    public final void transactionBuilderSetIOsSetIOs(String txBuilderSetIOs, String inputs, String outputs, Promise promise) {
         Native.I
-                .transactionBuilderAddOutput(new RPtr(txBuilder), new RPtr(address), new RPtr(value))
+                .transactionBuilderSetIOsSetIOs(new RPtr(txBuilderSetIOs), new RPtr(inputs), new RPtr(outputs))
+                .map(RPtr::toJs)
                 .pour(promise);
     }
 
+    // TransactionBuilderSetWitness
+
     @ReactMethod
-    public final void transactionBuilderGetBalance(String txBuilder, String fee, Promise promise) {
+    public final void transactionBuilderSetWitnessGetAuthDataForWitness(String txBuilderSetWitness, Promise promise) {
         Native.I
-                .transactionBuilderGetBalance(new RPtr(txBuilder), new RPtr(fee))
+                .transactionBuilderSetWitnessGetAuthDataForWitness(new RPtr(txBuilderSetWitness))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
 
     @ReactMethod
-    public final void transactionBuilderSealWithOutputPolicy(String txBuilder, String fee, String outputPolicy, Promise promise) {
+    public final void transactionBuilderSetWitnessSetWitnesses(String txBuilderSetWitness, String witnesses, Promise promise) {
         Native.I
-                .transactionBuilderSealWithOutputPolicy(new RPtr(txBuilder), new RPtr(fee), new RPtr(outputPolicy))
+                .transactionBuilderSetWitnessSetWitnesses(new RPtr(txBuilderSetWitness), new RPtr(witnesses))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // TransactionBuilderSetAuthData
+
+    @ReactMethod
+    public final void transactionBuilderSetAuthDataSetPayloadAuth(String txBuilderSetAuthData, String auth, Promise promise) {
+        Native.I
+                .transactionBuilderSetAuthDataSetPayloadAuth(new RPtr(txBuilderSetAuthData), new RPtr(auth))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -304,6 +309,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Inputs
 
     @ReactMethod
+    public final void inputsNew(Promise promise) {
+        Native.I
+                .inputsNew()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void inputsSize(String inputs, Promise promise) {
         Native.I
                 .inputsSize(new RPtr(inputs))
@@ -316,6 +329,13 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
         Native.I
                 .inputsGet(new RPtr(inputs), index)
                 .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputsAdd(String inputs, String item, Promise promise) {
+        Native.I
+                .inputsAdd(new RPtr(inputs), new RPtr(item))
                 .pour(promise);
     }
 
@@ -351,39 +371,6 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void outputPolicyOne(String address, Promise promise) {
         Native.I
                 .outputPolicyOne(new RPtr(address))
-                .map(RPtr::toJs)
-                .pour(promise);
-    }
-
-    // TransactionFinalizer
-
-    @ReactMethod
-    public final void transactionFinalizerNew(String transaction, Promise promise) {
-        Native.I
-                .transactionFinalizerNew(new RPtr(transaction))
-                .map(RPtr::toJs)
-                .pour(promise);
-    }
-
-    @ReactMethod
-    public final void transactionFinalizerGetTxSignDataHash(String txFinalizer, Promise promise) {
-        Native.I
-                .transactionFinalizerGetTxSignDataHash(new RPtr(txFinalizer))
-                .map(RPtr::toJs)
-                .pour(promise);
-    }
-
-    @ReactMethod
-    public final void transactionFinalizerSetWitness(String txFinalizer, Integer index, String witness, Promise promise) {
-        Native.I
-                .transactionFinalizerSetWitness(new RPtr(txFinalizer), index, new RPtr(witness))
-                .pour(promise);
-    }
-
-    @ReactMethod
-    public final void transactionFinalizerBuild(String txFinalizer, Promise promise) {
-        Native.I
-                .transactionFinalizerBuild(new RPtr(txFinalizer))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -499,6 +486,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Outputs
 
     @ReactMethod
+    public final void outputsNew(Promise promise) {
+        Native.I
+                .outputsNew()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void outputsSize(String outputs, Promise promise) {
         Native.I
                 .outputsSize(new RPtr(outputs))
@@ -511,6 +506,13 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
         Native.I
                 .outputsGet(new RPtr(outputs), index)
                 .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void outputsAdd(String outputs, String item, Promise promise) {
+        Native.I
+                .outputsAdd(new RPtr(outputs), new RPtr(item))
                 .pour(promise);
     }
 
@@ -595,6 +597,117 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void balanceGetValue(String balance, Promise promise) {
         Native.I
                 .balanceGetValue(new RPtr(balance))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // InputOutputBuilder
+
+    @ReactMethod
+    public final void inputOutputBuilderEmpty(Promise promise) {
+        Native.I
+                .inputOutputBuilderEmpty()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputOutputBuilderAddInput(String ioBuilder, String input, Promise promise) {
+        Native.I
+                .inputOutputBuilderAddInput(new RPtr(ioBuilder), new RPtr(input))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputOutputBuilderAddOutput(String ioBuilder, String address, String value, Promise promise) {
+        Native.I
+                .inputOutputBuilderAddOutput(new RPtr(ioBuilder), new RPtr(address), new RPtr(value))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputOutputBuilderBuild(String ioBuilder, Promise promise) {
+        Native.I
+                .inputOutputBuilderBuild(new RPtr(ioBuilder))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputOutputBuilderSealWithOutputPolicy(String ioBuilder, String payload, String feeAlgorithm, String policy, Promise promise) {
+        Native.I
+                .inputOutputBuilderSealWithOutputPolicy(new RPtr(ioBuilder), new RPtr(payload), new RPtr(feeAlgorithm), new RPtr(policy))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // InputOutput
+
+    @ReactMethod
+    public final void inputOutputInputs(String inputOutput, Promise promise) {
+        Native.I
+                .inputOutputInputs(new RPtr(inputOutput))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void inputOutputOutputs(String inputOutput, Promise promise) {
+        Native.I
+                .inputOutputOutputs(new RPtr(inputOutput))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Witnesses
+
+    @ReactMethod
+    public final void witnessesNew(Promise promise) {
+        Native.I
+                .witnessesNew()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void witnessesSize(String witnesses, Promise promise) {
+        Native.I
+                .witnessesSize(new RPtr(witnesses))
+                .map(Long::intValue)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void witnessesGet(String witnesses, Integer index, Promise promise) {
+        Native.I
+                .witnessesGet(new RPtr(witnesses), index)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void witnessesAdd(String witnesses, String item, Promise promise) {
+        Native.I
+                .witnessesAdd(new RPtr(witnesses), new RPtr(item))
+                .pour(promise);
+    }
+
+    // PayloadAuthData
+
+    @ReactMethod
+    public final void payloadAuthDataForNoPayload(Promise promise) {
+        Native.I
+                .payloadAuthDataForNoPayload()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Payload
+
+    @ReactMethod
+    public final void payloadNoPayload(Promise promise) {
+        Native.I
+                .payloadNoPayload()
                 .map(RPtr::toJs)
                 .pour(promise);
     }

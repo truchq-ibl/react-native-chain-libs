@@ -35,7 +35,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_feeCalculate(
     fee
       .typed_ref::<Fee>()
       .zip(tx.owned::<Transaction>(&env))
-      .and_then(|(fee, tx)| fee.calculate(tx).ok_or(String::from("Cannot calculate fee")))
+      .map(|(fee, tx)| fee.calculate(tx))
       .and_then(|value| RPtr::new(value).jptr(&env))
   })
   .jresult(&env)

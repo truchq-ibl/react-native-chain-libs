@@ -38,6 +38,14 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputValue(
 
 #[allow(non_snake_case)]
 #[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsNew(
+  env: JNIEnv, _: JObject
+) -> jobject {
+  handle_exception_result(|| RPtr::new(Inputs::new()).jptr(&env)).jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsSize(
   env: JNIEnv, _: JObject, inputs: JRPtr
 ) -> jobject {
@@ -63,5 +71,21 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsGet(
       .map(|inputs| inputs.get(usize::from_jlong(index)))
       .and_then(|input| RPtr::new(input).jptr(&env))
   })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsAdd(
+  env: JNIEnv, _: JObject, inputs: JRPtr, item: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let inputs = inputs.rptr(&env)?;
+    inputs
+      .typed_ref::<Inputs>()
+      .zip(item.owned::<Input>(&env))
+      .map(|(inputs, item)| inputs.add(item))
+  })
+  .map(|_| JObject::null())
   .jresult(&env)
 }

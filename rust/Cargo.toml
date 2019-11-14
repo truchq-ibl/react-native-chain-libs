@@ -8,7 +8,7 @@ edition = "2018"
 cbindgen = "0.9"
 
 [dependencies]
-js-chain-libs = { git = "https://github.com/input-output-hk/js-chain-libs.git", tag = "v0.1.2", default-features = false }
+js-chain-libs = { git = "https://github.com/input-output-hk/js-chain-libs.git", tag = "v0.2.0", default-features = false }
 wasm-bindgen = { version = "0.2" }
 # jni = "0.13.1"
 

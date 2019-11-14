@@ -5,80 +5,92 @@ use crate::ptr::RPtr;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
-use js_chain_libs::{Address, Fee, Input, OutputPolicy, TransactionBuilder, Value};
+use js_chain_libs::{
+  Inputs, Outputs, PayloadAuthData, TransactionBuilder, TransactionBuilderSetAuthData,
+  TransactionBuilderSetIOs, TransactionBuilderSetWitness, Witnesses
+};
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderNewNoPayload(
+pub extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderNew(
   env: JNIEnv, _: JObject
 ) -> jobject {
-  handle_exception_result(|| RPtr::new(TransactionBuilder::new_no_payload()).jptr(&env))
-    .jresult(&env)
+  handle_exception_result(|| RPtr::new(TransactionBuilder::new()).jptr(&env)).jresult(&env)
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderAddInput(
-  env: JNIEnv, _: JObject, tx_builder: JRPtr, input: JRPtr
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderNoPayload(
+  env: JNIEnv, _: JObject, tx_builder: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
-    let tx_builder = tx_builder.rptr(&env)?;
-    tx_builder
-      .typed_ref::<TransactionBuilder>()
-      .zip(input.owned::<Input>(&env))
-      .map(|(tx_builder, input)| tx_builder.add_input(input))
-  })
-  .map(|_| JObject::null())
-  .jresult(&env)
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderAddOutput(
-  env: JNIEnv, _: JObject, tx_builder: JRPtr, address: JRPtr, value: JRPtr
-) -> jobject {
-  handle_exception_result(|| {
-    let tx_builder = tx_builder.rptr(&env)?;
-    tx_builder
-      .typed_ref::<TransactionBuilder>()
-      .zip(address.owned::<Address>(&env))
-      .zip(value.owned::<Value>(&env))
-      .map(|((tx_builder, address), value)| tx_builder.add_output(address, value))
-  })
-  .map(|_| JObject::null())
-  .jresult(&env)
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderGetBalance(
-  env: JNIEnv, _: JObject, tx_builder: JRPtr, fee: JRPtr
-) -> jobject {
-  handle_exception_result(|| {
-    let tx_builder = tx_builder.rptr(&env)?;
-    let fee = fee.rptr(&env)?;
-    tx_builder
-      .typed_ref::<TransactionBuilder>()
-      .zip(fee.typed_ref::<Fee>())
-      .and_then(|(tx_builder, fee)| tx_builder.get_balance(fee).into_result())
-      .and_then(|balance| RPtr::new(balance).jptr(&env))
-  })
-  .jresult(&env)
-}
-
-#[allow(non_snake_case)]
-#[no_mangle]
-pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSealWithOutputPolicy(
-  env: JNIEnv, _: JObject, tx_builder: JRPtr, fee: JRPtr, output_policy: JRPtr
-) -> jobject {
-  handle_exception_result(|| {
-    let fee = fee.rptr(&env)?;
     tx_builder
       .owned::<TransactionBuilder>(&env)
-      .zip(fee.typed_ref::<Fee>())
-      .zip(output_policy.owned::<OutputPolicy>(&env))
-      .and_then(|((tx_builder, fee), output_policy)| {
-        tx_builder.seal_with_output_policy(fee, output_policy).into_result()
+      .and_then(|tx_builder| RPtr::new(TransactionBuilder::no_payload(tx_builder)).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetIOsSetIOs(
+  env: JNIEnv, _: JObject, tx_builder_set_ios: JRPtr, inputs: JRPtr, outputs: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let inputs = inputs.rptr(&env)?;
+    let outputs = outputs.rptr(&env)?;
+    tx_builder_set_ios
+      .owned::<TransactionBuilderSetIOs>(&env)
+      .zip(inputs.typed_ref::<Inputs>())
+      .zip(outputs.typed_ref::<Outputs>())
+      .map(|((tx_builder_set_ios, inputs), outputs)| tx_builder_set_ios.set_ios(inputs, outputs))
+      .and_then(|tx_builder_set_witness| RPtr::new(tx_builder_set_witness).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetWitnessGetAuthDataForWitness(
+  env: JNIEnv, _: JObject, tx_builder_set_witness: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let tx_builder_set_witness = tx_builder_set_witness.rptr(&env)?;
+    tx_builder_set_witness
+      .typed_ref::<TransactionBuilderSetWitness>()
+      .map(|tx_builder_set_witness| tx_builder_set_witness.get_auth_data_for_witness())
+      .and_then(|tx_sign_data_hash| RPtr::new(tx_sign_data_hash).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetWitnessSetWitnesses(
+  env: JNIEnv, _: JObject, tx_builder_set_witness: JRPtr, witnesses: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let witnesses = witnesses.rptr(&env)?;
+    tx_builder_set_witness
+      .owned::<TransactionBuilderSetWitness>(&env)
+      .zip(witnesses.typed_ref::<Witnesses>())
+      .map(|(tx_builder_set_witness, witnesses)| tx_builder_set_witness.set_witnesses(witnesses))
+      .and_then(|tx_builder_set_auth_data| RPtr::new(tx_builder_set_auth_data).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetAuthDataSetPayloadAuth(
+  env: JNIEnv, _: JObject, tx_builder_set_auth_data: JRPtr, auth: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    tx_builder_set_auth_data
+      .owned::<TransactionBuilderSetAuthData>(&env)
+      .zip(auth.owned::<PayloadAuthData>(&env))
+      .and_then(|(tx_builder_set_auth_data, auth)| {
+        tx_builder_set_auth_data.set_payload_auth(auth).into_result()
       })
       .and_then(|transaction| RPtr::new(transaction).jptr(&env))
   })
