@@ -39,15 +39,36 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderAddOu
 ) -> jobject {
   handle_exception_result(|| {
     let io_builder = io_builder.rptr(&env)?;
+    let address = address.rptr(&env)?;
+    let value = value.rptr(&env)?;
     io_builder
       .typed_ref::<InputOutputBuilder>()
-      .zip(address.owned::<Address>(&env))
-      .zip(value.owned::<Value>(&env))
+      .zip(address.typed_ref::<Address>())
+      .zip(value.typed_ref::<Value>())
       .and_then(|((io_builder, address), value)| {
         io_builder.add_output(address, value).into_result()
       })
   })
   .map(|_| JObject::null())
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderEstimateFee(
+  env: JNIEnv, _: JObject, io_builder: JRPtr, fee: JRPtr, payload: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let io_builder = io_builder.rptr(&env)?;
+    let fee = fee.rptr(&env)?;
+    let payload = payload.rptr(&env)?;
+    io_builder
+      .typed_ref::<InputOutputBuilder>()
+      .zip(fee.typed_ref::<Fee>())
+      .zip(payload.typed_ref::<Payload>())
+      .map(|((io_builder, fee), payload)| io_builder.estimate_fee(fee, payload))
+      .and_then(|value| RPtr::new(value).jptr(&env))
+  })
   .jresult(&env)
 }
 
@@ -72,11 +93,13 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderSealW
 ) -> jobject {
   handle_exception_result(|| {
     let payload = payload.rptr(&env)?;
+    let fee_algorithm = fee_algorithm.rptr(&env)?;
+    let policy = policy.rptr(&env)?;
     io_builder
       .owned::<InputOutputBuilder>(&env)
       .zip(payload.typed_ref::<Payload>())
-      .zip(fee_algorithm.owned::<Fee>(&env))
-      .zip(policy.owned::<OutputPolicy>(&env))
+      .zip(fee_algorithm.typed_ref::<Fee>())
+      .zip(policy.typed_ref::<OutputPolicy>())
       .and_then(|(((io_builder, payload), fee_algorithm), policy)| {
         io_builder.seal_with_output_policy(payload, fee_algorithm, policy).into_result()
       })

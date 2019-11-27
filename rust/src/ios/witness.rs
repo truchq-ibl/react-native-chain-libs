@@ -8,15 +8,15 @@ use js_chain_libs::{
 
 #[no_mangle]
 pub unsafe extern "C" fn witness_for_account(
-  genesis_hash: &mut RPtr, transaction_id: &mut RPtr, secret_key: &mut RPtr,
-  account_spending_counter: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
+  genesis_hash: RPtr, transaction_id: RPtr, secret_key: RPtr, account_spending_counter: RPtr,
+  result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     genesis_hash
-      .owned::<Hash>()
-      .zip(transaction_id.owned::<TransactionSignDataHash>())
-      .zip(secret_key.owned::<PrivateKey>())
-      .zip(account_spending_counter.owned::<SpendingCounter>())
+      .typed_ref::<Hash>()
+      .zip(transaction_id.typed_ref::<TransactionSignDataHash>())
+      .zip(secret_key.typed_ref::<PrivateKey>())
+      .zip(account_spending_counter.typed_ref::<SpendingCounter>())
       .map(|(((genesis_hash, transaction_id), secret_key), account_spending_counter)| {
         Witness::for_account(genesis_hash, transaction_id, secret_key, account_spending_counter)
       })
@@ -27,14 +27,14 @@ pub unsafe extern "C" fn witness_for_account(
 
 #[no_mangle]
 pub unsafe extern "C" fn witness_for_utxo(
-  genesis_hash: &mut RPtr, transaction_id: &mut RPtr, secret_key: &mut RPtr, result: &mut RPtr,
+  genesis_hash: RPtr, transaction_id: RPtr, secret_key: RPtr, result: &mut RPtr,
   error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     genesis_hash
-      .owned::<Hash>()
-      .zip(transaction_id.owned::<TransactionSignDataHash>())
-      .zip(secret_key.owned::<PrivateKey>())
+      .typed_ref::<Hash>()
+      .zip(transaction_id.typed_ref::<TransactionSignDataHash>())
+      .zip(secret_key.typed_ref::<PrivateKey>())
       .map(|((genesis_hash, transaction_id), secret_key)| {
         Witness::for_utxo(genesis_hash, transaction_id, secret_key)
       })

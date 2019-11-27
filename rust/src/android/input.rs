@@ -15,9 +15,10 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputFromAccount(
 ) -> jobject {
   handle_exception_result(|| {
     let account = account.rptr(&env)?;
+    let v = v.rptr(&env)?;
     account
       .typed_ref::<Account>()
-      .zip(v.owned::<Value>(&env))
+      .zip(v.typed_ref::<Value>())
       .map(|(account, v)| Input::from_account(account, v))
       .and_then(|input| RPtr::new(input).jptr(&env))
   })

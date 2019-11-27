@@ -14,8 +14,9 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentFromTransaction
   env: JNIEnv, _: JObject, tx_ptr: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
+    let tx_ptr = tx_ptr.rptr(&env)?;
     tx_ptr
-      .owned::<Transaction>(&env)
+      .typed_ref::<Transaction>()
       .map(|tx| Fragment::from_transaction(tx))
       .and_then(|fragment| RPtr::new(fragment).jptr(&env))
   })

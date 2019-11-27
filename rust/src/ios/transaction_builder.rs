@@ -3,7 +3,7 @@ use super::string::CharPtr;
 use crate::panic::{handle_exception, handle_exception_result, ToResult, Zip};
 use crate::ptr::RPtr;
 use js_chain_libs::{
-  Inputs, Outputs, PayloadAuthData, TransactionBuilder, TransactionBuilderSetAuthData,
+  Certificate, Inputs, Outputs, PayloadAuthData, TransactionBuilder, TransactionBuilderSetAuthData,
   TransactionBuilderSetIOs, TransactionBuilderSetWitness, Witnesses
 };
 
@@ -12,6 +12,20 @@ pub unsafe extern "C" fn transaction_builder_new(result: &mut RPtr, error: &mut 
   handle_exception(|| TransactionBuilder::new())
     .map(|tx_builder| RPtr::new(tx_builder))
     .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn transaction_builder_payload(
+  tx_builder: &mut RPtr, cert: RPtr, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    tx_builder
+      .owned::<TransactionBuilder>()
+      .zip(cert.typed_ref::<Certificate>())
+      .map(|(tx_builder, cert)| tx_builder.payload(cert))
+  })
+  .map(|tx_builder_set_ios| RPtr::new(tx_builder_set_ios))
+  .response(result, error)
 }
 
 #[no_mangle]
@@ -71,13 +85,26 @@ pub unsafe extern "C" fn transaction_builder_set_witness_set_witnesses(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn transaction_builder_set_auth_data_get_auth_data(
+  tx_builder_set_auth_data: RPtr, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    tx_builder_set_auth_data
+      .typed_ref::<TransactionBuilderSetAuthData>()
+      .map(|tx_builder_set_auth_data| tx_builder_set_auth_data.get_auth_data())
+  })
+  .map(|transaction_binding_auth_data| RPtr::new(transaction_binding_auth_data))
+  .response(result, error)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn transaction_builder_set_auth_data_set_payload_auth(
-  tx_builder_set_auth_data: &mut RPtr, auth: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
+  tx_builder_set_auth_data: &mut RPtr, auth: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     tx_builder_set_auth_data
       .owned::<TransactionBuilderSetAuthData>()
-      .zip(auth.owned::<PayloadAuthData>())
+      .zip(auth.typed_ref::<PayloadAuthData>())
       .and_then(|(tx_builder_set_auth_data, auth)| {
         tx_builder_set_auth_data.set_payload_auth(auth).into_result()
       })

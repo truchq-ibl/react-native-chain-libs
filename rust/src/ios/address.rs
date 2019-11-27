@@ -27,11 +27,11 @@ pub unsafe extern "C" fn address_to_string(
 
 #[no_mangle]
 pub unsafe extern "C" fn address_single_from_public_key(
-  key: &mut RPtr, discrimination: AddressDiscrimination, result: &mut RPtr, error: &mut CharPtr
+  key: RPtr, discrimination: AddressDiscrimination, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     key
-      .owned::<PublicKey>()
+      .typed_ref::<PublicKey>()
       .map(|key| Address::single_from_public_key(key, discrimination.into()))
       .map(|addr| RPtr::new(addr))
   })
@@ -40,13 +40,13 @@ pub unsafe extern "C" fn address_single_from_public_key(
 
 #[no_mangle]
 pub unsafe extern "C" fn address_delegation_from_public_key(
-  key: &mut RPtr, delegation: &mut RPtr, discrimination: AddressDiscrimination, result: &mut RPtr,
+  key: RPtr, delegation: RPtr, discrimination: AddressDiscrimination, result: &mut RPtr,
   error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     key
-      .owned::<PublicKey>()
-      .zip(delegation.owned::<PublicKey>())
+      .typed_ref::<PublicKey>()
+      .zip(delegation.typed_ref::<PublicKey>())
       .map(|(key, delegation)| {
         Address::delegation_from_public_key(key, delegation, discrimination.into())
       })
@@ -57,11 +57,11 @@ pub unsafe extern "C" fn address_delegation_from_public_key(
 
 #[no_mangle]
 pub unsafe extern "C" fn address_account_from_public_key(
-  key: &mut RPtr, discrimination: AddressDiscrimination, result: &mut RPtr, error: &mut CharPtr
+  key: RPtr, discrimination: AddressDiscrimination, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     key
-      .owned::<PublicKey>()
+      .typed_ref::<PublicKey>()
       .map(|key| Address::account_from_public_key(key, discrimination.into()))
       .map(|address| RPtr::new(address))
   })

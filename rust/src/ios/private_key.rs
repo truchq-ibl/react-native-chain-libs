@@ -22,3 +22,14 @@ pub unsafe extern "C" fn private_key_to_public(
   })
   .response(result, error)
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn private_key_from_extended_bytes(
+  data: *const u8, len: usize, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    PrivateKey::from_extended_bytes(std::slice::from_raw_parts(data, len)).into_result()
+  })
+  .map(|private_key| RPtr::new(private_key))
+  .response(result, error)
+}

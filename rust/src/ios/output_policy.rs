@@ -11,9 +11,11 @@ pub unsafe extern "C" fn output_policy_forget(result: &mut RPtr, error: &mut Cha
 
 #[no_mangle]
 pub unsafe extern "C" fn output_policy_one(
-  address: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
+  address: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| address.owned::<Address>().map(|address| OutputPolicy::one(address)))
-    .map(|output_policy| RPtr::new(output_policy))
-    .response(result, error)
+  handle_exception_result(|| {
+    address.typed_ref::<Address>().map(|address| OutputPolicy::one(address))
+  })
+  .map(|output_policy| RPtr::new(output_policy))
+  .response(result, error)
 }

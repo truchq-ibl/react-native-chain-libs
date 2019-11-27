@@ -53,6 +53,7 @@ final class Native {
 
     // TransactionBuilder
     public final native Result<RPtr> transactionBuilderNew();
+    public final native Result<RPtr> transactionBuilderPayload(RPtr txBuilder, RPtr cert);
     public final native Result<RPtr> transactionBuilderNoPayload(RPtr txBuilder);
 
     // TransactionBuilderSetIOs
@@ -63,10 +64,12 @@ final class Native {
     public final native Result<RPtr> transactionBuilderSetWitnessSetWitnesses(RPtr txBuilderSetWitness, RPtr witnesses);
 
     // TransactionBuilderSetAuthData
+    public final native Result<RPtr> transactionBuilderSetAuthDataGetAuthData(RPtr txBuilderSetAuthData);
     public final native Result<RPtr> transactionBuilderSetAuthDataSetPayloadAuth(RPtr txBuilderSetAuthData, RPtr auth);
 
     // Account
     public final native Result<RPtr> accountFromAddress(RPtr address);
+    public final native Result<RPtr> accountSingleFromPublicKey(RPtr key);
 
     // Input
     public final native Result<RPtr> inputFromAccount(RPtr account, RPtr v);
@@ -93,6 +96,7 @@ final class Native {
     // PrivateKey
     public final native Result<RPtr> privateKeyFromBech32(String bech32Str);
     public final native Result<RPtr> privateKeyToPublic(RPtr privateKey);
+    public final native Result<RPtr> privateKeyFromExtendedBytes(byte[] bytes);
 
     // Hash
     public final native Result<RPtr> hashFromHex(String hexString);
@@ -138,6 +142,7 @@ final class Native {
     public final native Result<RPtr> inputOutputBuilderEmpty();
     public final native Result<Void> inputOutputBuilderAddInput(RPtr ioBuilder, RPtr input);
     public final native Result<Void> inputOutputBuilderAddOutput(RPtr ioBuilder, RPtr address, RPtr value);
+    public final native Result<RPtr> inputOutputBuilderEstimateFee(RPtr ioBuilder, RPtr fee, RPtr payload);
     public final native Result<RPtr> inputOutputBuilderBuild(RPtr ioBuilder);
     public final native Result<RPtr> inputOutputBuilderSealWithOutputPolicy(RPtr ioBuilder, RPtr payload, RPtr feeAlgorithm, RPtr policy);
 
@@ -156,6 +161,46 @@ final class Native {
 
     // Payload
     public final native Result<RPtr> payloadNoPayload();
+
+    // StakeDelegationAuthData
+    public final native Result<RPtr> stakeDelegationAuthDataNew(RPtr signature);
+
+    // StakeDelegation
+    public final native Result<RPtr> stakeDelegationNew(RPtr delegationType, RPtr account);
+    public final native Result<RPtr> stakeDelegationDelegationType(RPtr stakeDelegation);
+    public final native Result<RPtr> stakeDelegationAccount(RPtr stakeDelegation);
+
+    // Certificate
+    public final native Result<RPtr> certificateStakeDelegation(RPtr stakeDelegation);
+    public final native Result<RPtr> certificateStakePoolRegistration(RPtr poolRegistration);
+    public final native Result<RPtr> certificateStakePoolRetirement(RPtr poolRetirement);
+    public final native Result<RPtr> certificateGetType(RPtr certificate);
+    public final native Result<RPtr> certificateGetStakeDelegation(RPtr certificate);
+    public final native Result<RPtr> certificateGetOwnerStakeDelegation(RPtr certificate);
+    public final native Result<RPtr> certificateGetPoolRegistration(RPtr certificate);
+    public final native Result<RPtr> certificateGetPoolRetirement(RPtr certificate);
+
+    // AccountBindingSignature
+    public final native Result<RPtr> accountBindingSignatureNewSingle(RPtr privateKey, RPtr authData);
+
+    // Bip32PrivateKey
+    public final native Result<RPtr> bip32PrivateKeyDerive(RPtr bip32PrivateKey, int index);
+    public final native Result<RPtr> bip32PrivateKeyGenerateEd25519Bip32();
+    public final native Result<RPtr> bip32PrivateKeyToRawKey(RPtr bip32PrivateKey);
+    public final native Result<RPtr> bip32PrivateKeyToPublic(RPtr bip32PrivateKey);
+    public final native Result<RPtr> bip32PrivateKeyFromBytes(byte[] bytes);
+    public final native Result<byte[]> bip32PrivateKeyAsBytes(RPtr bip32PrivateKey);
+    public final native Result<RPtr> bip32PrivateKeyFromBech32(String bech32Str);
+    public final native Result<String> bip32PrivateKeyToBech32(RPtr bip32PrivateKey);
+    public final native Result<RPtr> bip32PrivateKeyFromBip39Entropy(byte[] entropy, byte[] password);
+
+    // Bip32PublicKey
+    public final native Result<RPtr> bip32PublicKeyDerive(RPtr bip32PublicKey, int index);
+    public final native Result<RPtr> bip32PublicKeyToRawKey(RPtr bip32PublicKey);
+    public final native Result<RPtr> bip32PublicKeyFromBytes(byte[] bytes);
+    public final native Result<byte[]> bip32PublicKeyAsBytes(RPtr bip32PublicKey);
+    public final native Result<RPtr> bip32PublicKeyFromBech32(String bech32Str);
+    public final native Result<String> bip32PublicKeyToBech32(RPtr bip32PublicKey);
 
     public final native void ptrFree(RPtr ptr);
 }

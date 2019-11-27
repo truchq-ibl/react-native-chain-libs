@@ -17,11 +17,15 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_witnessForAccount(
   account_spending_counter: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
+    let genesis_hash = genesis_hash.rptr(&env)?;
+    let transaction_id = transaction_id.rptr(&env)?;
+    let secret_key = secret_key.rptr(&env)?;
+    let account_spending_counter = account_spending_counter.rptr(&env)?;
     genesis_hash
-      .owned::<Hash>(&env)
-      .zip(transaction_id.owned::<TransactionSignDataHash>(&env))
-      .zip(secret_key.owned::<PrivateKey>(&env))
-      .zip(account_spending_counter.owned::<SpendingCounter>(&env))
+      .typed_ref::<Hash>()
+      .zip(transaction_id.typed_ref::<TransactionSignDataHash>())
+      .zip(secret_key.typed_ref::<PrivateKey>())
+      .zip(account_spending_counter.typed_ref::<SpendingCounter>())
       .map(|(((genesis_hash, transaction_id), secret_key), account_spending_counter)| {
         Witness::for_account(genesis_hash, transaction_id, secret_key, account_spending_counter)
       })
@@ -36,10 +40,13 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_witnessForUtxo(
   env: JNIEnv, _: JObject, genesis_hash: JRPtr, transaction_id: JRPtr, secret_key: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
+    let genesis_hash = genesis_hash.rptr(&env)?;
+    let transaction_id = transaction_id.rptr(&env)?;
+    let secret_key = secret_key.rptr(&env)?;
     genesis_hash
-      .owned::<Hash>(&env)
-      .zip(transaction_id.owned::<TransactionSignDataHash>(&env))
-      .zip(secret_key.owned::<PrivateKey>(&env))
+      .typed_ref::<Hash>()
+      .zip(transaction_id.typed_ref::<TransactionSignDataHash>())
+      .zip(secret_key.typed_ref::<PrivateKey>())
       .map(|((genesis_hash, transaction_id), secret_key)| {
         Witness::for_utxo(genesis_hash, transaction_id, secret_key)
       })

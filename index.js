@@ -173,7 +173,6 @@ export class Address extends Ptr {
     */
     static async single_from_public_key(key, discrimination) {
         const keyPtr = Ptr._assertClass(key, PublicKey);
-        key.ptr = null;
         const ret = await ChainLibs.addressSingleFromPublicKey(keyPtr, discrimination);
         return Ptr._wrap(ret, Address);
     }
@@ -188,7 +187,6 @@ export class Address extends Ptr {
     static async delegation_from_public_key(key, delegation, discrimination) {
         const keyPtr = Ptr._assertClass(key, PublicKey);
         const delPtr = Ptr._assertClass(delegation, PublicKey);
-        key.ptr = delegation.ptr = null;
         const ret = await ChainLibs.addressDelegationFromPublicKey(keyPtr, delPtr, discrimination);
         return Ptr._wrap(ret, Address);
     }
@@ -201,7 +199,6 @@ export class Address extends Ptr {
     */
     static async account_from_public_key(key, discrimination) {
         const keyPtr = Ptr._assertClass(key, PublicKey);
-        key.ptr = null;
         const ret = await ChainLibs.addressAccountFromPublicKey(keyPtr, discrimination);
         return Ptr._wrap(ret, Address);
     }
@@ -219,6 +216,16 @@ export class Account extends Ptr {
         const ret = await ChainLibs.accountFromAddress(Ptr._assertClass(address, Address));
         return Ptr._wrap(ret, Account);
     }
+
+    /**
+    * @param {PublicKey} key
+    * @returns {Promise<Account>}
+    */
+    static async single_from_public_key(key) {
+        const keyPtr = Ptr._assertClass(key, PublicKey);
+        const ret = await ChainLibs.accountSingleFromPublicKey(keyPtr);
+        return Ptr._wrap(ret, Account);
+    }
 }
 
 /**
@@ -232,7 +239,6 @@ export class Input extends Ptr {
     static async from_account(account, v) {
         const accountPtr = Ptr._assertClass(account, Account);
         const vPtr = Ptr._assertClass(v, Value);
-        v.ptr = null;
         const ret = await ChainLibs.inputFromAccount(accountPtr, vPtr);
         return Ptr._wrap(ret, Input);
     }
@@ -443,7 +449,6 @@ export class UtxoPointer extends Ptr {
     static async new(fragmentId, outputIndex, value) {
         const fragmentIdPtr = Ptr._assertClass(fragmentId, FragmentId);
         const valuePtr = Ptr._assertClass(value, Value);
-        fragmentId.ptr = value.ptr = null;
         const ret = await ChainLibs.utxoPointerNew(fragmentIdPtr, outputIndex, valuePtr);
         return Ptr._wrap(ret, UtxoPointer);
     }
@@ -456,7 +461,6 @@ export class Fragment extends Ptr {
     */
     static async from_transaction(tx) {
         const txPtr = Ptr._assertClass(tx, Transaction);
-        tx.ptr = null;
         const ret = await ChainLibs.fragmentFromTransaction(txPtr);
         return Ptr._wrap(ret, Fragment);
     }
@@ -575,7 +579,6 @@ export class Fee extends Ptr {
         const constantPtr = Ptr._assertClass(constant, Value);
         const coefficientPtr = Ptr._assertClass(coefficient, Value);
         const certificatePtr = Ptr._assertClass(certificate, Value);
-        constant.ptr = coefficient.ptr = certificate.ptr = null;
         const ret = await ChainLibs.feeLinearFee(constantPtr, coefficientPtr, certificatePtr);
         return Ptr._wrap(ret, Fee);
     }
@@ -587,7 +590,6 @@ export class Fee extends Ptr {
     */
     async calculate(tx) {
         const txPtr = Ptr._assertClass(tx, Transaction);
-        tx.ptr = null;
         const ret = await ChainLibs.feeCalculate(this.ptr, txPtr);
         return Ptr._wrap(ret, Value);
     }
@@ -615,7 +617,6 @@ export class OutputPolicy extends Ptr {
     */
     static async one(address) {
         const addressPtr = Ptr._assertClass(address, Address);
-        address.ptr = null;
         const ret = await ChainLibs.outputPolicyOne(addressPtr);
         return Ptr._wrap(ret, OutputPolicy);
     }
@@ -698,6 +699,15 @@ export class PrivateKey extends Ptr {
         const ret = await ChainLibs.privateKeyToPublic(this.ptr);
         return Ptr._wrap(ret, PublicKey);
     }
+
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<PrivateKey>}
+    */
+    static async from_extended_bytes(bytes) {
+        const ret = await ChainLibs.privateKeyFromExtendedBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, PrivateKey);
+    }
 }
 
 /**
@@ -741,7 +751,6 @@ export class Witness extends Ptr {
         const genesisHashPtr = Ptr._assertClass(genesisHash, Hash);
         const transactionIdPtr = Ptr._assertClass(transactionId, TransactionSignDataHash);
         const secretKeyPtr = Ptr._assertClass(secretKey, PrivateKey);
-        genesisHash.ptr = transactionId.ptr = secretKey.ptr = null;
         const ret = await ChainLibs.witnessForUtxo(genesisHashPtr, transactionIdPtr, secretKeyPtr);
         return Ptr._wrap(ret, Witness);
     }
@@ -760,7 +769,6 @@ export class Witness extends Ptr {
         const transactionIdPtr = Ptr._assertClass(transactionId, TransactionSignDataHash);
         const secretKeyPtr = Ptr._assertClass(secretKey, PrivateKey);
         const accountSpendingCounterPtr = Ptr._assertClass(accountSpendingCounter, SpendingCounter);
-        genesisHash.ptr = transactionId.ptr = secretKey.ptr = accountSpendingCounter.ptr = null;
         const ret = await ChainLibs.witnessForAccount(genesisHashPtr, transactionIdPtr, secretKeyPtr, accountSpendingCounterPtr);
         return Ptr._wrap(ret, Witness);
     }
@@ -820,6 +828,14 @@ export class PayloadAuthData extends Ptr {
 */
 export class TransactionBuilderSetAuthData extends Ptr {
     /**
+    * @returns {Promise<TransactionBindingAuthData>}
+    */
+    async get_auth_data() {
+        const ret = await ChainLibs.transactionBuilderSetAuthDataGetAuthData(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
     * Set the authenticated data
     * @param {PayloadAuthData} auth
     * @returns {Promise<Transaction>}
@@ -827,7 +843,7 @@ export class TransactionBuilderSetAuthData extends Ptr {
     async set_payload_auth(auth) {
         const authPtr = Ptr._assertClass(auth, PayloadAuthData);
         const ptr = this.ptr;
-        this.ptr = auth.ptr = null;
+        this.ptr = null;
         const ret = await ChainLibs.transactionBuilderSetAuthDataSetPayloadAuth(ptr, authPtr);
         return Ptr._wrap(ret, Transaction);
     }
@@ -921,6 +937,18 @@ export class TransactionBuilder extends Ptr {
     }
 
     /**
+    * @param {Certificate} cert
+    * @returns {Promise<TransactionBuilderSetIOs>}
+    */
+    async payload(cert) {
+        const certPtr = Ptr._assertClass(cert, Certificate);
+        const ptr = this.ptr;
+        this.ptr = null;
+        const ret = await ChainLibs.transactionBuilderPayload(ptr, certPtr);
+        return Ptr._wrap(ret, TransactionBuilderSetIOs);
+    }
+
+    /**
     * @returns {Promise<TransactionBuilderSetIOs>}
     */
     async no_payload() {
@@ -992,8 +1020,20 @@ export class InputOutputBuilder extends Ptr {
     add_output(address, value) {
         const addressPtr = Ptr._assertClass(address, Address);
         const valuePtr = Ptr._assertClass(value, Value);
-        address.ptr = value.ptr = null;
         return ChainLibs.inputOutputBuilderAddOutput(this.ptr, addressPtr, valuePtr);
+    }
+
+    /**
+    * Estimate fee with the currently added inputs, outputs and certificate based on the given algorithm
+    * @param {Fee} fee
+    * @param {Payload} payload
+    * @returns {Value}
+    */
+    async estimate_fee(fee, payload) {
+        const feePtr = Ptr._assertClass(fee, Fee);
+        const payloadPtr = Ptr._assertClass(payload, Payload);
+        const ret = await ChainLibs.inputOutputBuilderEstimateFee(this.ptr, feePtr, payloadPtr);
+        return Ptr._wrap(ret, Value);
     }
 
     /**
@@ -1018,8 +1058,318 @@ export class InputOutputBuilder extends Ptr {
         const feeAlgorithmPtr = Ptr._assertClass(feeAlgorithm, Fee);
         const policyPtr = Ptr._assertClass(policy, OutputPolicy);
         const ptr = this.ptr;
-        this.ptr = feeAlgorithm.ptr = policy.ptr = null;
+        this.ptr = null;
         const ret = await ChainLibs.inputOutputBuilderSealWithOutputPolicy(ptr, payloadPtr, feeAlgorithmPtr, policyPtr);
         return Ptr._wrap(ret, InputOutput);
+    }
+}
+
+/**
+*/
+export class StakeDelegationAuthData extends Ptr {
+    /**
+    * @param {AccountBindingSignature} signature
+    * @returns {Promise<StakeDelegationAuthData>}
+    */
+    static async new(signature) {
+        const signaturePtr = Ptr._assertClass(signature, Ptr);
+        const ret = await ChainLibs.stakeDelegationAuthDataNew(signaturePtr);
+        return Ptr._wrap(ret, StakeDelegationAuthData);
+    }
+}
+
+/**
+*/
+export class StakeDelegation extends Ptr {
+    /**
+    * Create a stake delegation object from account (stake key) to pool_id
+    * @param {DelegationType} delegationType
+    * @param {PublicKey} account
+    * @returns {Promise<StakeDelegation>}
+    */
+    static async new(delegationType, account) {
+        const delegationTypePtr = Ptr._assertClass(delegationType, Ptr);
+        const accountPtr = Ptr._assertClass(account, PublicKey);
+        const ret = await ChainLibs.stakeDelegationNew(delegationTypePtr, accountPtr);
+        return Ptr._wrap(ret, StakeDelegation);
+    }
+
+    /**
+    * @returns {Promise<DelegationType>}
+    */
+    async delegation_type() {
+        const ret = await ChainLibs.stakeDelegationDelegationType(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
+    * @returns {Promise<AccountIdentifier>}
+    */
+    async account() {
+        const ret = await ChainLibs.stakeDelegationAccount(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+}
+
+/**
+*/
+export class Certificate extends Ptr {
+    /**
+    * Create a Certificate for StakeDelegation
+    * @param {StakeDelegation} stakeDelegation
+    * @returns {Promise<Certificate>}
+    */
+    static async stake_delegation(stakeDelegation) {
+        const stakeDelegationPtr = Ptr._assertClass(stakeDelegation, StakeDelegation);
+        const ret = await ChainLibs.certificateStakeDelegation(stakeDelegationPtr);
+        return Ptr._wrap(ret, Certificate);
+    }
+
+    /**
+    * Create a Certificate for PoolRegistration
+    * @param {PoolRegistration} poolRegistration
+    * @returns {Promise<Certificate>}
+    */
+    static async stake_pool_registration(poolRegistration) {
+        const poolRegistrationPtr = Ptr._assertClass(poolRegistration, PoolRegistration);
+        const ret = await ChainLibs.certificateStakePoolRegistration(poolRegistrationPtr);
+        return Ptr._wrap(ret, Certificate);
+    }
+
+    /**
+    * Create a Certificate for PoolRetirement
+    * @param {PoolRetirement} poolRetirement
+    * @returns {Promise<Certificate>}
+    */
+    static async stake_pool_retirement(poolRetirement) {
+        const poolRetirementPtr = Ptr._assertClass(poolRetirement, PoolRetirement);
+        const ret = await ChainLibs.certificateStakePoolRetirement(poolRetirementPtr);
+        return Ptr._wrap(ret, Certificate);
+    }
+
+    /**
+    * @returns {Promise<number>}
+    */
+    async get_type() {
+        const ret = await ChainLibs.certificateGetType(this.ptr);
+        return ret;
+    }
+
+    /**
+    * @returns {Promise<StakeDelegation>}
+    */
+    async get_stake_delegation() {
+        const ret = await ChainLibs.certificateGetStakeDelegation(this.ptr);
+        return Ptr._wrap(ret, StakeDelegation);
+    }
+
+    /**
+    * @returns {Promise<OwnerStakeDelegation>}
+    */
+    async get_owner_stake_delegation() {
+        const ret = await ChainLibs.certificateGetOwnerStakeDelegation(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
+    * @returns {Promise<PoolRegistration>}
+    */
+    async get_pool_registration() {
+        const ret = await ChainLibs.certificateGetPoolRegistration(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
+    * @returns {Promise<PoolRetirement>}
+    */
+    async get_pool_retirement() {
+        const ret = await ChainLibs.certificateGetPoolRetirement(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+}
+
+/**
+*/
+export class AccountBindingSignature extends Ptr {
+    /**
+    * @param {PrivateKey} privateKey
+    * @param {TransactionBindingAuthData} authData
+    * @returns {Promise<AccountBindingSignature>}
+    */
+    static async new_single(privateKey, authData) {
+        const privateKeyPtr = Ptr._assertClass(privateKey, PrivateKey);
+        const authDataPtr = Ptr._assertClass(authData, Ptr);
+        const ret = await ChainLibs.accountBindingSignatureNewSingle(privateKeyPtr, authDataPtr);
+        return Ptr._wrap(ret, AccountBindingSignature);
+    }
+}
+
+/**
+*/
+export class Bip32PrivateKey extends Ptr {
+    /**
+    * derive this private key with the given index.
+    *
+    * # Security considerations
+    *
+    * * hard derivation index cannot be soft derived with the public key
+    *
+    * # Hard derivation vs Soft derivation
+    *
+    * If you pass an index below 0x80000000 then it is a soft derivation.
+    * The advantage of soft derivation is that it is possible to derive the
+    * public key too. I.e. derivation the private key with a soft derivation
+    * index and then retrieving the associated public key is equivalent to
+    * deriving the public key associated to the parent private key.
+    *
+    * Hard derivation index does not allow public key derivation.
+    *
+    * This is why deriving the private key should not fail while deriving
+    * the public key may fail (if the derivation index is invalid).
+    * @param {number} index
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    async derive(index) {
+        const ret = await ChainLibs.bip32PrivateKeyDerive(this.ptr, index);
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async generate_ed25519_bip32() {
+        const ret = await ChainLibs.bip32PrivateKeyGenerateEd25519Bip32();
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<PrivateKey>}
+    */
+    async to_raw_key() {
+        const ret = await ChainLibs.bip32PrivateKeyToRawKey(this.ptr);
+        return Ptr._wrap(ret, PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    async to_public() {
+        const ret = await ChainLibs.bip32PrivateKeyToPublic(this.ptr);
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.bip32PrivateKeyFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.bip32PrivateKeyAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+
+    /**
+    * @param {string} bech32Str
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async from_bech32(bech32Str) {
+        const ret = await ChainLibs.bip32PrivateKeyFromBech32(bech32Str);
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<string>}
+    */
+    to_bech32() {
+        return ChainLibs.bip32PrivateKeyToBech32(this.ptr);
+    }
+
+    /**
+    * @param {Uint8Array} entropy
+    * @param {Uint8Array} password
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async from_bip39_entropy(entropy, password) {
+        const ret = await ChainLibs.bip32PrivateKeyFromBip39Entropy(b64FromUint8Array(entropy), b64FromUint8Array(password));
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+}
+
+/**
+*/
+export class Bip32PublicKey extends Ptr {
+    /**
+    * derive this private key with the given index.
+    *
+    * # Security considerations
+    *
+    * * hard derivation index cannot be soft derived with the public key
+    *
+    * # Hard derivation vs Soft derivation
+    *
+    * If you pass an index below 0x80000000 then it is a soft derivation.
+    * The advantage of soft derivation is that it is possible to derive the
+    * public key too. I.e. derivation the private key with a soft derivation
+    * index and then retrieving the associated public key is equivalent to
+    * deriving the public key associated to the parent private key.
+    *
+    * Hard derivation index does not allow public key derivation.
+    *
+    * This is why deriving the private key should not fail while deriving
+    * the public key may fail (if the derivation index is invalid).
+    * @param {number} index
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    async derive(index) {
+        const ret = await ChainLibs.bip32PublicKeyDerive(this.ptr, index);
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @returns {Promise<PublicKey>}
+    */
+    async to_raw_key() {
+        const ret = await ChainLibs.bip32PublicKeyToRawKey(this.ptr);
+        return Ptr._wrap(ret, PublicKey);
+    }
+
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.bip32PublicKeyFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.bip32PublicKeyAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+
+    /**
+    * @param {string} bech32Str
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    static async from_bech32(bech32Str) {
+        const ret = await ChainLibs.bip32PublicKeyFromBech32(bech32Str);
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @returns {Promise<string>}
+    */
+    to_bech32() {
+        return ChainLibs.bip32PublicKeyToBech32(this.ptr);
     }
 }

@@ -6,7 +6,7 @@ use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
 use js_chain_libs::{
-  Inputs, Outputs, PayloadAuthData, TransactionBuilder, TransactionBuilderSetAuthData,
+  Certificate, Inputs, Outputs, PayloadAuthData, TransactionBuilder, TransactionBuilderSetAuthData,
   TransactionBuilderSetIOs, TransactionBuilderSetWitness, Witnesses
 };
 
@@ -16,6 +16,22 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderNew(
   env: JNIEnv, _: JObject
 ) -> jobject {
   handle_exception_result(|| RPtr::new(TransactionBuilder::new()).jptr(&env)).jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderPayload(
+  env: JNIEnv, _: JObject, tx_builder: JRPtr, cert: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let cert = cert.rptr(&env)?;
+    tx_builder
+      .owned::<TransactionBuilder>(&env)
+      .zip(cert.typed_ref::<Certificate>())
+      .map(|(tx_builder, cert)| tx_builder.payload(cert))
+      .and_then(|tx_builder_set_ios| RPtr::new(tx_builder_set_ios).jptr(&env))
+  })
+  .jresult(&env)
 }
 
 #[allow(non_snake_case)]
@@ -82,13 +98,29 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetWi
 
 #[allow(non_snake_case)]
 #[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetAuthDataGetAuthData(
+  env: JNIEnv, _: JObject, tx_builder_set_auth_data: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let tx_builder_set_auth_data = tx_builder_set_auth_data.rptr(&env)?;
+    tx_builder_set_auth_data
+      .typed_ref::<TransactionBuilderSetAuthData>()
+      .map(|tx_builder_set_auth_data| tx_builder_set_auth_data.get_auth_data())
+      .and_then(|transaction_binding_auth_data| RPtr::new(transaction_binding_auth_data).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionBuilderSetAuthDataSetPayloadAuth(
   env: JNIEnv, _: JObject, tx_builder_set_auth_data: JRPtr, auth: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
+    let auth = auth.rptr(&env)?;
     tx_builder_set_auth_data
       .owned::<TransactionBuilderSetAuthData>(&env)
-      .zip(auth.owned::<PayloadAuthData>(&env))
+      .zip(auth.typed_ref::<PayloadAuthData>())
       .and_then(|(tx_builder_set_auth_data, auth)| {
         tx_builder_set_auth_data.set_payload_auth(auth).into_result()
       })

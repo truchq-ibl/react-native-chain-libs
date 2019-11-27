@@ -6,14 +6,13 @@ use js_chain_libs::{Fee, Transaction, Value};
 
 #[no_mangle]
 pub unsafe extern "C" fn fee_linear_fee(
-  constant: &mut RPtr, coefficient: &mut RPtr, certificate: &mut RPtr, result: &mut RPtr,
-  error: &mut CharPtr
+  constant: RPtr, coefficient: RPtr, certificate: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     constant
-      .owned::<Value>()
-      .zip(coefficient.owned::<Value>())
-      .zip(certificate.owned::<Value>())
+      .typed_ref::<Value>()
+      .zip(coefficient.typed_ref::<Value>())
+      .zip(certificate.typed_ref::<Value>())
       .map(|((constant, coefficient), certificate)| {
         Fee::linear_fee(constant, coefficient, certificate)
       })
@@ -24,10 +23,10 @@ pub unsafe extern "C" fn fee_linear_fee(
 
 #[no_mangle]
 pub unsafe extern "C" fn fee_calculate(
-  fee: RPtr, tx: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
+  fee: RPtr, tx: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    fee.typed_ref::<Fee>().zip(tx.owned::<Transaction>()).map(|(fee, tx)| fee.calculate(tx))
+    fee.typed_ref::<Fee>().zip(tx.typed_ref::<Transaction>()).map(|(fee, tx)| fee.calculate(tx))
   })
   .map(|value| RPtr::new(value))
   .response(result, error)

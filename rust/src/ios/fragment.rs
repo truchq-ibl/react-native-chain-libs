@@ -7,9 +7,9 @@ use js_chain_libs::{Fragment, Transaction};
 
 #[no_mangle]
 pub unsafe extern "C" fn fragment_from_transaction(
-  tx: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
+  tx: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| tx.owned::<Transaction>().map(|tx| Fragment::from_transaction(tx)))
+  handle_exception_result(|| tx.typed_ref::<Transaction>().map(|tx| Fragment::from_transaction(tx)))
     .map(|fragment| RPtr::new(fragment))
     .response(result, error)
 }

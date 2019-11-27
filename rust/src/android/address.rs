@@ -66,8 +66,9 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressSingleFromPublic
   env: JNIEnv, _: JObject, key_ptr: JRPtr, discrimination: jint
 ) -> jobject {
   handle_exception_result(|| {
+    let key_ptr = key_ptr.rptr(&env)?;
     key_ptr
-      .owned::<PublicKey>(&env)
+      .typed_ref::<PublicKey>()
       .map(|key| {
         Address::single_from_public_key(key, AddressDiscrimination::from(discrimination).into())
       })
@@ -82,9 +83,11 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressDelegationFromPu
   env: JNIEnv, _: JObject, key_ptr: JRPtr, delegation_ptr: JRPtr, discrimination: jint
 ) -> jobject {
   handle_exception_result(|| {
+    let key_ptr = key_ptr.rptr(&env)?;
+    let delegation_ptr = delegation_ptr.rptr(&env)?;
     key_ptr
-      .owned::<PublicKey>(&env)
-      .zip(delegation_ptr.owned::<PublicKey>(&env))
+      .typed_ref::<PublicKey>()
+      .zip(delegation_ptr.typed_ref::<PublicKey>())
       .map(|(key, delegation)| {
         Address::delegation_from_public_key(
           key,
@@ -103,8 +106,9 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressAccountFromPubli
   env: JNIEnv, _: JObject, key_ptr: JRPtr, discrimination: jint
 ) -> jobject {
   handle_exception_result(|| {
+    let key_ptr = key_ptr.rptr(&env)?;
     key_ptr
-      .owned::<PublicKey>(&env)
+      .typed_ref::<PublicKey>()
       .map(|key| {
         Address::account_from_public_key(key, AddressDiscrimination::from(discrimination).into())
       })

@@ -21,8 +21,9 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputPolicyOne(
   env: JNIEnv, _: JObject, address: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
+    let address = address.rptr(&env)?;
     address
-      .owned::<Address>(&env)
+      .typed_ref::<Address>()
       .and_then(|address| RPtr::new(OutputPolicy::one(address)).jptr(&env))
   })
   .jresult(&env)

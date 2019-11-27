@@ -56,7 +56,7 @@ import {
 } from 'react-native-chain-libs';
 ​
 ​function buffer2hex(buffer) {
-​   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 ​}
 ​
 const accountInputAddress = await Address.from_string(
@@ -96,6 +96,8 @@ const IOs = await ioBuilder.seal_with_output_policy(
     await OutputPolicy.one(accountInputAddress)
 );
 
+accountInputAddress.free();
+
 feeAlgorithm.free();
 
 const txBuilderSetIOs = await (await TransactionBuilder.new()).no_payload();
@@ -123,6 +125,8 @@ const witness = await Witness.for_account(
     await SpendingCounter.zero()
 );
 
+privateKey.free();
+
 const witnesses = await Witnesses.new();
 
 await witnesses.add(witness);
@@ -134,6 +138,8 @@ witnesses.free();
 const signedTx = await txBuilderSetAuthData.set_payload_auth(await PayloadAuthData.for_no_payload());
 
 const readyToSendTx = await Fragment.from_transaction(signedTx);
+
+signedTx.free();
 
 const readyToSendTxBytes = await readyToSendTx.as_bytes();
 

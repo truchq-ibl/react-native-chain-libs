@@ -4,7 +4,7 @@ use super::string::ToString;
 use crate::panic::{handle_exception_result, ToResult};
 use crate::ptr::RPtr;
 use jni::objects::{JObject, JString};
-use jni::sys::jobject;
+use jni::sys::{jbyteArray, jobject};
 use jni::JNIEnv;
 use js_chain_libs::PrivateKey;
 
@@ -32,6 +32,21 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyToPublic(
     rptr
       .typed_ref::<PrivateKey>()
       .and_then(|private_key| RPtr::new(private_key.to_public()).jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyFromExtendedBytes(
+  env: JNIEnv, _: JObject, bytes: jbyteArray
+) -> jobject {
+  handle_exception_result(|| {
+    env
+      .convert_byte_array(bytes)
+      .into_result()
+      .and_then(|bytes| PrivateKey::from_extended_bytes(&bytes).into_result())
+      .and_then(|private_key| RPtr::new(private_key).jptr(&env))
   })
   .jresult(&env)
 }

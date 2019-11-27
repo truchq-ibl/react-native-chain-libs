@@ -233,6 +233,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public final void transactionBuilderPayload(String txBuilder, String cert, Promise promise) {
+        Native.I
+                .transactionBuilderPayload(new RPtr(txBuilder), new RPtr(cert))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void transactionBuilderNoPayload(String txBuilder, Promise promise) {
         Native.I
                 .transactionBuilderNoPayload(new RPtr(txBuilder))
@@ -271,6 +279,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // TransactionBuilderSetAuthData
 
     @ReactMethod
+    public final void transactionBuilderSetAuthDataGetAuthData(String txBuilderSetAuthData, Promise promise) {
+        Native.I
+                .transactionBuilderSetAuthDataGetAuthData(new RPtr(txBuilderSetAuthData))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void transactionBuilderSetAuthDataSetPayloadAuth(String txBuilderSetAuthData, String auth, Promise promise) {
         Native.I
                 .transactionBuilderSetAuthDataSetPayloadAuth(new RPtr(txBuilderSetAuthData), new RPtr(auth))
@@ -284,6 +300,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void accountFromAddress(String address, Promise promise) {
         Native.I
                 .accountFromAddress(new RPtr(address))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void accountSingleFromPublicKey(String key, Promise promise) {
+        Native.I
+                .accountSingleFromPublicKey(new RPtr(key))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -407,6 +431,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void privateKeyToPublic(String prvPtr, Promise promise) {
         Native.I
                 .privateKeyToPublic(new RPtr(prvPtr))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void privateKeyFromExtendedBytes(String bytes, Promise promise) {
+        Native.I
+                .privateKeyFromExtendedBytes(Base64.decode(bytes, Base64.DEFAULT))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -626,6 +658,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public final void inputOutputBuilderEstimateFee(String ioBuilder, String fee, String payload, Promise promise) {
+        Native.I
+                .inputOutputBuilderEstimateFee(new RPtr(ioBuilder), new RPtr(fee), new RPtr(payload))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void inputOutputBuilderBuild(String ioBuilder, Promise promise) {
         Native.I
                 .inputOutputBuilderBuild(new RPtr(ioBuilder))
@@ -709,6 +749,225 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
         Native.I
                 .payloadNoPayload()
                 .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // StakeDelegationAuthData
+
+    @ReactMethod
+    public final void stakeDelegationAuthDataNew(String signature, Promise promise) {
+        Native.I
+                .stakeDelegationAuthDataNew(new RPtr(signature))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // StakeDelegation
+
+    @ReactMethod
+    public final void stakeDelegationNew(String delegationType, String account, Promise promise) {
+        Native.I
+                .stakeDelegationNew(new RPtr(delegationType), new RPtr(account))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void stakeDelegationDelegationType(String stakeDelegation, Promise promise) {
+        Native.I
+                .stakeDelegationDelegationType(new RPtr(stakeDelegation))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void stakeDelegationAccount(String stakeDelegation, Promise promise) {
+        Native.I
+                .stakeDelegationAccount(new RPtr(stakeDelegation))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Certificate
+
+    @ReactMethod
+    public final void certificateStakeDelegation(String stakeDelegation, Promise promise) {
+        Native.I
+                .certificateStakeDelegation(new RPtr(stakeDelegation))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateStakePoolRegistration(String poolRegistration, Promise promise) {
+        Native.I
+                .certificateStakePoolRegistration(new RPtr(poolRegistration))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateStakePoolRetirement(String poolRetirement, Promise promise) {
+        Native.I
+                .certificateStakePoolRetirement(new RPtr(poolRetirement))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateGetType(String certificate, Promise promise) {
+        Native.I
+                .certificateGetType(new RPtr(certificate))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateGetStakeDelegation(String certificate, Promise promise) {
+        Native.I
+                .certificateGetStakeDelegation(new RPtr(certificate))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateGetOwnerStakeDelegation(String certificate, Promise promise) {
+        Native.I
+                .certificateGetOwnerStakeDelegation(new RPtr(certificate))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateGetPoolRegistration(String certificate, Promise promise) {
+        Native.I
+                .certificateGetPoolRegistration(new RPtr(certificate))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void certificateGetPoolRetirement(String certificate, Promise promise) {
+        Native.I
+                .certificateGetPoolRetirement(new RPtr(certificate))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // AccountBindingSignature
+
+    @ReactMethod
+    public final void accountBindingSignatureNewSingle(String privateKey, String authData, Promise promise) {
+        Native.I
+                .accountBindingSignatureNewSingle(new RPtr(privateKey), new RPtr(authData))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Bip32PrivateKey
+
+    public final void bip32PrivateKeyDerive(String bip32PrivateKey, Integer index, Promise promise) {
+        Native.I
+                .bip32PrivateKeyDerive(new RPtr(bip32PrivateKey), index)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyGenerateEd25519Bip32(Promise promise) {
+        Native.I
+                .bip32PrivateKeyGenerateEd25519Bip32()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyToRawKey(String bip32PrivateKey, Promise promise) {
+        Native.I
+                .bip32PrivateKeyToRawKey(new RPtr(bip32PrivateKey))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyToPublic(String bip32PrivateKey, Promise promise) {
+        Native.I
+                .bip32PrivateKeyToPublic(new RPtr(bip32PrivateKey))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyFromBytes(String bytes, Promise promise) {
+        Native.I
+                .bip32PrivateKeyFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyAsBytes(String bip32PrivateKey, Promise promise) {
+        Native.I
+                .bip32PrivateKeyAsBytes(new RPtr(bip32PrivateKey))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyFromBech32(String bech32Str, Promise promise) {
+        Native.I
+                .bip32PrivateKeyFromBech32(bech32Str)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyToBech32(String bip32PrivateKey, Promise promise) {
+        Native.I
+                .bip32PrivateKeyToBech32(new RPtr(bip32PrivateKey))
+                .pour(promise);
+    }
+
+    public final void bip32PrivateKeyFromBip39Entropy(String entropy, String password, Promise promise) {
+        Native.I
+                .bip32PrivateKeyFromBip39Entropy(Base64.decode(entropy, Base64.DEFAULT), Base64.decode(password, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    // Bip32PublicKey
+
+    public final void bip32PublicKeyDerive(String bip32PublicKey, Integer index, Promise promise) {
+        Native.I
+                .bip32PublicKeyDerive(new RPtr(bip32PublicKey), index)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PublicKeyToRawKey(String bip32PublicKey, Promise promise) {
+        Native.I
+                .bip32PublicKeyToRawKey(new RPtr(bip32PublicKey))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PublicKeyFromBytes(String bytes, Promise promise) {
+        Native.I
+                .bip32PublicKeyFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PublicKeyAsBytes(String bip32PublicKey, Promise promise) {
+        Native.I
+                .bip32PublicKeyAsBytes(new RPtr(bip32PublicKey))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
+    public final void bip32PublicKeyFromBech32(String bech32Str, Promise promise) {
+        Native.I
+                .bip32PublicKeyFromBech32(bech32Str)
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void bip32PublicKeyToBech32(String bip32PublicKey, Promise promise) {
+        Native.I
+                .bip32PublicKeyToBech32(new RPtr(bip32PublicKey))
                 .pour(promise);
     }
 

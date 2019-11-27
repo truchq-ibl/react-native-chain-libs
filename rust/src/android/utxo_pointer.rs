@@ -13,7 +13,9 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_utxoPointerNew(
   env: JNIEnv, _: JObject, fragment_id: JRPtr, output_index: jint, value: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
-    fragment_id.owned::<FragmentId>(&env).zip(value.owned::<Value>(&env)).and_then(
+    let fragment_id = fragment_id.rptr(&env)?;
+    let value = value.rptr(&env)?;
+    fragment_id.typed_ref::<FragmentId>().zip(value.typed_ref::<Value>()).and_then(
       |(fragment_id, value)| {
         RPtr::new(UtxoPointer::new(fragment_id, output_index as u8, value)).jptr(&env)
       }

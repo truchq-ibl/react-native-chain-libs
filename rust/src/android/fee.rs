@@ -13,10 +13,13 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_feeLinearFee(
   env: JNIEnv, _: JObject, constant: JRPtr, coefficient: JRPtr, certificate: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
+    let constant = constant.rptr(&env)?;
+    let coefficient = coefficient.rptr(&env)?;
+    let certificate = certificate.rptr(&env)?;
     constant
-      .owned::<Value>(&env)
-      .zip(coefficient.owned::<Value>(&env))
-      .zip(certificate.owned::<Value>(&env))
+      .typed_ref::<Value>()
+      .zip(coefficient.typed_ref::<Value>())
+      .zip(certificate.typed_ref::<Value>())
       .map(|((constant, coefficient), certificate)| {
         Fee::linear_fee(constant, coefficient, certificate)
       })
@@ -32,9 +35,10 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_feeCalculate(
 ) -> jobject {
   handle_exception_result(|| {
     let fee = fee.rptr(&env)?;
+    let tx = tx.rptr(&env)?;
     fee
       .typed_ref::<Fee>()
-      .zip(tx.owned::<Transaction>(&env))
+      .zip(tx.typed_ref::<Transaction>())
       .map(|(fee, tx)| fee.calculate(tx))
       .and_then(|value| RPtr::new(value).jptr(&env))
   })
