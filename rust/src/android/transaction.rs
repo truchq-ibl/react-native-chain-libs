@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -16,7 +16,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionId(
     let transaction = transaction.rptr(&env)?;
     transaction
       .typed_ref::<Transaction>()
-      .and_then(|transaction| RPtr::new(transaction.id()).jptr(&env))
+      .and_then(|transaction| transaction.id().rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -30,7 +30,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionInputs(
     let transaction = transaction.rptr(&env)?;
     transaction
       .typed_ref::<Transaction>()
-      .and_then(|transaction| RPtr::new(transaction.inputs()).jptr(&env))
+      .and_then(|transaction| transaction.inputs().rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -44,7 +44,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionOutputs(
     let transaction = transaction.rptr(&env)?;
     transaction
       .typed_ref::<Transaction>()
-      .and_then(|transaction| RPtr::new(transaction.outputs()).jptr(&env))
+      .and_then(|transaction| transaction.outputs().rptr().jptr(&env))
   })
   .jresult(&env)
 }

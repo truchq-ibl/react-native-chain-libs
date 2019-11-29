@@ -1,14 +1,14 @@
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::{handle_exception, handle_exception_result, ToResult, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Address, Fee, Input, InputOutputBuilder, OutputPolicy, Payload, Value};
 
 #[no_mangle]
 pub unsafe extern "C" fn input_output_builder_empty(
   result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception(|| RPtr::new(InputOutputBuilder::empty())).response(result, error)
+  handle_exception(|| InputOutputBuilder::empty().rptr()).response(result, error)
 }
 
 #[no_mangle]
@@ -51,7 +51,7 @@ pub unsafe extern "C" fn input_output_builder_estimate_fee(
       .zip(payload.typed_ref::<Payload>())
       .map(|((io_builder, fee), payload)| io_builder.estimate_fee(fee, payload))
   })
-  .map(|value| RPtr::new(value))
+  .map(|value| value.rptr())
   .response(result, error)
 }
 
@@ -62,7 +62,7 @@ pub unsafe extern "C" fn input_output_builder_build(
   handle_exception_result(|| {
     io_builder.owned::<InputOutputBuilder>().map(|io_builder| io_builder.build())
   })
-  .map(|input_output| RPtr::new(input_output))
+  .map(|input_output| input_output.rptr())
   .response(result, error)
 }
 
@@ -81,6 +81,6 @@ pub unsafe extern "C" fn input_output_builder_seal_with_output_policy(
         io_builder.seal_with_output_policy(payload, fee_algorithm, policy).into_result()
       })
   })
-  .map(|input_output| RPtr::new(input_output))
+  .map(|input_output| input_output.rptr())
   .response(result, error)
 }

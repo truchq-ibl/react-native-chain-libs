@@ -1,7 +1,7 @@
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Account, Address, PublicKey};
 
 #[no_mangle]
@@ -11,7 +11,7 @@ pub unsafe extern "C" fn account_from_address(
   handle_exception_result(|| {
     address.typed_ref::<Address>().and_then(|address| Account::from_address(address).into_result())
   })
-  .map(|account| RPtr::new(account))
+  .map(|account| account.rptr())
   .response(result, error)
 }
 
@@ -22,6 +22,6 @@ pub unsafe extern "C" fn account_single_from_public_key(
   handle_exception_result(|| {
     key.typed_ref::<PublicKey>().map(|key| Account::single_from_public_key(key))
   })
-  .map(|account| RPtr::new(account))
+  .map(|account| account.rptr())
   .response(result, error)
 }

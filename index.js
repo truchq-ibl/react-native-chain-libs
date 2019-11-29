@@ -13,6 +13,9 @@ function b64FromUint8Array(uint8Array) {
 
 class Ptr {
     static _wrap(ptr, klass) {
+        if (ptr === '0') {
+            return undefined;
+        }
         const obj = Object.create(klass.prototype);
         obj.ptr = ptr;
         return obj;
@@ -418,8 +421,8 @@ export class FragmentId extends Ptr {
     * @param {Uint8Array} bytes
     * @returns {Promise<FragmentId>}
     */
-    static async from_bytes(bytes) {
-        const ret = await ChainLibs.fragmentIdFromBytes(b64FromUint8Array(bytes));
+    static async calculate(bytes) {
+        const ret = await ChainLibs.fragmentIdCalculate(b64FromUint8Array(bytes));
         return Ptr._wrap(ret, FragmentId);
     }
 
@@ -470,9 +473,7 @@ export class Fragment extends Ptr {
     * @returns {Promise<Transaction>}
     */
     async get_transaction() {
-        const ptr = this.ptr;
-        this.ptr = null;
-        const ret = await ChainLibs.fragmentGetTransaction(ptr);
+        const ret = await ChainLibs.fragmentGetTransaction(this.ptr);
         return Ptr._wrap(ret, Transaction);
     }
 
@@ -732,6 +733,176 @@ export class SpendingCounter extends Ptr {
 }
 
 /**
+*/
+export class Bip32PublicKey extends Ptr {
+    /**
+    * derive this private key with the given index.
+    *
+    * # Security considerations
+    *
+    * * hard derivation index cannot be soft derived with the public key
+    *
+    * # Hard derivation vs Soft derivation
+    *
+    * If you pass an index below 0x80000000 then it is a soft derivation.
+    * The advantage of soft derivation is that it is possible to derive the
+    * public key too. I.e. derivation the private key with a soft derivation
+    * index and then retrieving the associated public key is equivalent to
+    * deriving the public key associated to the parent private key.
+    *
+    * Hard derivation index does not allow public key derivation.
+    *
+    * This is why deriving the private key should not fail while deriving
+    * the public key may fail (if the derivation index is invalid).
+    * @param {number} index
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    async derive(index) {
+        const ret = await ChainLibs.bip32PublicKeyDerive(this.ptr, index);
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @returns {Promise<PublicKey>}
+    */
+    async to_raw_key() {
+        const ret = await ChainLibs.bip32PublicKeyToRawKey(this.ptr);
+        return Ptr._wrap(ret, PublicKey);
+    }
+
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.bip32PublicKeyFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.bip32PublicKeyAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+
+    /**
+    * @param {string} bech32Str
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    static async from_bech32(bech32Str) {
+        const ret = await ChainLibs.bip32PublicKeyFromBech32(bech32Str);
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @returns {Promise<string>}
+    */
+    to_bech32() {
+        return ChainLibs.bip32PublicKeyToBech32(this.ptr);
+    }
+}
+
+/**
+*/
+export class Bip32PrivateKey extends Ptr {
+    /**
+    * derive this private key with the given index.
+    *
+    * # Security considerations
+    *
+    * * hard derivation index cannot be soft derived with the public key
+    *
+    * # Hard derivation vs Soft derivation
+    *
+    * If you pass an index below 0x80000000 then it is a soft derivation.
+    * The advantage of soft derivation is that it is possible to derive the
+    * public key too. I.e. derivation the private key with a soft derivation
+    * index and then retrieving the associated public key is equivalent to
+    * deriving the public key associated to the parent private key.
+    *
+    * Hard derivation index does not allow public key derivation.
+    *
+    * This is why deriving the private key should not fail while deriving
+    * the public key may fail (if the derivation index is invalid).
+    * @param {number} index
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    async derive(index) {
+        const ret = await ChainLibs.bip32PrivateKeyDerive(this.ptr, index);
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async generate_ed25519_bip32() {
+        const ret = await ChainLibs.bip32PrivateKeyGenerateEd25519Bip32();
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<PrivateKey>}
+    */
+    async to_raw_key() {
+        const ret = await ChainLibs.bip32PrivateKeyToRawKey(this.ptr);
+        return Ptr._wrap(ret, PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<Bip32PublicKey>}
+    */
+    async to_public() {
+        const ret = await ChainLibs.bip32PrivateKeyToPublic(this.ptr);
+        return Ptr._wrap(ret, Bip32PublicKey);
+    }
+
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.bip32PrivateKeyFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.bip32PrivateKeyAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+
+    /**
+    * @param {string} bech32Str
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async from_bech32(bech32Str) {
+        const ret = await ChainLibs.bip32PrivateKeyFromBech32(bech32Str);
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+
+    /**
+    * @returns {Promise<string>}
+    */
+    to_bech32() {
+        return ChainLibs.bip32PrivateKeyToBech32(this.ptr);
+    }
+
+    /**
+    * @param {Uint8Array} entropy
+    * @param {Uint8Array} password
+    * @returns {Promise<Bip32PrivateKey>}
+    */
+    static async from_bip39_entropy(entropy, password) {
+        const ret = await ChainLibs.bip32PrivateKeyFromBip39Entropy(b64FromUint8Array(entropy), b64FromUint8Array(password));
+        return Ptr._wrap(ret, Bip32PrivateKey);
+    }
+}
+
+/**
 * Structure that proofs that certain user agrees with
 * some data. This structure is used to sign `Transaction`
 * and get `SignedTransaction` out.
@@ -770,6 +941,21 @@ export class Witness extends Ptr {
         const secretKeyPtr = Ptr._assertClass(secretKey, PrivateKey);
         const accountSpendingCounterPtr = Ptr._assertClass(accountSpendingCounter, SpendingCounter);
         const ret = await ChainLibs.witnessForAccount(genesisHashPtr, transactionIdPtr, secretKeyPtr, accountSpendingCounterPtr);
+        return Ptr._wrap(ret, Witness);
+    }
+
+    /**
+    * Generate Witness for an utxo-based transaction Input
+    * @param {Hash} genesisHash
+    * @param {TransactionSignDataHash} transactionId
+    * @param {Bip32PrivateKey} secretKey
+    * @returns {Promise<Witness>}
+    */
+    static async for_legacy_icarus_utxo(genesisHash, transactionId, secretKey) {
+        const genesisHashPtr = Ptr._assertClass(genesisHash, Hash);
+        const transactionIdPtr = Ptr._assertClass(transactionId, TransactionSignDataHash);
+        const secretKeyPtr = Ptr._assertClass(secretKey, Bip32PrivateKey);
+        const ret = await ChainLibs.witnessForLegacyIcarusUtxo(genesisHashPtr, transactionIdPtr, secretKeyPtr);
         return Ptr._wrap(ret, Witness);
     }
 }
@@ -826,13 +1012,18 @@ export class PayloadAuthData extends Ptr {
 
 /**
 */
+export class TransactionBindingAuthData extends Ptr {
+}
+
+/**
+*/
 export class TransactionBuilderSetAuthData extends Ptr {
     /**
     * @returns {Promise<TransactionBindingAuthData>}
     */
     async get_auth_data() {
         const ret = await ChainLibs.transactionBuilderSetAuthDataGetAuthData(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, TransactionBindingAuthData);
     }
 
     /**
@@ -1079,6 +1270,59 @@ export class StakeDelegationAuthData extends Ptr {
 }
 
 /**
+* Set the choice of delegation:
+*
+* * No delegation
+* * Full delegation of this account to a specific pool
+* * Ratio of stake to multiple pools
+*/
+export class DelegationType extends Ptr {
+    /**
+    * @returns {Promise<DelegationType>}
+    */
+    static async non_delegated() {
+        const ret = await ChainLibs.delegationTypeNonDelegated();
+        return Ptr._wrap(ret, DelegationType);
+    }
+
+    /**
+    * @param {PoolId} poolId
+    * @returns {Promise<DelegationType>}
+    */
+    static async full(poolId) {
+        const poolIdPtr = Ptr._assertClass(poolId, Ptr);
+        const ret = await ChainLibs.delegationTypeFull(poolIdPtr);
+        return Ptr._wrap(ret, DelegationType);
+    }
+
+    /**
+    * @param {DelegationRatio} r
+    * @returns {Promise<DelegationType>}
+    */
+    static async ratio(r) {
+        const rPtr = Ptr._assertClass(r, Ptr);
+        const ret = await ChainLibs.delegationTypeRatio(rPtr);
+        return Ptr._wrap(ret, DelegationType);
+    }
+
+    /**
+    * @returns {Promise<number>}
+    */
+    async get_kind() {
+        const ret = await ChainLibs.delegationTypeGetKind(this.ptr);
+        return ret;
+    }
+    
+    /**
+    * @returns {Promise<PoolId | undefined>}
+    */
+    async get_full() {
+        const ret = await ChainLibs.delegationTypeGetFull(this.ptr);
+        return Ptr._wrap(ret, Ptr);
+    }
+}
+
+/**
 */
 export class StakeDelegation extends Ptr {
     /**
@@ -1131,7 +1375,7 @@ export class Certificate extends Ptr {
     * @returns {Promise<Certificate>}
     */
     static async stake_pool_registration(poolRegistration) {
-        const poolRegistrationPtr = Ptr._assertClass(poolRegistration, PoolRegistration);
+        const poolRegistrationPtr = Ptr._assertClass(poolRegistration, Ptr);
         const ret = await ChainLibs.certificateStakePoolRegistration(poolRegistrationPtr);
         return Ptr._wrap(ret, Certificate);
     }
@@ -1142,7 +1386,7 @@ export class Certificate extends Ptr {
     * @returns {Promise<Certificate>}
     */
     static async stake_pool_retirement(poolRetirement) {
-        const poolRetirementPtr = Ptr._assertClass(poolRetirement, PoolRetirement);
+        const poolRetirementPtr = Ptr._assertClass(poolRetirement, Ptr);
         const ret = await ChainLibs.certificateStakePoolRetirement(poolRetirementPtr);
         return Ptr._wrap(ret, Certificate);
     }
@@ -1198,178 +1442,8 @@ export class AccountBindingSignature extends Ptr {
     */
     static async new_single(privateKey, authData) {
         const privateKeyPtr = Ptr._assertClass(privateKey, PrivateKey);
-        const authDataPtr = Ptr._assertClass(authData, Ptr);
+        const authDataPtr = Ptr._assertClass(authData, TransactionBindingAuthData);
         const ret = await ChainLibs.accountBindingSignatureNewSingle(privateKeyPtr, authDataPtr);
         return Ptr._wrap(ret, AccountBindingSignature);
-    }
-}
-
-/**
-*/
-export class Bip32PrivateKey extends Ptr {
-    /**
-    * derive this private key with the given index.
-    *
-    * # Security considerations
-    *
-    * * hard derivation index cannot be soft derived with the public key
-    *
-    * # Hard derivation vs Soft derivation
-    *
-    * If you pass an index below 0x80000000 then it is a soft derivation.
-    * The advantage of soft derivation is that it is possible to derive the
-    * public key too. I.e. derivation the private key with a soft derivation
-    * index and then retrieving the associated public key is equivalent to
-    * deriving the public key associated to the parent private key.
-    *
-    * Hard derivation index does not allow public key derivation.
-    *
-    * This is why deriving the private key should not fail while deriving
-    * the public key may fail (if the derivation index is invalid).
-    * @param {number} index
-    * @returns {Promise<Bip32PrivateKey>}
-    */
-    async derive(index) {
-        const ret = await ChainLibs.bip32PrivateKeyDerive(this.ptr, index);
-        return Ptr._wrap(ret, Bip32PrivateKey);
-    }
-
-    /**
-    * @returns {Promise<Bip32PrivateKey>}
-    */
-    static async generate_ed25519_bip32() {
-        const ret = await ChainLibs.bip32PrivateKeyGenerateEd25519Bip32();
-        return Ptr._wrap(ret, Bip32PrivateKey);
-    }
-
-    /**
-    * @returns {Promise<PrivateKey>}
-    */
-    async to_raw_key() {
-        const ret = await ChainLibs.bip32PrivateKeyToRawKey(this.ptr);
-        return Ptr._wrap(ret, PrivateKey);
-    }
-
-    /**
-    * @returns {Promise<Bip32PublicKey>}
-    */
-    async to_public() {
-        const ret = await ChainLibs.bip32PrivateKeyToPublic(this.ptr);
-        return Ptr._wrap(ret, Bip32PublicKey);
-    }
-
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {Promise<Bip32PrivateKey>}
-    */
-    static async from_bytes(bytes) {
-        const ret = await ChainLibs.bip32PrivateKeyFromBytes(b64FromUint8Array(bytes));
-        return Ptr._wrap(ret, Bip32PrivateKey);
-    }
-
-    /**
-    * @returns {Promise<Uint8Array>}
-    */
-    async as_bytes() {
-        const b64 = await ChainLibs.bip32PrivateKeyAsBytes(this.ptr);
-        return Uint8ArrayFromB64(b64);
-    }
-
-    /**
-    * @param {string} bech32Str
-    * @returns {Promise<Bip32PrivateKey>}
-    */
-    static async from_bech32(bech32Str) {
-        const ret = await ChainLibs.bip32PrivateKeyFromBech32(bech32Str);
-        return Ptr._wrap(ret, Bip32PrivateKey);
-    }
-
-    /**
-    * @returns {Promise<string>}
-    */
-    to_bech32() {
-        return ChainLibs.bip32PrivateKeyToBech32(this.ptr);
-    }
-
-    /**
-    * @param {Uint8Array} entropy
-    * @param {Uint8Array} password
-    * @returns {Promise<Bip32PrivateKey>}
-    */
-    static async from_bip39_entropy(entropy, password) {
-        const ret = await ChainLibs.bip32PrivateKeyFromBip39Entropy(b64FromUint8Array(entropy), b64FromUint8Array(password));
-        return Ptr._wrap(ret, Bip32PrivateKey);
-    }
-}
-
-/**
-*/
-export class Bip32PublicKey extends Ptr {
-    /**
-    * derive this private key with the given index.
-    *
-    * # Security considerations
-    *
-    * * hard derivation index cannot be soft derived with the public key
-    *
-    * # Hard derivation vs Soft derivation
-    *
-    * If you pass an index below 0x80000000 then it is a soft derivation.
-    * The advantage of soft derivation is that it is possible to derive the
-    * public key too. I.e. derivation the private key with a soft derivation
-    * index and then retrieving the associated public key is equivalent to
-    * deriving the public key associated to the parent private key.
-    *
-    * Hard derivation index does not allow public key derivation.
-    *
-    * This is why deriving the private key should not fail while deriving
-    * the public key may fail (if the derivation index is invalid).
-    * @param {number} index
-    * @returns {Promise<Bip32PublicKey>}
-    */
-    async derive(index) {
-        const ret = await ChainLibs.bip32PublicKeyDerive(this.ptr, index);
-        return Ptr._wrap(ret, Bip32PublicKey);
-    }
-
-    /**
-    * @returns {Promise<PublicKey>}
-    */
-    async to_raw_key() {
-        const ret = await ChainLibs.bip32PublicKeyToRawKey(this.ptr);
-        return Ptr._wrap(ret, PublicKey);
-    }
-
-    /**
-    * @param {Uint8Array} bytes
-    * @returns {Promise<Bip32PublicKey>}
-    */
-    static async from_bytes(bytes) {
-        const ret = await ChainLibs.bip32PublicKeyFromBytes(b64FromUint8Array(bytes));
-        return Ptr._wrap(ret, Bip32PublicKey);
-    }
-
-    /**
-    * @returns {Promise<Uint8Array>}
-    */
-    async as_bytes() {
-        const b64 = await ChainLibs.bip32PublicKeyAsBytes(this.ptr);
-        return Uint8ArrayFromB64(b64);
-    }
-
-    /**
-    * @param {string} bech32Str
-    * @returns {Promise<Bip32PublicKey>}
-    */
-    static async from_bech32(bech32Str) {
-        const ret = await ChainLibs.bip32PublicKeyFromBech32(bech32Str);
-        return Ptr._wrap(ret, Bip32PublicKey);
-    }
-
-    /**
-    * @returns {Promise<string>}
-    */
-    to_bech32() {
-        return ChainLibs.bip32PublicKeyToBech32(this.ptr);
     }
 }

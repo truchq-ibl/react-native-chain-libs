@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -12,7 +12,7 @@ use js_chain_libs::{Address, OutputPolicy};
 pub extern "C" fn Java_io_emurgo_chainlibs_Native_outputPolicyForget(
   env: JNIEnv, _: JObject
 ) -> jobject {
-  handle_exception_result(|| RPtr::new(OutputPolicy::forget()).jptr(&env)).jresult(&env)
+  handle_exception_result(|| OutputPolicy::forget().rptr().jptr(&env)).jresult(&env)
 }
 
 #[allow(non_snake_case)]
@@ -22,9 +22,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputPolicyOne(
 ) -> jobject {
   handle_exception_result(|| {
     let address = address.rptr(&env)?;
-    address
-      .typed_ref::<Address>()
-      .and_then(|address| RPtr::new(OutputPolicy::one(address)).jptr(&env))
+    address.typed_ref::<Address>().and_then(|address| OutputPolicy::one(address).rptr().jptr(&env))
   })
   .jresult(&env)
 }

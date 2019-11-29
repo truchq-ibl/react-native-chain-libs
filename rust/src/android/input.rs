@@ -2,7 +2,7 @@ use super::primitive::ToPrimitiveObject;
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::{jlong, jobject};
 use jni::JNIEnv;
@@ -20,7 +20,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputFromAccount(
       .typed_ref::<Account>()
       .zip(v.typed_ref::<Value>())
       .map(|(account, v)| Input::from_account(account, v))
-      .and_then(|input| RPtr::new(input).jptr(&env))
+      .and_then(|input| input.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputValue(
 ) -> jobject {
   handle_exception_result(|| {
     let input = input.rptr(&env)?;
-    input.typed_ref::<Input>().and_then(|input| RPtr::new(input.value()).jptr(&env))
+    input.typed_ref::<Input>().and_then(|input| input.value().rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -42,7 +42,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputValue(
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsNew(
   env: JNIEnv, _: JObject
 ) -> jobject {
-  handle_exception_result(|| RPtr::new(Inputs::new()).jptr(&env)).jresult(&env)
+  handle_exception_result(|| Inputs::new().rptr().jptr(&env)).jresult(&env)
 }
 
 #[allow(non_snake_case)]
@@ -70,7 +70,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputsGet(
     inputs
       .typed_ref::<Inputs>()
       .map(|inputs| inputs.get(usize::from_jlong(index)))
-      .and_then(|input| RPtr::new(input).jptr(&env))
+      .and_then(|input| input.rptr().jptr(&env))
   })
   .jresult(&env)
 }

@@ -6,14 +6,14 @@ use std::mem;
 
 use super::string::ToString;
 use crate::panic::{Result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 
 pub type JRPtr<'a> = JObject<'a>;
 
 pub struct RPtrRef(RPtr);
 
 impl RPtrRef {
-  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&mut T> {
+  pub unsafe fn typed_ref<T: RPtrRepresentable>(&self) -> Result<&mut T> {
     self.0.typed_ref::<T>()
   }
 
@@ -32,7 +32,7 @@ pub trait ToJniPtr {
 
 pub trait FromJniPtr {
   fn rptr<'a>(self, env: &'a JNIEnv) -> Result<RPtrRef>;
-  unsafe fn owned<'a, T: Sized + 'static>(self, env: &'a JNIEnv) -> Result<T>;
+  unsafe fn owned<'a, T: RPtrRepresentable>(self, env: &'a JNIEnv) -> Result<T>;
   unsafe fn free<'a>(self, env: &'a JNIEnv) -> Result<()>;
 }
 
@@ -96,7 +96,7 @@ impl<'a> FromJniPtr for JRPtr<'a> {
       .into_result()
   }
 
-  unsafe fn owned<T: Sized + 'static>(self, env: &JNIEnv) -> Result<T> {
+  unsafe fn owned<T: RPtrRepresentable>(self, env: &JNIEnv) -> Result<T> {
     self
       .rptr(env)
       .and_then(|rptr| rptr.to_ptr().owned::<T>())

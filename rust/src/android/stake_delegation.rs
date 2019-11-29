@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -19,7 +19,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationNew(
       .typed_ref::<DelegationType>()
       .zip(account.typed_ref::<PublicKey>())
       .map(|(delegation_type, account)| StakeDelegation::new(delegation_type, account))
-      .and_then(|stake_delegation| RPtr::new(stake_delegation).jptr(&env))
+      .and_then(|stake_delegation| stake_delegation.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -34,7 +34,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationDelegati
     stake_delegation
       .typed_ref::<StakeDelegation>()
       .map(|stake_delegation| stake_delegation.delegation_type())
-      .and_then(|delegation_type| RPtr::new(delegation_type).jptr(&env))
+      .and_then(|delegation_type| delegation_type.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -49,7 +49,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationAccount(
     stake_delegation
       .typed_ref::<StakeDelegation>()
       .map(|stake_delegation| stake_delegation.account())
-      .and_then(|account_identifier| RPtr::new(account_identifier).jptr(&env))
+      .and_then(|account_identifier| account_identifier.rptr().jptr(&env))
   })
   .jresult(&env)
 }

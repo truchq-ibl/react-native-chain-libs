@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -23,7 +23,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_feeLinearFee(
       .map(|((constant, coefficient), certificate)| {
         Fee::linear_fee(constant, coefficient, certificate)
       })
-      .and_then(|fee| RPtr::new(fee).jptr(&env))
+      .and_then(|fee| fee.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -40,7 +40,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_feeCalculate(
       .typed_ref::<Fee>()
       .zip(tx.typed_ref::<Transaction>())
       .map(|(fee, tx)| fee.calculate(tx))
-      .and_then(|value| RPtr::new(value).jptr(&env))
+      .and_then(|value| value.rptr().jptr(&env))
   })
   .jresult(&env)
 }

@@ -1,7 +1,7 @@
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::{handle_exception_result, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{FragmentId, UtxoPointer, Value};
 
 #[no_mangle]
@@ -14,6 +14,6 @@ pub unsafe extern "C" fn utxo_pointer_new(
       .zip(value.typed_ref::<Value>())
       .map(|(fragment_id, value)| UtxoPointer::new(fragment_id, output_index, value))
   })
-  .map(|utxo_pointer| RPtr::new(utxo_pointer))
+  .map(|utxo_pointer| utxo_pointer.rptr())
   .response(result, error)
 }

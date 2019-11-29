@@ -417,6 +417,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
+    public final void witnessForLegacyIcarusUtxo(String genesisHash, String transactionId, String secretKey, Promise promise) {
+        Native.I
+                .witnessForLegacyIcarusUtxo(new RPtr(genesisHash), new RPtr(transactionId), new RPtr(secretKey))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // PrivateKey
 
     @ReactMethod
@@ -551,9 +559,9 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // FragmentId
 
     @ReactMethod
-    public final void fragmentIdFromBytes(String bytes, Promise promise) {
+    public final void fragmentIdCalculate(String bytes, Promise promise) {
         Native.I
-                .fragmentIdFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .fragmentIdCalculate(Base64.decode(bytes, Base64.DEFAULT))
                 .map(RPtr::toJs)
                 .pour(promise);
     }
@@ -968,6 +976,43 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void bip32PublicKeyToBech32(String bip32PublicKey, Promise promise) {
         Native.I
                 .bip32PublicKeyToBech32(new RPtr(bip32PublicKey))
+                .pour(promise);
+    }
+
+    // DelegationType
+
+    public final void delegationTypeNonDelegated(Promise promise) {
+        Native.I
+                .delegationTypeNonDelegated()
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void delegationTypeFull(String poolId, Promise promise) {
+        Native.I
+                .delegationTypeFull(new RPtr(poolId))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void delegationTypeRatio(String r, Promise promise) {
+        Native.I
+                .delegationTypeRatio(new RPtr(r))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void delegationTypeGetKind(String delegationType, Promise promise) {
+        Native.I
+                .delegationTypeGetKind(new RPtr(delegationType))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    public final void delegationTypeGetFull(String delegationType, Promise promise) {
+        Native.I
+                .delegationTypeGetFull(new RPtr(delegationType))
+                .map(RPtr::toJs)
                 .pour(promise);
     }
 

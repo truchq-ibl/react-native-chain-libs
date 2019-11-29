@@ -74,40 +74,66 @@ await ioBuilder.add_input(input);
 
 input.free();
 
-await ioBuilder.add_output(
-    await Address.from_string(
-        'ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn'
-    ),
-    await Value.from_str('500')
+const address = await Address.from_string(
+    'ca1q5nr5pvt9e5p009strshxndrsx5etcentslp2rwj6csm8sfk24a2w3swacn'
 );
+
+const value500 = await Value.from_str('500');
+
+await ioBuilder.add_output(
+    address,
+    value500,
+);
+
+address.free();
+value500.free();
+
+const value20 = await Value.from_str('20');
+const value5 = await Value.from_str('5');
+const value0 = await Value.from_str('0');
 
 const feeAlgorithm = await Fee.linear_fee(
     // constant fee
-    await Value.from_str('20'),
+    value20,
     // coefficient
-    await Value.from_str('5'),
+    value5,
     // certificate cost
-    await Value.from_str('0')
+    value0,
 );
 
-const IOs = await ioBuilder.seal_with_output_policy(
-    await Payload.no_payload(),
-    feeAlgorithm,
-    await OutputPolicy.one(accountInputAddress)
-);
+value20.free();
+value5.free();
+value0.free();
+
+const payload = await Payload.no_payload();
+const policy = await OutputPolicy.one(accountInputAddress);
 
 accountInputAddress.free();
 
+const IOs = await ioBuilder.seal_with_output_policy(
+    payload,
+    feeAlgorithm,
+    policy,
+);
+
+payload.free();
 feeAlgorithm.free();
+policy.free();
+
+const inputs = await IOs.inputs();
+const outputs = await IOs.outputs();
+
+IOs.free();
 
 const txBuilderSetIOs = await (await TransactionBuilder.new()).no_payload();
 
 const txBuilderSetWitness = await txBuilderSetIOs.set_ios(
-    await IOs.inputs(),
-    await IOs.outputs()
+    inputs,
+    outputs,
 );
 
-IOs.free();
+inputs.free();
+outputs.free();
 
 // Sign the transaction
 // We need the genesis hash, the transaction id and the input account private key
@@ -118,17 +144,22 @@ const privateKey = await PrivateKey.from_bech32(
     'ed25519e_sk1gz0ff4w444nwejap5shxrllypz5euswq6wn04fffzes02atw99xkd4jn838v3vrfg9eqt7f4sxjlsy0tdcmj0d2dqvwc8ztwgyfnwyszvjg32'
 );
 
+const hash = await Hash.from_hex(genesisHash);
+
+const accountSpendingCounter = await SpendingCounter.zero();
+
 const witness = await Witness.for_account(
-    await Hash.from_hex(genesisHash),
+    hash,
     await txBuilderSetWitness.get_auth_data_for_witness(),
     privateKey,
-    await SpendingCounter.zero()
+    accountSpendingCounter,
 );
 
+hash.free();
 privateKey.free();
+accountSpendingCounter.free();
 
 const witnesses = await Witnesses.new();
-
 await witnesses.add(witness);
 
 const txBuilderSetAuthData = await txBuilderSetWitness.set_witnesses(witnesses);

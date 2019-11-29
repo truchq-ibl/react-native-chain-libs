@@ -1,7 +1,7 @@
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::InputOutput;
 
 #[no_mangle]
@@ -11,7 +11,7 @@ pub unsafe extern "C" fn input_output_inputs(
   handle_exception_result(|| {
     input_output.typed_ref::<InputOutput>().map(|input_output| input_output.inputs())
   })
-  .map(|inputs| RPtr::new(inputs))
+  .map(|inputs| inputs.rptr())
   .response(result, error)
 }
 
@@ -22,6 +22,6 @@ pub unsafe extern "C" fn input_output_outputs(
   handle_exception_result(|| {
     input_output.typed_ref::<InputOutput>().map(|input_output| input_output.outputs())
   })
-  .map(|outputs| RPtr::new(outputs))
+  .map(|outputs| outputs.rptr())
   .response(result, error)
 }

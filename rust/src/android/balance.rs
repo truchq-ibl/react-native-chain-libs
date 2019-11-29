@@ -2,7 +2,7 @@ use super::primitive::ToPrimitiveObject;
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::{jboolean, jobject};
 use jni::JNIEnv;
@@ -55,7 +55,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_balanceGetValue(
 ) -> jobject {
   handle_exception_result(|| {
     let balance = balance.rptr(&env)?;
-    balance.typed_ref::<Balance>().and_then(|balance| RPtr::new(balance.get_value()).jptr(&env))
+    balance.typed_ref::<Balance>().and_then(|balance| balance.get_value().rptr().jptr(&env))
   })
   .jresult(&env)
 }

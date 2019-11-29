@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -17,7 +17,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_accountFromAddress(
     address
       .typed_ref::<Address>()
       .and_then(|address| Account::from_address(address).into_result())
-      .and_then(|account| RPtr::new(account).jptr(&env))
+      .and_then(|account| account.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_accountSingleFromPublic
     key
       .typed_ref::<PublicKey>()
       .map(|key| Account::single_from_public_key(key))
-      .and_then(|account| RPtr::new(account).jptr(&env))
+      .and_then(|account| account.rptr().jptr(&env))
   })
   .jresult(&env)
 }

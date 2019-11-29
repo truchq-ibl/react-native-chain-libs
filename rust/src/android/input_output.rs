@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -17,7 +17,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputInputs(
     input_output
       .typed_ref::<InputOutput>()
       .map(|input_output| input_output.inputs())
-      .and_then(|inputs| RPtr::new(inputs).jptr(&env))
+      .and_then(|inputs| inputs.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputOutputs(
     input_output
       .typed_ref::<InputOutput>()
       .map(|input_output| input_output.outputs())
-      .and_then(|outputs| RPtr::new(outputs).jptr(&env))
+      .and_then(|outputs| outputs.rptr().jptr(&env))
   })
   .jresult(&env)
 }

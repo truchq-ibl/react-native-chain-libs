@@ -5,6 +5,7 @@ mod balance;
 mod bip32_private_key;
 mod bip32_public_key;
 mod certificate;
+mod delegation_type;
 mod fee;
 mod fragment;
 mod fragment_id;

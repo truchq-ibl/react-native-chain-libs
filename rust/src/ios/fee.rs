@@ -1,7 +1,7 @@
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::{handle_exception_result, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Fee, Transaction, Value};
 
 #[no_mangle]
@@ -17,7 +17,7 @@ pub unsafe extern "C" fn fee_linear_fee(
         Fee::linear_fee(constant, coefficient, certificate)
       })
   })
-  .map(|fee| RPtr::new(fee))
+  .map(|fee| fee.rptr())
   .response(result, error)
 }
 
@@ -28,6 +28,6 @@ pub unsafe extern "C" fn fee_calculate(
   handle_exception_result(|| {
     fee.typed_ref::<Fee>().zip(tx.typed_ref::<Transaction>()).map(|(fee, tx)| fee.calculate(tx))
   })
-  .map(|value| RPtr::new(value))
+  .map(|value| value.rptr())
   .response(result, error)
 }

@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -17,7 +17,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateStakeDelegat
     stake_delegation
       .typed_ref::<StakeDelegation>()
       .map(|stake_delegation| Certificate::stake_delegation(stake_delegation))
-      .and_then(|certificate| RPtr::new(certificate).jptr(&env))
+      .and_then(|certificate| certificate.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateStakePoolReg
     pool_registration
       .typed_ref::<PoolRegistration>()
       .map(|pool_registration| Certificate::stake_pool_registration(pool_registration))
-      .and_then(|certificate| RPtr::new(certificate).jptr(&env))
+      .and_then(|certificate| certificate.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -47,7 +47,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateStakePoolRet
     pool_retirement
       .typed_ref::<PoolRetirement>()
       .map(|pool_retirement| Certificate::stake_pool_retirement(pool_retirement))
-      .and_then(|certificate| RPtr::new(certificate).jptr(&env))
+      .and_then(|certificate| certificate.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -62,7 +62,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateGetType(
     certificate
       .typed_ref::<Certificate>()
       .map(|certificate| certificate.get_type())
-      .and_then(|certificate_type| RPtr::new(certificate_type).jptr(&env))
+      .and_then(|certificate_type| certificate_type.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -77,7 +77,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateGetStakeDele
     certificate
       .typed_ref::<Certificate>()
       .and_then(|certificate| certificate.get_stake_delegation().into_result())
-      .and_then(|stake_delegation| RPtr::new(stake_delegation).jptr(&env))
+      .and_then(|stake_delegation| stake_delegation.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -92,7 +92,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateGetOwnerStak
     certificate
       .typed_ref::<Certificate>()
       .and_then(|certificate| certificate.get_owner_stake_delegation().into_result())
-      .and_then(|owner_stake_delegation| RPtr::new(owner_stake_delegation).jptr(&env))
+      .and_then(|owner_stake_delegation| owner_stake_delegation.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -107,7 +107,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateGetPoolRegis
     certificate
       .typed_ref::<Certificate>()
       .and_then(|certificate| certificate.get_pool_registration().into_result())
-      .and_then(|pool_registration| RPtr::new(pool_registration).jptr(&env))
+      .and_then(|pool_registration| pool_registration.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -122,7 +122,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateGetPoolRetir
     certificate
       .typed_ref::<Certificate>()
       .and_then(|certificate| certificate.get_pool_retirement().into_result())
-      .and_then(|pool_retirement| RPtr::new(pool_retirement).jptr(&env))
+      .and_then(|pool_retirement| pool_retirement.rptr().jptr(&env))
   })
   .jresult(&env)
 }

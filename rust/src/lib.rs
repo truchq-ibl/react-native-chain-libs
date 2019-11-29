@@ -5,6 +5,7 @@ mod address;
 mod js_result;
 mod panic;
 mod ptr;
+mod ptr_impl;
 
 pub use address::*;
 pub use ptr::*;

@@ -6,7 +6,7 @@ use super::ptr_j::*;
 use super::result::ToJniResult;
 use super::string::*;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 
 use crate::js_chain_libs::PublicKey;
 
@@ -18,7 +18,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_publicKeyFromBech32(
   handle_exception_result(|| {
     let rstr = bech32_str.string(&env)?;
     let val = PublicKey::from_bech32(&rstr).into_result()?;
-    RPtr::new(val).jptr(&env)
+    val.rptr().jptr(&env)
   })
   .jresult(&env)
 }

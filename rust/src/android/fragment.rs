@@ -2,7 +2,7 @@ use super::primitive::ToPrimitiveObject;
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::{jboolean, jobject};
 use jni::JNIEnv;
@@ -18,7 +18,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentFromTransaction
     tx_ptr
       .typed_ref::<Transaction>()
       .map(|tx| Fragment::from_transaction(tx))
-      .and_then(|fragment| RPtr::new(fragment).jptr(&env))
+      .and_then(|fragment| fragment.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -26,13 +26,14 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentFromTransaction
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentGetTransaction(
-  env: JNIEnv, _: JObject, ptr: JRPtr
+  env: JNIEnv, _: JObject, fragment: JRPtr
 ) -> jobject {
   handle_exception_result(|| {
-    ptr
-      .owned::<Fragment>(&env)
+    let fragment = fragment.rptr(&env)?;
+    fragment
+      .typed_ref::<Fragment>()
       .and_then(|fragment| fragment.get_transaction().into_result())
-      .and_then(|tx| RPtr::new(tx).jptr(&env))
+      .and_then(|tx| tx.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -200,10 +201,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_fragmentId(
 ) -> jobject {
   handle_exception_result(|| {
     let rptr = ptr.rptr(&env)?;
-    rptr
-      .typed_ref::<Fragment>()
-      .map(|fragment| fragment.id())
-      .and_then(|id| RPtr::new(id).jptr(&env))
+    rptr.typed_ref::<Fragment>().map(|fragment| fragment.id()).and_then(|id| id.rptr().jptr(&env))
   })
   .jresult(&env)
 }

@@ -2,7 +2,7 @@ use super::data::DataPtr;
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Fragment, Transaction};
 
 #[no_mangle]
@@ -10,18 +10,18 @@ pub unsafe extern "C" fn fragment_from_transaction(
   tx: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| tx.typed_ref::<Transaction>().map(|tx| Fragment::from_transaction(tx)))
-    .map(|fragment| RPtr::new(fragment))
+    .map(|fragment| fragment.rptr())
     .response(result, error)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn fragment_get_transaction(
-  fragment: &mut RPtr, result: &mut RPtr, error: &mut CharPtr
+  fragment: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
-    fragment.owned::<Fragment>().and_then(|fragment| fragment.get_transaction().into_result())
+    fragment.typed_ref::<Fragment>().and_then(|fragment| fragment.get_transaction().into_result())
   })
-  .map(|tx| RPtr::new(tx))
+  .map(|tx| tx.rptr())
   .response(result, error)
 }
 
@@ -139,6 +139,6 @@ pub unsafe extern "C" fn fragment_id(
   fragment: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| fragment.typed_ref::<Fragment>().map(|fragment| fragment.id()))
-    .map(|fragment_id| RPtr::new(fragment_id))
+    .map(|fragment_id| fragment_id.rptr())
     .response(result, error)
 }

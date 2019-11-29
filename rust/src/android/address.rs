@@ -5,7 +5,7 @@ use super::string::ToJniString;
 use super::string::*;
 use crate::address::AddressDiscrimination;
 use crate::panic::{handle_exception_result, ToResult, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::{JObject, JString};
 use jni::sys::{jint, jobject};
 use jni::JNIEnv;
@@ -40,7 +40,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_addressFromString(
     string
       .string(&env)
       .and_then(|rstr| Address::from_string(&rstr).into_result())
-      .and_then(|address| RPtr::new(address).jptr(&env))
+      .and_then(|address| address.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -72,7 +72,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressSingleFromPublic
       .map(|key| {
         Address::single_from_public_key(key, AddressDiscrimination::from(discrimination).into())
       })
-      .and_then(|address| RPtr::new(address).jptr(&env))
+      .and_then(|address| address.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -95,7 +95,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressDelegationFromPu
           AddressDiscrimination::from(discrimination).into()
         )
       })
-      .and_then(|address| RPtr::new(address).jptr(&env))
+      .and_then(|address| address.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -112,7 +112,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressAccountFromPubli
       .map(|key| {
         Address::account_from_public_key(key, AddressDiscrimination::from(discrimination).into())
       })
-      .and_then(|address| RPtr::new(address).jptr(&env))
+      .and_then(|address| address.rptr().jptr(&env))
   })
   .jresult(&env)
 }

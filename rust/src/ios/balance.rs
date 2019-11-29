@@ -2,7 +2,7 @@ use super::result::CResult;
 use super::string::CharPtr;
 use crate::js_chain_libs::Balance;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 
 #[no_mangle]
 pub unsafe extern "C" fn balance_is_positive(
@@ -33,6 +33,6 @@ pub unsafe extern "C" fn balance_get_value(
   balance: RPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| balance.typed_ref::<Balance>().map(|balance| balance.get_value()))
-    .map(|value| RPtr::new(value))
+    .map(|value| value.rptr())
     .response(result, error)
 }

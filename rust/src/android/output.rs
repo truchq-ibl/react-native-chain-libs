@@ -2,7 +2,7 @@ use super::primitive::ToPrimitiveObject;
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::{jlong, jobject};
 use jni::JNIEnv;
@@ -18,7 +18,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputAddress(
     output
       .typed_ref::<Output>()
       .map(|output| output.address())
-      .and_then(|address| RPtr::new(address).jptr(&env))
+      .and_then(|address| address.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -33,7 +33,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputValue(
     output
       .typed_ref::<Output>()
       .map(|output| output.value())
-      .and_then(|value| RPtr::new(value).jptr(&env))
+      .and_then(|value| value.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -43,7 +43,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputValue(
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputsNew(
   env: JNIEnv, _: JObject
 ) -> jobject {
-  handle_exception_result(|| RPtr::new(Outputs::new()).jptr(&env)).jresult(&env)
+  handle_exception_result(|| Outputs::new().rptr().jptr(&env)).jresult(&env)
 }
 
 #[allow(non_snake_case)]
@@ -71,7 +71,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_outputsGet(
     outputs
       .typed_ref::<Outputs>()
       .map(|outputs| outputs.get(usize::from_jlong(index)))
-      .and_then(|output| RPtr::new(output).jptr(&env))
+      .and_then(|output| output.rptr().jptr(&env))
   })
   .jresult(&env)
 }

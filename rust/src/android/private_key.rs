@@ -2,7 +2,7 @@ use super::ptr_j::*;
 use super::result::ToJniResult;
 use super::string::ToString;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::{JObject, JString};
 use jni::sys::{jbyteArray, jobject};
 use jni::JNIEnv;
@@ -17,7 +17,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyFromBech32(
     bech32_str
       .string(&env)
       .and_then(|bech32_str| PrivateKey::from_bech32(&bech32_str).into_result())
-      .and_then(|private_key| RPtr::new(private_key).jptr(&env))
+      .and_then(|private_key| private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -29,9 +29,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyToPublic(
 ) -> jobject {
   handle_exception_result(|| {
     let rptr = ptr.rptr(&env)?;
-    rptr
-      .typed_ref::<PrivateKey>()
-      .and_then(|private_key| RPtr::new(private_key.to_public()).jptr(&env))
+    rptr.typed_ref::<PrivateKey>().and_then(|private_key| private_key.to_public().rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -46,7 +44,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_privateKeyFromExtendedBytes(
       .convert_byte_array(bytes)
       .into_result()
       .and_then(|bytes| PrivateKey::from_extended_bytes(&bytes).into_result())
-      .and_then(|private_key| RPtr::new(private_key).jptr(&env))
+      .and_then(|private_key| private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }

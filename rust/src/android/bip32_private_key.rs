@@ -3,7 +3,7 @@ use super::result::ToJniResult;
 use super::string::ToJniString;
 use super::string::ToString;
 use crate::panic::{handle_exception_result, ToResult, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::{JObject, JString};
 use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
@@ -19,7 +19,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyDerive(
     bip_32_private_key
       .typed_ref::<Bip32PrivateKey>()
       .map(|bip_32_private_key| bip_32_private_key.derive(index as u32))
-      .and_then(|bip_32_private_key| RPtr::new(bip_32_private_key).jptr(&env))
+      .and_then(|bip_32_private_key| bip_32_private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyGenerate
   handle_exception_result(|| {
     Bip32PrivateKey::generate_ed25519_bip32()
       .into_result()
-      .and_then(|bip_32_private_key| RPtr::new(bip_32_private_key).jptr(&env))
+      .and_then(|bip_32_private_key| bip_32_private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -47,7 +47,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyToRawKey
     bip_32_private_key
       .typed_ref::<Bip32PrivateKey>()
       .map(|bip_32_private_key| bip_32_private_key.to_raw_key())
-      .and_then(|private_key| RPtr::new(private_key).jptr(&env))
+      .and_then(|private_key| private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -62,7 +62,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyToPublic
     bip_32_private_key
       .typed_ref::<Bip32PrivateKey>()
       .map(|bip_32_private_key| bip_32_private_key.to_public())
-      .and_then(|bip_32_public_key| RPtr::new(bip_32_public_key).jptr(&env))
+      .and_then(|bip_32_public_key| bip_32_public_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -77,7 +77,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyFromByte
       .convert_byte_array(bytes)
       .into_result()
       .and_then(|bytes| Bip32PrivateKey::from_bytes(&bytes).into_result())
-      .and_then(|bip_32_private_key| RPtr::new(bip_32_private_key).jptr(&env))
+      .and_then(|bip_32_private_key| bip_32_private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -107,7 +107,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyFromBech32(
     bech32_str
       .string(&env)
       .and_then(|bech32_str| Bip32PrivateKey::from_bech32(&bech32_str).into_result())
-      .and_then(|bip_32_private_key| RPtr::new(bip_32_private_key).jptr(&env))
+      .and_then(|bip_32_private_key| bip_32_private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -137,7 +137,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_bip32PrivateKeyFromBip3
       .into_result()
       .zip(env.convert_byte_array(password).into_result())
       .map(|(entropy, password)| Bip32PrivateKey::from_bip39_entropy(&entropy, &password))
-      .and_then(|bip_32_private_key| RPtr::new(bip_32_private_key).jptr(&env))
+      .and_then(|bip_32_private_key| bip_32_private_key.rptr().jptr(&env))
   })
   .jresult(&env)
 }

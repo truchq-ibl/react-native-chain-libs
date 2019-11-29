@@ -2,7 +2,7 @@ use super::ptr_j::*;
 use super::result::ToJniResult;
 use super::string::ToString;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::{JObject, JString};
 use jni::sys::{jbyteArray, jobject};
 use jni::JNIEnv;
@@ -18,7 +18,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionSignDataHash
       .convert_byte_array(bytes)
       .into_result()
       .and_then(|bytes| TransactionSignDataHash::from_bytes(&bytes).into_result())
-      .and_then(|tx_sign_data_hash| RPtr::new(tx_sign_data_hash).jptr(&env))
+      .and_then(|tx_sign_data_hash| tx_sign_data_hash.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -32,7 +32,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_transactionSignDataHash
     input
       .string(&env)
       .and_then(|input| TransactionSignDataHash::from_hex(&input).into_result())
-      .and_then(|tx_sign_data_hash| RPtr::new(tx_sign_data_hash).jptr(&env))
+      .and_then(|tx_sign_data_hash| tx_sign_data_hash.rptr().jptr(&env))
   })
   .jresult(&env)
 }

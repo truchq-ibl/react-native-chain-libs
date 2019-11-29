@@ -1,7 +1,7 @@
 use super::result::CResult;
 use super::string::CharPtr;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::Transaction;
 
 #[no_mangle]
@@ -11,7 +11,7 @@ pub unsafe extern "C" fn transaction_id(
   handle_exception_result(|| {
     transaction.typed_ref::<Transaction>().map(|transaction| transaction.id())
   })
-  .map(|tx_sign_data_hash| RPtr::new(tx_sign_data_hash))
+  .map(|tx_sign_data_hash| tx_sign_data_hash.rptr())
   .response(result, error)
 }
 
@@ -22,7 +22,7 @@ pub unsafe extern "C" fn transaction_inputs(
   handle_exception_result(|| {
     transaction.typed_ref::<Transaction>().map(|transaction| transaction.inputs())
   })
-  .map(|inputs| RPtr::new(inputs))
+  .map(|inputs| inputs.rptr())
   .response(result, error)
 }
 
@@ -33,6 +33,6 @@ pub unsafe extern "C" fn transaction_outputs(
   handle_exception_result(|| {
     transaction.typed_ref::<Transaction>().map(|transaction| transaction.outputs())
   })
-  .map(|outputs| RPtr::new(outputs))
+  .map(|outputs| outputs.rptr())
   .response(result, error)
 }

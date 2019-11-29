@@ -2,7 +2,7 @@ use super::result::CResult;
 use super::string::*;
 use crate::js_chain_libs::Value;
 use crate::panic::*;
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 
 #[no_mangle]
 pub unsafe extern "C" fn value_checked_add(
@@ -11,7 +11,7 @@ pub unsafe extern "C" fn value_checked_add(
   handle_exception_result(|| {
     let val = value.typed_ref::<Value>()?;
     let oth = other.typed_ref::<Value>()?;
-    val.checked_add(oth).map(|val| RPtr::new(val)).into_result()
+    val.checked_add(oth).map(|val| val.rptr()).into_result()
   })
   .response(result, error)
 }
@@ -20,15 +20,13 @@ pub unsafe extern "C" fn value_checked_add(
 pub unsafe extern "C" fn value_from_str(
   chars: CharPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
-  handle_exception_result(|| {
-    Value::from_str(chars.into_str()).map(|val| RPtr::new(val)).into_result()
-  })
-  .response(result, error)
+  handle_exception_result(|| Value::from_str(chars.into_str()).map(|val| val.rptr()).into_result())
+    .response(result, error)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn value_from_u64(u: u64, result: &mut RPtr, error: &mut CharPtr) -> bool {
-  handle_exception(|| RPtr::new(Value::from(u))).response(result, error)
+  handle_exception(|| Value::from(u).rptr()).response(result, error)
 }
 
 #[no_mangle]
@@ -46,7 +44,7 @@ pub unsafe extern "C" fn value_checked_sub(
   handle_exception_result(|| {
     let val = value.typed_ref::<Value>()?;
     let oth = other.typed_ref::<Value>()?;
-    val.checked_sub(oth).into_result().map(|val| RPtr::new(val))
+    val.checked_sub(oth).into_result().map(|val| val.rptr())
   })
   .response(result, error)
 }

@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::handle_exception_result;
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -17,7 +17,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationAuthData
     signature
       .typed_ref::<AccountBindingSignature>()
       .map(|signature| StakeDelegationAuthData::new(signature))
-      .and_then(|stake_delegation_auth_data| RPtr::new(stake_delegation_auth_data).jptr(&env))
+      .and_then(|stake_delegation_auth_data| stake_delegation_auth_data.rptr().jptr(&env))
   })
   .jresult(&env)
 }

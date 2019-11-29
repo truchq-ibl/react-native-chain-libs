@@ -6,7 +6,7 @@ use super::ptr_j::*;
 use super::result::ToJniResult;
 use super::string::*;
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 
 use js_chain_libs::Value;
 
@@ -18,7 +18,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_valueFromStr(
   handle_exception_result(|| {
     let rstr = string.string(&env)?;
     let val = Value::from_str(&rstr).into_result()?;
-    RPtr::new(val).jptr(&env)
+    val.rptr().jptr(&env)
   })
   .jresult(&env)
 }
@@ -30,7 +30,7 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_valueFromU64(
 ) -> jobject {
   handle_exception_result(|| {
     let r_u64 = u64::from_jlong(long);
-    RPtr::new(Value::from(r_u64)).jptr(&env)
+    Value::from(r_u64).rptr().jptr(&env)
   })
   .jresult(&env)
 }
@@ -59,7 +59,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_valueCheckedAdd(
     let rother = other.rptr(&env)?;
     let otherval = rother.typed_ref::<Value>()?;
     let res = val.checked_add(otherval).into_result()?;
-    RPtr::new(res).jptr(&env)
+    res.rptr().jptr(&env)
   })
   .jresult(&env)
 }
@@ -75,7 +75,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_valueCheckedSub(
     let rother = other.rptr(&env)?;
     let otherval = rother.typed_ref::<Value>()?;
     let res = val.checked_sub(otherval).into_result()?;
-    RPtr::new(res).jptr(&env)
+    res.rptr().jptr(&env)
   })
   .jresult(&env)
 }

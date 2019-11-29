@@ -92,6 +92,7 @@ final class Native {
     // Witness
     public final native Result<RPtr> witnessForAccount(RPtr genesisHash, RPtr transactionId, RPtr secretKey, RPtr accountSpendingCounter);
     public final native Result<RPtr> witnessForUtxo(RPtr genesisHash, RPtr transactionId, RPtr secretKey);
+    public final native Result<RPtr> witnessForLegacyIcarusUtxo(RPtr genesisHash, RPtr transactionId, RPtr secretKey);
 
     // PrivateKey
     public final native Result<RPtr> privateKeyFromBech32(String bech32Str);
@@ -121,7 +122,7 @@ final class Native {
     public final native Result<Void> outputsAdd(RPtr outputs, RPtr item);
 
     // FragmentId
-    public final native Result<RPtr> fragmentIdFromBytes(byte[] bytes);
+    public final native Result<RPtr> fragmentIdCalculate(byte[] bytes);
     public final native Result<byte[]> fragmentIdAsBytes(RPtr fragmentId);
 
     // TransactionSignDataHash
@@ -201,6 +202,13 @@ final class Native {
     public final native Result<byte[]> bip32PublicKeyAsBytes(RPtr bip32PublicKey);
     public final native Result<RPtr> bip32PublicKeyFromBech32(String bech32Str);
     public final native Result<String> bip32PublicKeyToBech32(RPtr bip32PublicKey);
+
+    // DelegationType
+    public final native Result<RPtr> delegationTypeNonDelegated();
+    public final native Result<RPtr> delegationTypeFull(RPtr poolId);
+    public final native Result<RPtr> delegationTypeRatio(RPtr r);
+    public final native Result<RPtr> delegationTypeGetKind(RPtr delegationType);
+    public final native Result<RPtr> delegationTypeGetFull(RPtr delegationType);
 
     public final native void ptrFree(RPtr ptr);
 }

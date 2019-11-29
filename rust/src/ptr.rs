@@ -18,13 +18,19 @@ impl From<usize> for RPtr {
   }
 }
 
+pub trait RPtrRepresentable: Sized + 'static {
+  fn rptr(self) -> RPtr {
+    let b: Box<Box<dyn Any>> = Box::new(Box::new(self));
+    RPtr(Box::into_raw(b) as *mut c_void)
+  }
+}
+
 impl RPtr {
-  pub fn new<T: Sized + 'static>(val: T) -> Self {
-    let b: Box<Box<dyn Any>> = Box::new(Box::new(val));
-    Self(Box::into_raw(b) as *mut c_void)
+  pub fn new<T: RPtrRepresentable>(val: T) -> Self {
+    val.rptr()
   }
 
-  pub unsafe fn typed_ref<T: Sized + 'static>(&self) -> Result<&mut T> {
+  pub unsafe fn typed_ref<T: RPtrRepresentable>(&self) -> Result<&mut T> {
     if self.0.is_null() {
       return Err(String::from("Pointer is NULL"));
     }
@@ -34,7 +40,7 @@ impl RPtr {
       .ok_or_else(|| format!("Bad pointer: 0x{:x}", self.0 as usize))
   }
 
-  pub unsafe fn owned<T: Sized + 'static>(mut self) -> Result<T> {
+  pub unsafe fn owned<T: RPtrRepresentable>(mut self) -> Result<T> {
     if self.0.is_null() {
       return Err(String::from("Pointer is NULL"));
     }
@@ -49,5 +55,14 @@ impl RPtr {
     }
     let _ = Box::from_raw(self.0 as *mut Box<dyn Any>);
     self.0 = std::ptr::null_mut();
+  }
+}
+
+impl<T: RPtrRepresentable> RPtrRepresentable for Option<T> {
+  fn rptr(self) -> RPtr {
+    match self {
+      Some(val) => val.rptr(),
+      None => RPtr(std::ptr::null_mut())
+    }
   }
 }

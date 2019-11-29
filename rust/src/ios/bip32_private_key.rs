@@ -2,7 +2,7 @@ use super::data::DataPtr;
 use super::result::CResult;
 use super::string::{CharPtr, IntoCString, IntoStr};
 use crate::panic::{handle_exception, handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::Bip32PrivateKey;
 
 #[no_mangle]
@@ -14,7 +14,7 @@ pub unsafe extern "C" fn bip_32_private_key_derive(
       .typed_ref::<Bip32PrivateKey>()
       .map(|bip_32_private_key| bip_32_private_key.derive(index))
   })
-  .map(|bip_32_private_key| RPtr::new(bip_32_private_key))
+  .map(|bip_32_private_key| bip_32_private_key.rptr())
   .response(result, error)
 }
 
@@ -23,7 +23,7 @@ pub unsafe extern "C" fn bip_32_private_key_generate_ed25519_bip32(
   result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| Bip32PrivateKey::generate_ed25519_bip32().into_result())
-    .map(|bip_32_private_key| RPtr::new(bip_32_private_key))
+    .map(|bip_32_private_key| bip_32_private_key.rptr())
     .response(result, error)
 }
 
@@ -36,7 +36,7 @@ pub unsafe extern "C" fn bip_32_private_key_to_raw_key(
       .typed_ref::<Bip32PrivateKey>()
       .map(|bip_32_private_key| bip_32_private_key.to_raw_key())
   })
-  .map(|private_key| RPtr::new(private_key))
+  .map(|private_key| private_key.rptr())
   .response(result, error)
 }
 
@@ -49,7 +49,7 @@ pub unsafe extern "C" fn bip_32_private_key_to_public(
       .typed_ref::<Bip32PrivateKey>()
       .map(|bip_32_private_key| bip_32_private_key.to_public())
   })
-  .map(|bip_32_public_key| RPtr::new(bip_32_public_key))
+  .map(|bip_32_public_key| bip_32_public_key.rptr())
   .response(result, error)
 }
 
@@ -60,7 +60,7 @@ pub unsafe extern "C" fn bip_32_private_key_from_bytes(
   handle_exception_result(|| {
     Bip32PrivateKey::from_bytes(std::slice::from_raw_parts(data, len)).into_result()
   })
-  .map(|bip_32_private_key| RPtr::new(bip_32_private_key))
+  .map(|bip_32_private_key| bip_32_private_key.rptr())
   .response(result, error)
 }
 
@@ -82,7 +82,7 @@ pub extern "C" fn bip_32_private_key_from_bech32(
   bech32_str: CharPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| Bip32PrivateKey::from_bech32(bech32_str.into_str()).into_result())
-    .map(|bip_32_private_key| RPtr::new(bip_32_private_key))
+    .map(|bip_32_private_key| bip_32_private_key.rptr())
     .response(result, error)
 }
 
@@ -110,6 +110,6 @@ pub unsafe extern "C" fn bip_32_private_key_from_bip39_entropy(
       std::slice::from_raw_parts(password_data, password_len)
     )
   })
-  .map(|bip_32_private_key| RPtr::new(bip_32_private_key))
+  .map(|bip_32_private_key| bip_32_private_key.rptr())
   .response(result, error)
 }

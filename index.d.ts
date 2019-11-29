@@ -260,7 +260,7 @@ export class FragmentId extends Ptr {
   * @param {Uint8Array} bytes
   * @returns {Promise<FragmentId>}
   */
-  static from_bytes(bytes: Uint8Array): Promise<FragmentId>;
+  static calculate(bytes: Uint8Array): Promise<FragmentId>;
 
   /**
   * @returns {Promise<Uint8Array>}
@@ -547,6 +547,15 @@ export class Witness extends Ptr {
   * @returns {Promise<Witness>}
   */
   static for_account(genesis_hash: Hash, transaction_id: TransactionSignDataHash, secret_key: PrivateKey, account_spending_counter: SpendingCounter): Promise<Witness>;
+
+  /**
+  * Generate Witness for an utxo-based transaction Input
+  * @param {Hash} genesis_hash 
+  * @param {TransactionSignDataHash} transaction_id 
+  * @param {Bip32PrivateKey} secret_key 
+  * @returns {Promise<Witness>} 
+  */
+  static for_legacy_icarus_utxo(genesis_hash: Hash, transaction_id: TransactionSignDataHash, secret_key: Bip32PrivateKey): Promise<Witness>;
 }
 
 /**
@@ -582,6 +591,11 @@ export class PayloadAuthData extends Ptr {
   * @returns {Promise<PayloadAuthData>} 
   */
   static for_no_payload(): Promise<PayloadAuthData>;
+}
+
+/**
+*/
+export class TransactionBindingAuthData extends Ptr {
 }
 
 /**
@@ -760,6 +774,42 @@ export class StakeDelegationAuthData extends Ptr {
 }
 
 /**
+* Set the choice of delegation:
+*
+* * No delegation
+* * Full delegation of this account to a specific pool
+* * Ratio of stake to multiple pools
+*/
+export class DelegationType extends Ptr {
+  /**
+  * @returns {Promise<DelegationType>} 
+  */
+  static non_delegated(): Promise<DelegationType>;
+
+  /**
+  * @param {PoolId} pool_id 
+  * @returns {Promise<DelegationType>} 
+  */
+  static full(pool_id: PoolId): Promise<DelegationType>;
+
+  /**
+  * @param {DelegationRatio} r 
+  * @returns {Promise<DelegationType>} 
+  */
+  static ratio(r: DelegationRatio): Promise<DelegationType>;
+
+  /**
+  * @returns {Promise<number>} 
+  */
+  get_kind(): Promise<number>;
+
+  /**
+  * @returns {Promise<PoolId | undefined>} 
+  */
+  get_full(): Promise<PoolId | undefined>;
+}
+
+/**
 */
 export class StakeDelegation extends Ptr {
   /**
@@ -868,7 +918,7 @@ export class Bip32PrivateKey extends Ptr {
   * @returns {Promise<Bip32PrivateKey>} 
   */
   derive(index: number): Promise<Bip32PrivateKey>;
-  
+
   /**
   * @returns {Promise<Bip32PrivateKey>} 
   */

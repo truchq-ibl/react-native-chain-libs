@@ -2,7 +2,7 @@ use super::data::DataPtr;
 use super::result::CResult;
 use super::string::{CharPtr, IntoCString, IntoStr};
 use crate::panic::{handle_exception_result, ToResult};
-use crate::ptr::RPtr;
+use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::Bip32PublicKey;
 
 #[no_mangle]
@@ -14,7 +14,7 @@ pub unsafe extern "C" fn bip32_public_key_derive(
       .typed_ref::<Bip32PublicKey>()
       .and_then(|bip32_public_key| bip32_public_key.derive(index).into_result())
   })
-  .map(|bip32_public_key| RPtr::new(bip32_public_key))
+  .map(|bip32_public_key| bip32_public_key.rptr())
   .response(result, error)
 }
 
@@ -27,7 +27,7 @@ pub unsafe extern "C" fn bip32_public_key_to_raw_key(
       .typed_ref::<Bip32PublicKey>()
       .map(|bip32_public_key| bip32_public_key.to_raw_key())
   })
-  .map(|public_key| RPtr::new(public_key))
+  .map(|public_key| public_key.rptr())
   .response(result, error)
 }
 
@@ -38,7 +38,7 @@ pub unsafe extern "C" fn bip32_public_key_from_bytes(
   handle_exception_result(|| {
     Bip32PublicKey::from_bytes(std::slice::from_raw_parts(data, len)).into_result()
   })
-  .map(|bip32_public_key| RPtr::new(bip32_public_key))
+  .map(|bip32_public_key| bip32_public_key.rptr())
   .response(result, error)
 }
 
@@ -60,7 +60,7 @@ pub extern "C" fn bip32_public_key_from_bech32(
   bech32_str: CharPtr, result: &mut RPtr, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| Bip32PublicKey::from_bech32(bech32_str.into_str()).into_result())
-    .map(|bip32_public_key| RPtr::new(bip32_public_key))
+    .map(|bip32_public_key| bip32_public_key.rptr())
     .response(result, error)
 }
 

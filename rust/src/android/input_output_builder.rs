@@ -1,7 +1,7 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
 use crate::panic::{handle_exception_result, ToResult, Zip};
-use crate::ptr::RPtr;
+use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
 use jni::sys::jobject;
 use jni::JNIEnv;
@@ -12,7 +12,7 @@ use js_chain_libs::{Address, Fee, Input, InputOutputBuilder, OutputPolicy, Paylo
 pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderEmpty(
   env: JNIEnv, _: JObject
 ) -> jobject {
-  handle_exception_result(|| RPtr::new(InputOutputBuilder::empty()).jptr(&env)).jresult(&env)
+  handle_exception_result(|| InputOutputBuilder::empty().rptr().jptr(&env)).jresult(&env)
 }
 
 #[allow(non_snake_case)]
@@ -67,7 +67,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderEstim
       .zip(fee.typed_ref::<Fee>())
       .zip(payload.typed_ref::<Payload>())
       .map(|((io_builder, fee), payload)| io_builder.estimate_fee(fee, payload))
-      .and_then(|value| RPtr::new(value).jptr(&env))
+      .and_then(|value| value.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -81,7 +81,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderBuild
     io_builder
       .owned::<InputOutputBuilder>(&env)
       .map(|io_builder| io_builder.build())
-      .and_then(|input_output| RPtr::new(input_output).jptr(&env))
+      .and_then(|input_output| input_output.rptr().jptr(&env))
   })
   .jresult(&env)
 }
@@ -103,7 +103,7 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_inputOutputBuilderSealW
       .and_then(|(((io_builder, payload), fee_algorithm), policy)| {
         io_builder.seal_with_output_policy(payload, fee_algorithm, policy).into_result()
       })
-      .and_then(|input_output| RPtr::new(input_output).jptr(&env))
+      .and_then(|input_output| input_output.rptr().jptr(&env))
   })
   .jresult(&env)
 }
