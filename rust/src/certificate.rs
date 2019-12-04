@@ -1,5 +1,4 @@
 use js_chain_libs::CertificateKind as RCertificateKind;
-use crate::ptr::RPtrRepresentable;
 
 #[repr(C)]
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -10,8 +9,6 @@ pub enum CertificateKind {
   PoolRetirement = 3,
   PoolUpdate = 4
 }
-
-impl RPtrRepresentable for CertificateKind {}
 
 impl From<RCertificateKind> for CertificateKind {
   fn from(certificate_kind: RCertificateKind) -> Self {
