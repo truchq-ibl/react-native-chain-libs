@@ -17,6 +17,13 @@ RCT_EXPORT_MODULE(ChainLibs)
              @"AddressDiscrimination": @{
                      @"Test": @(Test),
                      @"Production": @(Production)
+                     },
+             @"CertificateKind": @{
+                     @"StakeDelegation": @(StakeDelegation),
+                     @"OwnerStakeDelegation": @(OwnerStakeDelegation),
+                     @"PoolRegistration": @(PoolRegistration),
+                     @"PoolRetirement": @(PoolRetirement),
+                     @"PoolUpdate": @(PoolUpdate),
                      }
              };
 }
@@ -1046,6 +1053,28 @@ RCT_EXPORT_METHOD(stakeDelegationAccount:(nonnull NSString *)stakeDelegationPtr 
     }] exec:stakeDelegationPtr andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(stakeDelegationAsBytes:(nonnull NSString *)stakeDelegationPtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* stakeDelegationPtr, CharPtr* error) {
+        DataPtr result;
+        RPtr stakeDelegation = [stakeDelegationPtr rPtr];
+        return stake_delegation_as_bytes(stakeDelegation, &result, error)
+            ? [[NSData fromDataPtr:&result] base64]
+            : nil;
+    }] exec:stakeDelegationPtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(stakeDelegationFromBytes:(nonnull NSString *)bytes  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* bytes, CharPtr* error) {
+        RPtr result;
+        NSData* data = [NSData fromBase64:bytes];
+        return stake_delegation_from_bytes((uint8_t*)data.bytes, data.length, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:bytes andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(certificateStakeDelegation:(nonnull NSString *)stakeDelegationPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSString* stakeDelegationPtr, CharPtr* error) {
@@ -1081,11 +1110,11 @@ RCT_EXPORT_METHOD(certificateStakePoolRetirement:(nonnull NSString *)poolRetirem
 
 RCT_EXPORT_METHOD(certificateGetType:(nonnull NSString *)certificatePtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
-    [[CSafeOperation new:^NSString*(NSString* certificatePtr, CharPtr* error) {
-        RPtr result;
+    [[CSafeOperation new:^NSNumber*(NSString* certificatePtr, CharPtr* error) {
+        CertificateKind result;
         RPtr certificate = [certificatePtr rPtr];
         return certificate_get_type(certificate, &result, error)
-            ? [NSString stringFromPtr:result]
+            ? [NSNumber numberWithInt:result]
             : nil;
     }] exec:certificatePtr andResolve:resolve orReject:reject];
 }

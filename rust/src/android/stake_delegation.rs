@@ -1,9 +1,9 @@
 use super::ptr_j::*;
 use super::result::ToJniResult;
-use crate::panic::{handle_exception_result, Zip};
+use crate::panic::{handle_exception_result, ToResult, Zip};
 use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
-use jni::sys::jobject;
+use jni::sys::{jbyteArray, jobject};
 use jni::JNIEnv;
 use js_chain_libs::{DelegationType, PublicKey, StakeDelegation};
 
@@ -50,6 +50,37 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationAccount(
       .typed_ref::<StakeDelegation>()
       .map(|stake_delegation| stake_delegation.account())
       .and_then(|account_identifier| account_identifier.rptr().jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationAsBytes(
+  env: JNIEnv, _: JObject, stake_delegation: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let stake_delegation = stake_delegation.rptr(&env)?;
+    stake_delegation
+      .typed_ref::<StakeDelegation>()
+      .map(|stake_delegation| stake_delegation.as_bytes())
+      .and_then(|bytes| env.byte_array_from_slice(&bytes).into_result())
+      .map(|arr| JObject::from(arr))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_stakeDelegationFromBytes(
+  env: JNIEnv, _: JObject, bytes: jbyteArray
+) -> jobject {
+  handle_exception_result(|| {
+    env
+      .convert_byte_array(bytes)
+      .into_result()
+      .and_then(|bytes| StakeDelegation::from_bytes(&bytes).into_result())
+      .and_then(|stake_delegation| stake_delegation.rptr().jptr(&env))
   })
   .jresult(&env)
 }

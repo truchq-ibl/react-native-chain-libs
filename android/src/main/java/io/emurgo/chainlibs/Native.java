@@ -16,6 +16,7 @@ final class Native {
     private native void initLibrary();
 
     public final native Map<String, Object> AddressDiscrimination();
+    public final native Map<String, Object> CertificateKind();
 
     // Value
     public final native Result<RPtr> valueFromStr(String str);
@@ -170,12 +171,14 @@ final class Native {
     public final native Result<RPtr> stakeDelegationNew(RPtr delegationType, RPtr account);
     public final native Result<RPtr> stakeDelegationDelegationType(RPtr stakeDelegation);
     public final native Result<RPtr> stakeDelegationAccount(RPtr stakeDelegation);
+    public final native Result<byte[]> stakeDelegationAsBytes(RPtr stakeDelegation);
+    public final native Result<RPtr> stakeDelegationFromBytes(byte[] bytes);
 
     // Certificate
     public final native Result<RPtr> certificateStakeDelegation(RPtr stakeDelegation);
     public final native Result<RPtr> certificateStakePoolRegistration(RPtr poolRegistration);
     public final native Result<RPtr> certificateStakePoolRetirement(RPtr poolRetirement);
-    public final native Result<RPtr> certificateGetType(RPtr certificate);
+    public final native Result<Integer> certificateGetType(RPtr certificate);
     public final native Result<RPtr> certificateGetStakeDelegation(RPtr certificate);
     public final native Result<RPtr> certificateGetOwnerStakeDelegation(RPtr certificate);
     public final native Result<RPtr> certificateGetPoolRegistration(RPtr certificate);

@@ -28,6 +28,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public Map<String, Object> getConstants() {
         HashMap<String, Object> map = new HashMap<>();
         map.put("AddressDiscrimination",  Native.I.AddressDiscrimination());
+        map.put("CertificateKind",  Native.I.CertificateKind());
         return map;
     }
 
@@ -796,6 +797,20 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    public final void stakeDelegationAsBytes(String stakeDelegation, Promise promise) {
+        Native.I
+                .stakeDelegationAsBytes(new RPtr(stakeDelegation))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
+    public final void stakeDelegationFromBytes(String bytes, Promise promise) {
+        Native.I
+                .stakeDelegationFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
     // Certificate
 
     @ReactMethod
@@ -826,7 +841,6 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public final void certificateGetType(String certificate, Promise promise) {
         Native.I
                 .certificateGetType(new RPtr(certificate))
-                .map(RPtr::toJs)
                 .pour(promise);
     }
 

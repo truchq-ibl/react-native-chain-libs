@@ -58,6 +58,10 @@ class Ptr {
 */
 export const AddressDiscrimination = ChainLibs.AddressDiscrimination;
 
+/**
+*/
+export const CertificateKind = ChainLibs.CertificateKind;
+
 export class Value extends Ptr {
     /**
     * Parse the given string into a rust u64 numeric type.
@@ -1352,6 +1356,23 @@ export class StakeDelegation extends Ptr {
     async account() {
         const ret = await ChainLibs.stakeDelegationAccount(this.ptr);
         return Ptr._wrap(ret, Ptr);
+    }
+
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.stakeDelegationAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<StakeDelegation>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.stakeDelegationFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, StakeDelegation);
     }
 }
 

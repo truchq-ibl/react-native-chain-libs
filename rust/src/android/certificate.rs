@@ -1,11 +1,38 @@
+use super::primitive::ToPrimitiveObject;
 use super::ptr_j::*;
 use super::result::ToJniResult;
+use super::string::ToJniString;
+use crate::certificate::CertificateKind;
 use crate::panic::{handle_exception_result, ToResult};
 use crate::ptr::RPtrRepresentable;
 use jni::objects::JObject;
-use jni::sys::jobject;
+use jni::sys::{jint, jobject};
 use jni::JNIEnv;
 use js_chain_libs::{Certificate, PoolRegistration, PoolRetirement, StakeDelegation};
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn Java_io_emurgo_chainlibs_Native_CertificateKind(
+  env: JNIEnv, _: JObject
+) -> jobject {
+  static PUT: &str = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
+  let class = env.find_class("java/util/HashMap").unwrap();
+  let map = env.new_object(class, "()V", &[]).unwrap();
+
+  let put = |key_name: &str, variant: CertificateKind| {
+    let key = *key_name.jstring(&env).unwrap();
+    let int = (variant as jint).jobject(&env).unwrap();
+    env.call_method(map, "put", PUT, &[key.into(), int.into()]).unwrap();
+  };
+
+  put("StakeDelegation", CertificateKind::StakeDelegation);
+  put("OwnerStakeDelegation", CertificateKind::OwnerStakeDelegation);
+  put("PoolRegistration", CertificateKind::PoolRegistration);
+  put("PoolRetirement", CertificateKind::PoolRetirement);
+  put("PoolUpdate", CertificateKind::PoolUpdate);
+
+  map.into_inner()
+}
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -61,8 +88,8 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_certificateGetType(
     let certificate = certificate.rptr(&env)?;
     certificate
       .typed_ref::<Certificate>()
-      .map(|certificate| certificate.get_type())
-      .and_then(|certificate_type| certificate_type.rptr().jptr(&env))
+      .map(|certificate| certificate.get_type().into())
+      .and_then(|certificate_kind: CertificateKind| (certificate_kind as jint).jobject(&env))
   })
   .jresult(&env)
 }

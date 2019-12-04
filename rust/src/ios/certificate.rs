@@ -1,5 +1,6 @@
 use super::result::CResult;
 use super::string::CharPtr;
+use crate::certificate::CertificateKind;
 use crate::panic::{handle_exception_result, ToResult};
 use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Certificate, PoolRegistration, PoolRetirement, StakeDelegation};
@@ -45,12 +46,12 @@ pub unsafe extern "C" fn certificate_stake_pool_retirement(
 
 #[no_mangle]
 pub unsafe extern "C" fn certificate_get_type(
-  certificate: RPtr, result: &mut RPtr, error: &mut CharPtr
+  certificate: RPtr, result: &mut CertificateKind, error: &mut CharPtr
 ) -> bool {
   handle_exception_result(|| {
     certificate.typed_ref::<Certificate>().map(|certificate| certificate.get_type())
   })
-  .map(|certificate_type| certificate_type.rptr())
+  .map(|certificate_kind| certificate_kind.into())
   .response(result, error)
 }
 

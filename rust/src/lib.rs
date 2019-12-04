@@ -2,6 +2,7 @@ extern crate js_chain_libs;
 extern crate wasm_bindgen;
 
 mod address;
+mod certificate;
 mod js_result;
 mod panic;
 mod ptr;

@@ -1,6 +1,26 @@
+/**
+* Allow to differentiate between address in
+* production and testing setting, so that
+* one type of address is not used in another setting.
+* Example
+* ```javascript
+* let discriminant = AddressDiscrimination.Test;
+* let address = Address::single_from_public_key(public_key, discriminant);
+* ```
+*/
 export enum AddressDiscrimination {
   Production,
   Test,
+}
+
+/**
+*/
+export enum CertificateKind {
+  StakeDelegation,
+  OwnerStakeDelegation,
+  PoolRegistration,
+  PoolRetirement,
+  PoolUpdate,
 }
 
 export class Ptr {
@@ -829,6 +849,17 @@ export class StakeDelegation extends Ptr {
   * @returns {Promise<AccountIdentifier>} 
   */
   account(): Promise<AccountIdentifier>;
+
+  /**
+  * @returns {Promise<Uint8Array>} 
+  */
+  as_bytes(): Promise<Uint8Array>;
+
+  /**
+  * @param {Uint8Array} bytes 
+  * @returns {Promise<StakeDelegation>} 
+  */
+  static from_bytes(bytes: Uint8Array): Promise<StakeDelegation>;
 }
 
 /**
