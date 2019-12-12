@@ -2,6 +2,7 @@ use crate::ptr::RPtrRepresentable;
 use js_chain_libs::*;
 
 impl RPtrRepresentable for Account {}
+impl RPtrRepresentable for AccountAddress {}
 impl RPtrRepresentable for AccountBindingSignature {}
 impl RPtrRepresentable for AccountIdentifier {}
 impl RPtrRepresentable for Address {}
@@ -16,6 +17,7 @@ impl RPtrRepresentable for DelegationType {}
 impl RPtrRepresentable for Fee {}
 impl RPtrRepresentable for Fragment {}
 impl RPtrRepresentable for FragmentId {}
+impl RPtrRepresentable for GroupAddress {}
 impl RPtrRepresentable for Hash {}
 impl RPtrRepresentable for Input {}
 impl RPtrRepresentable for InputOutput {}
@@ -32,6 +34,7 @@ impl RPtrRepresentable for PoolRegistration {}
 impl RPtrRepresentable for PoolRetirement {}
 impl RPtrRepresentable for PrivateKey {}
 impl RPtrRepresentable for PublicKey {}
+impl RPtrRepresentable for SingleAddress {}
 impl RPtrRepresentable for SpendingCounter {}
 impl RPtrRepresentable for StakeDelegation {}
 impl RPtrRepresentable for StakeDelegationAuthData {}

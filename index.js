@@ -60,6 +60,10 @@ export const AddressDiscrimination = ChainLibs.AddressDiscrimination;
 
 /**
 */
+export const AddressKind = ChainLibs.AddressKind;
+
+/**
+*/
 export const CertificateKind = ChainLibs.CertificateKind;
 
 export class Value extends Ptr {
@@ -128,12 +132,32 @@ export class PublicKey extends Ptr {
 }
 
 /**
+*/
+export class SingleAddress extends Ptr {}
+
+/**
+*/
+export class GroupAddress extends Ptr {}
+
+/**
+*/
+export class AccountAddress extends Ptr {}
+
+/**
 * An address of any type, this can be one of
 * * A utxo-based address without delegation (single)
 * * A utxo-based address with delegation (group)
 * * An address for an account
 */
 export class Address extends Ptr {
+    /**
+    * @returns {Promise<Uint8Array>}
+    */
+    async as_bytes() {
+        const b64 = await ChainLibs.addressAsBytes(this.ptr);
+        return Uint8ArrayFromB64(b64);
+    }
+
     /**
     * Construct Address from its bech32 representation
     * Example
@@ -208,6 +232,44 @@ export class Address extends Ptr {
         const keyPtr = Ptr._assertClass(key, PublicKey);
         const ret = await ChainLibs.addressAccountFromPublicKey(keyPtr, discrimination);
         return Ptr._wrap(ret, Address);
+    }
+
+    /**
+    * @returns {Promise<number>}
+    */
+    get_discrimination() {
+        return ChainLibs.addressGetDiscrimination(this.ptr);
+    }
+
+    /**
+    * @returns {Promise<number>}
+    */
+    get_kind() {
+        return ChainLibs.addressGetKind(this.ptr);
+    }
+
+    /**
+    * @returns {Promise<SingleAddress | undefined>}
+    */
+    async to_single_address() {
+        const ret = await ChainLibs.addressToSingleAddress(this.ptr);
+        return Ptr._wrap(ret, SingleAddress);
+    }
+
+    /**
+    * @returns {Promise<GroupAddress | undefined>}
+    */
+    async to_group_address() {
+        const ret = await ChainLibs.addressToGroupAddress(this.ptr);
+        return Ptr._wrap(ret, GroupAddress);
+    }
+
+    /**
+    * @returns {Promise<AccountAddress | undefined>}
+    */
+    async to_account_address() {
+        const ret = await ChainLibs.addressToAccountAddress(this.ptr);
+        return Ptr._wrap(ret, AccountAddress);
     }
 }
 
@@ -1274,6 +1336,24 @@ export class StakeDelegationAuthData extends Ptr {
 }
 
 /**
+*/
+export class PoolId extends Ptr {}
+
+/**
+* Delegation Ratio type express a number of parts
+* and a list of pools and their individual parts
+*
+* E.g. parts: 7, pools: [(A,2), (B,1), (C,4)] means that
+* A is associated with 2/7 of the stake, B has 1/7 of stake and C
+* has 4/7 of the stake.
+*
+* It\'s invalid to have less than 2 elements in the array,
+* and by extension parts need to be equal to the sum of individual
+* pools parts.
+*/
+export class DelegationRatio extends Ptr {}
+
+/**
 * Set the choice of delegation:
 *
 * * No delegation
@@ -1294,7 +1374,7 @@ export class DelegationType extends Ptr {
     * @returns {Promise<DelegationType>}
     */
     static async full(poolId) {
-        const poolIdPtr = Ptr._assertClass(poolId, Ptr);
+        const poolIdPtr = Ptr._assertClass(poolId, PoolId);
         const ret = await ChainLibs.delegationTypeFull(poolIdPtr);
         return Ptr._wrap(ret, DelegationType);
     }
@@ -1304,7 +1384,7 @@ export class DelegationType extends Ptr {
     * @returns {Promise<DelegationType>}
     */
     static async ratio(r) {
-        const rPtr = Ptr._assertClass(r, Ptr);
+        const rPtr = Ptr._assertClass(r, DelegationRatio);
         const ret = await ChainLibs.delegationTypeRatio(rPtr);
         return Ptr._wrap(ret, DelegationType);
     }
@@ -1322,9 +1402,13 @@ export class DelegationType extends Ptr {
     */
     async get_full() {
         const ret = await ChainLibs.delegationTypeGetFull(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, PoolId);
     }
 }
+
+/**
+*/
+export class AccountIdentifier extends Ptr {}
 
 /**
 */
@@ -1355,7 +1439,7 @@ export class StakeDelegation extends Ptr {
     */
     async account() {
         const ret = await ChainLibs.stakeDelegationAccount(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, AccountIdentifier);
     }
 
     /**
@@ -1378,6 +1462,18 @@ export class StakeDelegation extends Ptr {
 
 /**
 */
+export class PoolRegistration extends Ptr {}
+
+/**
+*/
+export class PoolRetirement extends Ptr {}
+
+/**
+*/
+export class OwnerStakeDelegation extends Ptr {}
+
+/**
+*/
 export class Certificate extends Ptr {
     /**
     * Create a Certificate for StakeDelegation
@@ -1396,7 +1492,7 @@ export class Certificate extends Ptr {
     * @returns {Promise<Certificate>}
     */
     static async stake_pool_registration(poolRegistration) {
-        const poolRegistrationPtr = Ptr._assertClass(poolRegistration, Ptr);
+        const poolRegistrationPtr = Ptr._assertClass(poolRegistration, PoolRegistration);
         const ret = await ChainLibs.certificateStakePoolRegistration(poolRegistrationPtr);
         return Ptr._wrap(ret, Certificate);
     }
@@ -1407,7 +1503,7 @@ export class Certificate extends Ptr {
     * @returns {Promise<Certificate>}
     */
     static async stake_pool_retirement(poolRetirement) {
-        const poolRetirementPtr = Ptr._assertClass(poolRetirement, Ptr);
+        const poolRetirementPtr = Ptr._assertClass(poolRetirement, PoolRetirement);
         const ret = await ChainLibs.certificateStakePoolRetirement(poolRetirementPtr);
         return Ptr._wrap(ret, Certificate);
     }
@@ -1415,9 +1511,8 @@ export class Certificate extends Ptr {
     /**
     * @returns {Promise<number>}
     */
-    async get_type() {
-        const ret = await ChainLibs.certificateGetType(this.ptr);
-        return ret;
+    get_type() {
+        return ChainLibs.certificateGetType(this.ptr);
     }
 
     /**
@@ -1433,7 +1528,7 @@ export class Certificate extends Ptr {
     */
     async get_owner_stake_delegation() {
         const ret = await ChainLibs.certificateGetOwnerStakeDelegation(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, OwnerStakeDelegation);
     }
 
     /**
@@ -1441,7 +1536,7 @@ export class Certificate extends Ptr {
     */
     async get_pool_registration() {
         const ret = await ChainLibs.certificateGetPoolRegistration(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, PoolRegistration);
     }
 
     /**
@@ -1449,7 +1544,7 @@ export class Certificate extends Ptr {
     */
     async get_pool_retirement() {
         const ret = await ChainLibs.certificateGetPoolRetirement(this.ptr);
-        return Ptr._wrap(ret, Ptr);
+        return Ptr._wrap(ret, PoolRetirement);
     }
 }
 

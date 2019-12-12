@@ -15,6 +15,15 @@ export enum AddressDiscrimination {
 
 /**
 */
+export enum AddressKind {
+  Single,
+  Group,
+  Account,
+  Multisig,
+}
+
+/**
+*/
 export enum CertificateKind {
   StakeDelegation,
   OwnerStakeDelegation,
@@ -22,6 +31,8 @@ export enum CertificateKind {
   PoolRetirement,
   PoolUpdate,
 }
+
+export type Optional<T> = T | undefined;
 
 export class Ptr {
   /**
@@ -32,12 +43,29 @@ export class Ptr {
 }
 
 /**
+*/
+export class SingleAddress extends Ptr {}
+
+/**
+*/
+export class GroupAddress extends Ptr {}
+
+/**
+*/
+export class AccountAddress extends Ptr {}
+
+/**
 * An address of any type, this can be one of
 * * A utxo-based address without delegation (single)
 * * A utxo-based address with delegation (group)
 * * An address for an account
 */
 export class Address extends Ptr {
+  /**
+  * @returns {Promise<Uint8Array>} 
+  */
+  as_bytes(): Promise<Uint8Array>;
+
   /**
   * Construct Address from its bech32 representation
   * Example
@@ -74,27 +102,52 @@ export class Address extends Ptr {
   * let address = Address.single_from_public_key(public_key, AddressDiscrimination.Test);
   * ```
   * @param {PublicKey} key
-  * @param {number} discrimination
+  * @param {AddressDiscrimination} discrimination
   * @returns {Promise<Address>}
   */
-  static single_from_public_key(key: PublicKey, discrimination: number): Promise<Address>;
+  static single_from_public_key(key: PublicKey, discrimination: AddressDiscrimination): Promise<Address>;
 
   /**
   * Construct a non-account address from a pair of public keys, delegating founds from the first to the second
   * @param {PublicKey} key
   * @param {PublicKey} delegation
-  * @param {number} discrimination
+  * @param {AddressDiscrimination} discrimination
   * @returns {Promise<Address>}
   */
-  static delegation_from_public_key(key: PublicKey, delegation: PublicKey, discrimination: number): Promise<Address>;
+  static delegation_from_public_key(key: PublicKey, delegation: PublicKey, discrimination: AddressDiscrimination): Promise<Address>;
 
   /**
   * Construct address of account type from a public key
   * @param {PublicKey} key
-  * @param {number} discrimination
+  * @param {AddressDiscrimination} discrimination
   * @returns {Promise<Address>}
   */
-  static account_from_public_key(key: PublicKey, discrimination: number): Promise<Address>;
+  static account_from_public_key(key: PublicKey, discrimination: AddressDiscrimination): Promise<Address>;
+
+  /**
+  * @returns {Promise<AddressDiscrimination>} 
+  */
+  get_discrimination(): Promise<AddressDiscrimination>;
+
+  /**
+  * @returns {Promise<AddressKind>} 
+  */
+  get_kind(): Promise<AddressKind>;
+
+  /**
+  * @returns {Promise<Optional<SingleAddress>>} 
+  */
+  to_single_address(): Promise<Optional<SingleAddress>>;
+
+  /**
+  * @returns {Promise<Option<GroupAddress>>} 
+  */
+  to_group_address(): Promise<Optional<GroupAddress>>;
+
+  /**
+  * @returns {Promise<Optional<AccountAddress>>} 
+  */
+  to_account_address(): Promise<Optional<AccountAddress>>;
 }
 
 /**
@@ -794,6 +847,24 @@ export class StakeDelegationAuthData extends Ptr {
 }
 
 /**
+*/
+export class PoolId extends Ptr {}
+
+/**
+* Delegation Ratio type express a number of parts
+* and a list of pools and their individual parts
+*
+* E.g. parts: 7, pools: [(A,2), (B,1), (C,4)] means that
+* A is associated with 2/7 of the stake, B has 1/7 of stake and C
+* has 4/7 of the stake.
+*
+* It\'s invalid to have less than 2 elements in the array,
+* and by extension parts need to be equal to the sum of individual
+* pools parts.
+*/
+export class DelegationRatio extends Ptr {}
+
+/**
 * Set the choice of delegation:
 *
 * * No delegation
@@ -824,10 +895,14 @@ export class DelegationType extends Ptr {
   get_kind(): Promise<number>;
 
   /**
-  * @returns {Promise<PoolId | undefined>} 
+  * @returns {Promise<Optional<PoolId>>} 
   */
-  get_full(): Promise<PoolId | undefined>;
+  get_full(): Promise<Optional<PoolId>>;
 }
+
+/**
+*/
+export class AccountIdentifier extends Ptr {}
 
 /**
 */
@@ -864,6 +939,18 @@ export class StakeDelegation extends Ptr {
 
 /**
 */
+export class PoolRegistration extends Ptr {}
+
+/**
+*/
+export class PoolRetirement extends Ptr {}
+
+/**
+*/
+export class OwnerStakeDelegation extends Ptr {}
+
+/**
+*/
 export class Certificate extends Ptr {
   /**
   * Create a Certificate for StakeDelegation
@@ -887,9 +974,9 @@ export class Certificate extends Ptr {
   static stake_pool_retirement(pool_retirement: PoolRetirement): Promise<Certificate>;
 
   /**
-  * @returns {Promise<number>} 
+  * @returns {Promise<CertificateKind>} 
   */
-  get_type(): Promise<number>;
+  get_type(): Promise<CertificateKind>;
 
   /**
   * @returns {Promise<StakeDelegation>} 

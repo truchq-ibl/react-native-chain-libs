@@ -28,6 +28,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     public Map<String, Object> getConstants() {
         HashMap<String, Object> map = new HashMap<>();
         map.put("AddressDiscrimination",  Native.I.AddressDiscrimination());
+        map.put("AddressKind",  Native.I.AddressKind());
         map.put("CertificateKind",  Native.I.CertificateKind());
         return map;
     }
@@ -81,6 +82,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Address
 
     @ReactMethod
+    public final void addressAsBytes(String address, Promise promise) {
+        Native.I
+                .addressAsBytes(new RPtr(address))
+                .map(bytes -> Base64.encodeToString(bytes, Base64.DEFAULT))
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void addressFromString(String str, Promise promise) {
         Native.I
                 .addressFromString(str)
@@ -118,6 +127,44 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .map(RPtr::toJs)
                 .pour(promise);
 	}
+
+    @ReactMethod
+    public final void addressGetDiscrimination(String address, Promise promise) {
+        Native.I
+                .addressGetDiscrimination(new RPtr(address))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void addressGetKind(String address, Promise promise) {
+        Native.I
+                .addressGetKind(new RPtr(address))
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void addressToSingleAddress(String address, Promise promise) {
+        Native.I
+                .addressToSingleAddress(new RPtr(address))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void addressToGroupAddress(String address, Promise promise) {
+        Native.I
+                .addressToGroupAddress(new RPtr(address))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
+    public final void addressToAccountAddress(String address, Promise promise) {
+        Native.I
+                .addressToAccountAddress(new RPtr(address))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
 
     // Fragment
 
@@ -797,6 +844,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void stakeDelegationAsBytes(String stakeDelegation, Promise promise) {
         Native.I
                 .stakeDelegationAsBytes(new RPtr(stakeDelegation))
@@ -804,6 +852,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void stakeDelegationFromBytes(String bytes, Promise promise) {
         Native.I
                 .stakeDelegationFromBytes(Base64.decode(bytes, Base64.DEFAULT))
@@ -888,6 +937,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
 
     // Bip32PrivateKey
 
+    @ReactMethod
     public final void bip32PrivateKeyDerive(String bip32PrivateKey, Integer index, Promise promise) {
         Native.I
                 .bip32PrivateKeyDerive(new RPtr(bip32PrivateKey), index)
@@ -895,6 +945,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyGenerateEd25519Bip32(Promise promise) {
         Native.I
                 .bip32PrivateKeyGenerateEd25519Bip32()
@@ -902,6 +953,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyToRawKey(String bip32PrivateKey, Promise promise) {
         Native.I
                 .bip32PrivateKeyToRawKey(new RPtr(bip32PrivateKey))
@@ -909,6 +961,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyToPublic(String bip32PrivateKey, Promise promise) {
         Native.I
                 .bip32PrivateKeyToPublic(new RPtr(bip32PrivateKey))
@@ -916,6 +969,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyFromBytes(String bytes, Promise promise) {
         Native.I
                 .bip32PrivateKeyFromBytes(Base64.decode(bytes, Base64.DEFAULT))
@@ -923,6 +977,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyAsBytes(String bip32PrivateKey, Promise promise) {
         Native.I
                 .bip32PrivateKeyAsBytes(new RPtr(bip32PrivateKey))
@@ -930,6 +985,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyFromBech32(String bech32Str, Promise promise) {
         Native.I
                 .bip32PrivateKeyFromBech32(bech32Str)
@@ -937,12 +993,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyToBech32(String bip32PrivateKey, Promise promise) {
         Native.I
                 .bip32PrivateKeyToBech32(new RPtr(bip32PrivateKey))
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PrivateKeyFromBip39Entropy(String entropy, String password, Promise promise) {
         Native.I
                 .bip32PrivateKeyFromBip39Entropy(Base64.decode(entropy, Base64.DEFAULT), Base64.decode(password, Base64.DEFAULT))
@@ -952,6 +1010,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
 
     // Bip32PublicKey
 
+    @ReactMethod
     public final void bip32PublicKeyDerive(String bip32PublicKey, Integer index, Promise promise) {
         Native.I
                 .bip32PublicKeyDerive(new RPtr(bip32PublicKey), index)
@@ -959,6 +1018,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PublicKeyToRawKey(String bip32PublicKey, Promise promise) {
         Native.I
                 .bip32PublicKeyToRawKey(new RPtr(bip32PublicKey))
@@ -966,6 +1026,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PublicKeyFromBytes(String bytes, Promise promise) {
         Native.I
                 .bip32PublicKeyFromBytes(Base64.decode(bytes, Base64.DEFAULT))
@@ -973,6 +1034,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PublicKeyAsBytes(String bip32PublicKey, Promise promise) {
         Native.I
                 .bip32PublicKeyAsBytes(new RPtr(bip32PublicKey))
@@ -980,6 +1042,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PublicKeyFromBech32(String bech32Str, Promise promise) {
         Native.I
                 .bip32PublicKeyFromBech32(bech32Str)
@@ -987,6 +1050,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void bip32PublicKeyToBech32(String bip32PublicKey, Promise promise) {
         Native.I
                 .bip32PublicKeyToBech32(new RPtr(bip32PublicKey))
@@ -995,6 +1059,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
 
     // DelegationType
 
+    @ReactMethod
     public final void delegationTypeNonDelegated(Promise promise) {
         Native.I
                 .delegationTypeNonDelegated()
@@ -1002,6 +1067,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void delegationTypeFull(String poolId, Promise promise) {
         Native.I
                 .delegationTypeFull(new RPtr(poolId))
@@ -1009,6 +1075,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void delegationTypeRatio(String r, Promise promise) {
         Native.I
                 .delegationTypeRatio(new RPtr(r))
@@ -1016,6 +1083,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void delegationTypeGetKind(String delegationType, Promise promise) {
         Native.I
                 .delegationTypeGetKind(new RPtr(delegationType))
@@ -1023,6 +1091,7 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
                 .pour(promise);
     }
 
+    @ReactMethod
     public final void delegationTypeGetFull(String delegationType, Promise promise) {
         Native.I
                 .delegationTypeGetFull(new RPtr(delegationType))

@@ -16,6 +16,7 @@ final class Native {
     private native void initLibrary();
 
     public final native Map<String, Object> AddressDiscrimination();
+    public final native Map<String, Object> AddressKind();
     public final native Map<String, Object> CertificateKind();
 
     // Value
@@ -30,11 +31,17 @@ final class Native {
     public final native Result<byte[]> publicKeyAsBytes(RPtr pubKey);
 
     // Address
+    public final native Result<byte[]> addressAsBytes(RPtr address);
     public final native Result<RPtr> addressFromString(String str);
     public final native Result<String> addressToString(RPtr address, String prefix);
     public final native Result<RPtr> addressSingleFromPublicKey(RPtr key, int discrimination);
     public final native Result<RPtr> addressDelegationFromPublicKey(RPtr key, RPtr delegation, int discrimination);
     public final native Result<RPtr> addressAccountFromPublicKey(RPtr key, int discrimination);
+    public final native Result<Integer> addressGetDiscrimination(RPtr address);
+    public final native Result<Integer> addressGetKind(RPtr address);
+    public final native Result<RPtr> addressToSingleAddress(RPtr address);
+    public final native Result<RPtr> addressToGroupAddress(RPtr address);
+    public final native Result<RPtr> addressToAccountAddress(RPtr address);
 
     // Fragment
     public final native Result<RPtr> fragmentFromTransaction(RPtr tx);
