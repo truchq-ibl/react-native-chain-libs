@@ -82,6 +82,14 @@ public class ChainLibsModule extends ReactContextBaseJavaModule {
     // Address
 
     @ReactMethod
+    public final void addressFromBytes(String bytes, Promise promise) {
+        Native.I
+                .addressFromBytes(Base64.decode(bytes, Base64.DEFAULT))
+                .map(RPtr::toJs)
+                .pour(promise);
+    }
+
+    @ReactMethod
     public final void addressAsBytes(String address, Promise promise) {
         Native.I
                 .addressAsBytes(new RPtr(address))

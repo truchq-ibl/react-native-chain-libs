@@ -62,6 +62,12 @@ export class AccountAddress extends Ptr {}
 */
 export class Address extends Ptr {
   /**
+  * @param {Uint8Array} bytes 
+  * @returns {Promise<Address>} 
+  */
+  static from_bytes(bytes: Uint8Array): Promise<Address>;
+  
+  /**
   * @returns {Promise<Uint8Array>} 
   */
   as_bytes(): Promise<Uint8Array>;

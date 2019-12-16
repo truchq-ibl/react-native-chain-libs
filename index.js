@@ -151,6 +151,15 @@ export class AccountAddress extends Ptr {}
 */
 export class Address extends Ptr {
     /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<Address>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.addressFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, Address);
+    }
+
+    /**
     * @returns {Promise<Uint8Array>}
     */
     async as_bytes() {

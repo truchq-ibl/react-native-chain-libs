@@ -7,6 +7,17 @@ use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Address, PublicKey};
 
 #[no_mangle]
+pub unsafe extern "C" fn address_from_bytes(
+  data: *const u8, len: usize, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    Address::from_bytes(std::slice::from_raw_parts(data, len).into()).into_result()
+  })
+  .map(|address| address.rptr())
+  .response(result, error)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn address_as_bytes(
   address: RPtr, result: &mut DataPtr, error: &mut CharPtr
 ) -> bool {

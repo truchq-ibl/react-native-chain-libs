@@ -7,7 +7,7 @@ use crate::address::{AddressDiscrimination, AddressKind};
 use crate::panic::{handle_exception_result, ToResult, Zip};
 use crate::ptr::RPtrRepresentable;
 use jni::objects::{JObject, JString};
-use jni::sys::{jint, jobject};
+use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
 use js_chain_libs::{Address, PublicKey};
 
@@ -50,6 +50,21 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_AddressKind(env: JNIEnv, _: JO
   put("Multisig", AddressKind::Multisig);
 
   map.into_inner()
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressFromBytes(
+  env: JNIEnv, _: JObject, bytes: jbyteArray
+) -> jobject {
+  handle_exception_result(|| {
+    env
+      .convert_byte_array(bytes)
+      .into_result()
+      .and_then(|bytes| Address::from_bytes((&bytes[..]).into()).into_result())
+      .and_then(|address| address.rptr().jptr(&env))
+  })
+  .jresult(&env)
 }
 
 #[allow(non_snake_case)]

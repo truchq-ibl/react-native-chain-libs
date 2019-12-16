@@ -31,6 +31,7 @@ final class Native {
     public final native Result<byte[]> publicKeyAsBytes(RPtr pubKey);
 
     // Address
+    public final native Result<RPtr> addressFromBytes(byte[] bytes);
     public final native Result<byte[]> addressAsBytes(RPtr address);
     public final native Result<RPtr> addressFromString(String str);
     public final native Result<String> addressToString(RPtr address, String prefix);
