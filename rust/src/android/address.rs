@@ -3,11 +3,11 @@ use super::ptr_j::*;
 use super::result::ToJniResult;
 use super::string::ToJniString;
 use super::string::*;
-use crate::address::AddressDiscrimination;
+use crate::address::{AddressDiscrimination, AddressKind};
 use crate::panic::{handle_exception_result, ToResult, Zip};
 use crate::ptr::RPtrRepresentable;
 use jni::objects::{JObject, JString};
-use jni::sys::{jint, jobject};
+use jni::sys::{jbyteArray, jint, jobject};
 use jni::JNIEnv;
 use js_chain_libs::{Address, PublicKey};
 
@@ -29,6 +29,58 @@ pub extern "C" fn Java_io_emurgo_chainlibs_Native_AddressDiscrimination(
   env.call_method(map, "put", PUT, &[test_key.into(), test_int.into()]).unwrap();
 
   map.into_inner()
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn Java_io_emurgo_chainlibs_Native_AddressKind(env: JNIEnv, _: JObject) -> jobject {
+  static PUT: &str = "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;";
+  let class = env.find_class("java/util/HashMap").unwrap();
+  let map = env.new_object(class, "()V", &[]).unwrap();
+
+  let put = |key_name: &str, variant: AddressKind| {
+    let key = *key_name.jstring(&env).unwrap();
+    let int = (variant as jint).jobject(&env).unwrap();
+    env.call_method(map, "put", PUT, &[key.into(), int.into()]).unwrap();
+  };
+
+  put("Single", AddressKind::Single);
+  put("Group", AddressKind::Group);
+  put("Account", AddressKind::Account);
+  put("Multisig", AddressKind::Multisig);
+
+  map.into_inner()
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressFromBytes(
+  env: JNIEnv, _: JObject, bytes: jbyteArray
+) -> jobject {
+  handle_exception_result(|| {
+    env
+      .convert_byte_array(bytes)
+      .into_result()
+      .and_then(|bytes| Address::from_bytes((&bytes[..]).into()).into_result())
+      .and_then(|address| address.rptr().jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressAsBytes(
+  env: JNIEnv, _: JObject, address: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let address = address.rptr(&env)?;
+    address
+      .typed_ref::<Address>()
+      .map(|address| address.as_bytes())
+      .and_then(|bytes| env.byte_array_from_slice(&bytes).into_result())
+      .map(|arr| JObject::from(arr))
+  })
+  .jresult(&env)
 }
 
 #[allow(non_snake_case)]
@@ -113,6 +165,81 @@ pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressAccountFromPubli
         Address::account_from_public_key(key, AddressDiscrimination::from(discrimination).into())
       })
       .and_then(|address| address.rptr().jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressGetDiscrimination(
+  env: JNIEnv, _: JObject, address: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let address = address.rptr(&env)?;
+    address
+      .typed_ref::<Address>()
+      .map(|address| address.get_discrimination().into())
+      .and_then(|discrimination: AddressDiscrimination| (discrimination as jint).jobject(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressGetKind(
+  env: JNIEnv, _: JObject, address: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let address = address.rptr(&env)?;
+    address
+      .typed_ref::<Address>()
+      .map(|address| address.get_kind().into())
+      .and_then(|address_kind: AddressKind| (address_kind as jint).jobject(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressToSingleAddress(
+  env: JNIEnv, _: JObject, address: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let address = address.rptr(&env)?;
+    address
+      .typed_ref::<Address>()
+      .map(|address| address.to_single_address())
+      .and_then(|single_address| single_address.rptr().jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressToGroupAddress(
+  env: JNIEnv, _: JObject, address: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let address = address.rptr(&env)?;
+    address
+      .typed_ref::<Address>()
+      .map(|address| address.to_group_address())
+      .and_then(|group_address| group_address.rptr().jptr(&env))
+  })
+  .jresult(&env)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "C" fn Java_io_emurgo_chainlibs_Native_addressToAccountAddress(
+  env: JNIEnv, _: JObject, address: JRPtr
+) -> jobject {
+  handle_exception_result(|| {
+    let address = address.rptr(&env)?;
+    address
+      .typed_ref::<Address>()
+      .map(|address| address.to_account_address())
+      .and_then(|account_address| account_address.rptr().jptr(&env))
   })
   .jresult(&env)
 }

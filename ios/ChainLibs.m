@@ -23,7 +23,13 @@ RCT_EXPORT_MODULE(ChainLibs)
                      @"OwnerStakeDelegation": @(OwnerStakeDelegation),
                      @"PoolRegistration": @(PoolRegistration),
                      @"PoolRetirement": @(PoolRetirement),
-                     @"PoolUpdate": @(PoolUpdate),
+                     @"PoolUpdate": @(PoolUpdate)
+                     },
+             @"AddressKind": @{
+                     @"Single": @(Single),
+                     @"Group": @(Group),
+                     @"Account": @(Account),
+                     @"Multisig": @(Multisig)
                      }
              };
 }
@@ -92,6 +98,28 @@ RCT_EXPORT_METHOD(publicKeyAsBytes:(nonnull NSString *)ptr withResolve:(RCTPromi
     }] exec:ptr andResolve:resolve orReject:reject];
 }
 
+RCT_EXPORT_METHOD(addressFromBytes:(nonnull NSString *)bytesStr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* bytesStr, CharPtr* error) {
+        RPtr result;
+        NSData* data = [NSData fromBase64:bytesStr];
+        return address_from_bytes((uint8_t*)data.bytes, data.length, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:bytesStr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressAsBytes:(nonnull NSString *)addressPtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* addressPtr, CharPtr* error) {
+        DataPtr result;
+        RPtr address = [addressPtr rPtr];
+        return address_as_bytes(address, &result, error)
+            ? [[NSData fromDataPtr:&result] base64]
+            : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
+}
+
 RCT_EXPORT_METHOD(addressFromString:(nonnull NSString *)string withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
 {
     [[CSafeOperation new:^NSString*(NSString* string, CharPtr* error) {
@@ -151,6 +179,61 @@ RCT_EXPORT_METHOD(addressAccountFromPublicKey:(nonnull NSString *)key withDiscri
             ? [NSString stringFromPtr:result]
             : nil;
     }] exec:@[key, discrimination] andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressGetDiscrimination:(nonnull NSString *)addressPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSNumber*(NSString* addressPtr, CharPtr* error) {
+        AddressDiscrimination result;
+        RPtr address = [addressPtr rPtr];
+        return address_get_discrimination(address, &result, error)
+            ? [NSNumber numberWithInt:result]
+            : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressGetKind:(nonnull NSString *)addressPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSNumber*(NSString* addressPtr, CharPtr* error) {
+        AddressKind result;
+        RPtr address = [addressPtr rPtr];
+        return address_get_kind(address, &result, error)
+            ? [NSNumber numberWithInt:result]
+            : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressToSingleAddress:(nonnull NSString *)addressPtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* addressPtr, CharPtr* error) {
+        RPtr result;
+        RPtr address = [addressPtr rPtr];
+        return address_to_single_address(address, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressToGroupAddress:(nonnull NSString *)addressPtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* addressPtr, CharPtr* error) {
+        RPtr result;
+        RPtr address = [addressPtr rPtr];
+        return address_to_group_address(address, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
+}
+
+RCT_EXPORT_METHOD(addressToAccountAddress:(nonnull NSString *)addressPtr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* addressPtr, CharPtr* error) {
+        RPtr result;
+        RPtr address = [addressPtr rPtr];
+        return address_to_account_address(address, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:addressPtr andResolve:resolve orReject:reject];
 }
 
 RCT_EXPORT_METHOD(fragmentFromTransaction:(nonnull NSString *)ptr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)

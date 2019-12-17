@@ -1,9 +1,30 @@
+use super::data::DataPtr;
 use super::result::CResult;
 use super::string::{CharPtr, IntoCString, IntoStr};
-use crate::address::AddressDiscrimination;
+use crate::address::{AddressDiscrimination, AddressKind};
 use crate::panic::{handle_exception_result, ToResult, Zip};
 use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{Address, PublicKey};
+
+#[no_mangle]
+pub unsafe extern "C" fn address_from_bytes(
+  data: *const u8, len: usize, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    Address::from_bytes(std::slice::from_raw_parts(data, len).into()).into_result()
+  })
+  .map(|address| address.rptr())
+  .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn address_as_bytes(
+  address: RPtr, result: &mut DataPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| address.typed_ref::<Address>().map(|address| address.as_bytes()))
+    .map(|bytes| bytes.into())
+    .response(result, error)
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn address_from_string(
@@ -65,5 +86,58 @@ pub unsafe extern "C" fn address_account_from_public_key(
       .map(|key| Address::account_from_public_key(key, discrimination.into()))
       .map(|address| address.rptr())
   })
+  .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn address_get_discrimination(
+  address: RPtr, result: &mut AddressDiscrimination, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    address.typed_ref::<Address>().map(|address| address.get_discrimination())
+  })
+  .map(|discrimination| discrimination.into())
+  .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn address_get_kind(
+  address: RPtr, result: &mut AddressKind, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| address.typed_ref::<Address>().map(|address| address.get_kind()))
+    .map(|address_kind| address_kind.into())
+    .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn address_to_single_address(
+  address: RPtr, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    address.typed_ref::<Address>().map(|address| address.to_single_address())
+  })
+  .map(|single_address| single_address.rptr())
+  .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn address_to_group_address(
+  address: RPtr, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    address.typed_ref::<Address>().map(|address| address.to_group_address())
+  })
+  .map(|group_address| group_address.rptr())
+  .response(result, error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn address_to_account_address(
+  address: RPtr, result: &mut RPtr, error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    address.typed_ref::<Address>().map(|address| address.to_account_address())
+  })
+  .map(|account_address| account_address.rptr())
   .response(result, error)
 }
