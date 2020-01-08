@@ -1,5 +1,5 @@
 use super::result::CResult;
-use super::string::CharPtr;
+use super::string::{CharPtr, IntoCString};
 use crate::panic::{handle_exception, handle_exception_result, Zip};
 use crate::ptr::{RPtr, RPtrRepresentable};
 use js_chain_libs::{
@@ -96,4 +96,22 @@ pub unsafe extern "C" fn witnesses_add(
       .map(|(witnesses, item)| witnesses.add(item))
   })
   .response(&mut (), error)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn witness_sign_for_legacy_icarus_utxo(
+  genesis_hash: RPtr, transaction_id: RPtr, secret_key: RPtr, result: &mut CharPtr,
+  error: &mut CharPtr
+) -> bool {
+  handle_exception_result(|| {
+    genesis_hash
+      .typed_ref::<Hash>()
+      .zip(transaction_id.typed_ref::<TransactionSignDataHash>())
+      .zip(secret_key.typed_ref::<Bip32PrivateKey>())
+      .map(|((genesis_hash, transaction_id), secret_key)| {
+        Witness::sign_for_legacy_icarus_utxo(genesis_hash, transaction_id, secret_key)
+      })
+  })
+  .map(|bech32| bech32.into_cstr())
+  .response(result, error)
 }

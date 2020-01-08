@@ -320,7 +320,11 @@ export class Input extends Ptr {
         const ret = await ChainLibs.inputFromAccount(accountPtr, vPtr);
         return Ptr._wrap(ret, Input);
     }
-
+    static async from_utxo(utxoPointer) {
+        const utxoPointerPtr = Ptr._assertClass(utxoPointer, UtxoPointer);
+        const ret = await ChainLibs.inputFromUtxo(utxoPointerPtr);
+        return Ptr._wrap(ret, Input);
+    }
     /**
     * @returns {Promise<Value>}
     */
@@ -500,7 +504,14 @@ export class FragmentId extends Ptr {
         const ret = await ChainLibs.fragmentIdCalculate(b64FromUint8Array(bytes));
         return Ptr._wrap(ret, FragmentId);
     }
-
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<Address>}
+    */
+    static async from_bytes(bytes) {
+        const ret = await ChainLibs.fragmentIdFromBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, FragmentId);
+    }
     /**
     * @returns {Promise<Uint8Array>}
     */
@@ -784,6 +795,14 @@ export class PrivateKey extends Ptr {
         const ret = await ChainLibs.privateKeyFromExtendedBytes(b64FromUint8Array(bytes));
         return Ptr._wrap(ret, PrivateKey);
     }
+    /**
+    * @param {Uint8Array} bytes
+    * @returns {Promise<PrivateKey>}
+    */
+   static async from_normal_bytes(bytes) {
+        const ret = await ChainLibs.privateKeyFromNormalBytes(b64FromUint8Array(bytes));
+        return Ptr._wrap(ret, PrivateKey);
+    }
 }
 
 /**
@@ -1033,6 +1052,14 @@ export class Witness extends Ptr {
         const ret = await ChainLibs.witnessForLegacyIcarusUtxo(genesisHashPtr, transactionIdPtr, secretKeyPtr);
         return Ptr._wrap(ret, Witness);
     }
+    static async sign_for_legacy_icarus_utxo(genesisHash, transactionId, secretKey) {
+        const genesisHashPtr = Ptr._assertClass(genesisHash, Hash);
+        const transactionIdPtr = Ptr._assertClass(transactionId, TransactionSignDataHash);
+        const secretKeyPtr = Ptr._assertClass(secretKey, Bip32PrivateKey);
+        const ret = await ChainLibs.witnessSignForLegacyIcarusUtxo(genesisHashPtr, transactionIdPtr, secretKeyPtr);
+        return Ptr._wrap(ret, Witness);
+    }
+    
 }
 
 /**
@@ -1083,6 +1110,13 @@ export class PayloadAuthData extends Ptr {
         const ret = await ChainLibs.payloadAuthDataForNoPayload();
         return Ptr._wrap(ret, PayloadAuthData);
     }
+    static async for_stake_delegation(auth_data) {
+        const authDataPtr = Ptr._assertClass(auth_data, StakeDelegationAuthData);
+
+        const ret = await ChainLibs.payloadAuthDataForStakeDelegation(authDataPtr);
+        return Ptr._wrap(ret, PayloadAuthData);
+    }
+    
 }
 
 /**
@@ -1235,6 +1269,18 @@ export class Payload extends Ptr {
         const ret = await ChainLibs.payloadNoPayload();
         return Ptr._wrap(ret, Payload);
     }
+    /**
+    * * @param {Certificate} certificate
+    * @returns {Promise<Payload>}
+    */
+    
+    static async certificate(certificate) {
+        const certPtr = Ptr._assertClass(certificate, Certificate);
+
+        const ret = await ChainLibs.payloadCertificate(certPtr);
+        return Ptr._wrap(ret, Payload);
+    }
+    
 }
 
 /**
@@ -1346,7 +1392,16 @@ export class StakeDelegationAuthData extends Ptr {
 
 /**
 */
-export class PoolId extends Ptr {}
+export class PoolId extends Ptr {
+    /**
+    * @param {string} input
+    * @returns {Promise<PoolId>}
+    */
+   static async from_hex(input) {
+        const ret = await ChainLibs.poolIdFromHex(input);
+        return Ptr._wrap(ret, PoolId);
+    }
+}
 
 /**
 * Delegation Ratio type express a number of parts

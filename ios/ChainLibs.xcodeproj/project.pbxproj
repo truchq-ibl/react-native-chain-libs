@@ -11,7 +11,6 @@
 		9284C0332362017700288246 /* SafeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 9284C0312362017700288246 /* SafeOperation.m */; };
 		B3E7B58A1CC2AC0600A0062D /* ChainLibs.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* ChainLibs.m */; };
 		BA22B1452362480000917552 /* NSData+DataPtr.m in Sources */ = {isa = PBXBuildFile; fileRef = BA22B1442362480000917552 /* NSData+DataPtr.m */; };
-		BF0DF270C6C2265C5C2F9E22 /* libPods-ChainLibs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4522B664462E1826102B0845 /* libPods-ChainLibs.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,7 +46,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF0DF270C6C2265C5C2F9E22 /* libPods-ChainLibs.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

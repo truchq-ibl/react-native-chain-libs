@@ -1494,4 +1494,83 @@ RCT_EXPORT_METHOD(ptrFree:(NSString *)ptr withResolve:(RCTPromiseResolveBlock)re
     }
 }
 
+RCT_EXPORT_METHOD(inputFromUtxo:(nonnull NSString *)utxoPointer withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        RPtr result;
+        RPtr utxoPointer = [[params objectAtIndex:0] rPtr];
+        return input_from_utxo(utxoPointer, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:@[utxoPointer] andResolve:resolve orReject:reject];
+}
+RCT_EXPORT_METHOD(privateKeyFromNormalBytes:(nonnull NSString *)bytesStr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* bytesStr, CharPtr* error) {
+        RPtr result;
+        NSData* data = [NSData fromBase64:bytesStr];
+        return private_key_from_normal_bytes((uint8_t*)data.bytes, data.length, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:bytesStr andResolve:resolve orReject:reject];
+}
+
+/*RCT_EXPORT_METHOD(fragmentIdFromBytes:(nonnull NSString *)bytesStr  withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* bytesStr, CharPtr* error) {
+        RPtr result;
+        NSData* data = [NSData fromBase64:bytesStr];
+        NSLog(@"truchq of hello = %@", bytesStr);
+        return fragment_id_from_bytes((uint8_t*)data.bytes, data.length, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:bytesStr andResolve:resolve orReject:reject];
+}*/
+RCT_EXPORT_METHOD(witnessSignForLegacyIcarusUtxo:(nonnull NSString *)genesisHash withTransactionId:(nonnull NSString *)transactionId andSecretKey:(nonnull NSString *)secretKey withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSArray* params, CharPtr* error) {
+        CharPtr result;
+        RPtr genesisHash = [[params objectAtIndex:0] rPtr];
+        RPtr transactionId = [[params objectAtIndex:1] rPtr];
+        RPtr secretKey = [[params objectAtIndex:2] rPtr];
+        return witness_sign_for_legacy_icarus_utxo(genesisHash,
+                                transactionId,
+                                secretKey,
+                                &result, error)
+            ? [NSString stringFromCharPtr:&result]
+            : nil;
+    }] exec:@[genesisHash, transactionId, secretKey] andResolve:resolve orReject:reject];
+}
+RCT_EXPORT_METHOD(poolIdFromHex:(nonnull NSString *)input withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* input, CharPtr* error) {
+        RPtr result;
+        return pool_id_from_hex([input charPtr], &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:input andResolve:resolve orReject:reject];
+}
+RCT_EXPORT_METHOD(payloadCertificate:(nonnull NSString *)certificatePtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* certificatePtr, CharPtr* error) {
+        RPtr result;
+        RPtr certificate = [certificatePtr rPtr];
+        return payload_certificate(certificate, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:certificatePtr andResolve:resolve orReject:reject];
+}
+
+
+RCT_EXPORT_METHOD(payloadAuthDataForStakeDelegation:(nonnull NSString *)authDataPtr withResolve:(RCTPromiseResolveBlock)resolve andReject:(RCTPromiseRejectBlock)reject)
+{
+    [[CSafeOperation new:^NSString*(NSString* authDataPtr, CharPtr* error) {
+        RPtr result;
+        RPtr certificate = [authDataPtr rPtr];
+        return payload_auth_data_for_stake_delegation(certificate, &result, error)
+            ? [NSString stringFromPtr:result]
+            : nil;
+    }] exec:authDataPtr andResolve:resolve orReject:reject];
+}
+
 @end

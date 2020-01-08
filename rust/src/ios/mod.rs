@@ -32,6 +32,7 @@ mod transaction_sign_data_hash;
 mod utxo_pointer;
 mod value;
 mod witness;
+mod poolid;
 
 pub use address::*;
 pub use data::*;
